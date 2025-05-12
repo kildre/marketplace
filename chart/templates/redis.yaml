@@ -1,0 +1,8 @@
+---
+apiVersion: cache.advana.cdao.us/v1alpha1
+kind: Redis
+metadata:
+  name: node-example-cache
+  namespace: node-example
+spec:
+  region: us-gov-west-1
