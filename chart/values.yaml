@@ -24,17 +24,17 @@ serviceAccount:
     eks.amazonaws.com/role-arn: aws-role-arn
 
 ingress:
-  enabled: false
-  tls: true
-  className: nginx # set if default IngressClass is not configured
-  annotations:
-    ingress.kubernetes.io/ssl-redirect: 'true'
-    ingress.kubernetes.io/proxy-body-size: '0'
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/backend-protocol: 'HTTP'
-    nginx.ingress.kubernetes.io/proxy-body-size: '0'
-    nginx.ingress.kubernetes.io/server-snippet: |
-      underscores_in_headers on;
+  enabled: true
+  tls: false
+  # gateways:  # set to use gateways instead of ingress
+  #   - istio-system/public
+  # className: nginx  # set if default IngressClass is not configured
+  # annotations:
+  #   ingress.kubernetes.io/ssl-redirect: 'true'
+  #   ingress.kubernetes.io/proxy-body-size: '0'
+  #   nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+  #   nginx.ingress.kubernetes.io/backend-protocol: 'HTTPS'
+  #   nginx.ingress.kubernetes.io/proxy-body-size: '0'
   domain: '{{ $.Values.global.appName }}.{{ $.Values.global.baseDomain }}'
   hosts:
     '{{ $.Values.ingress.domain }}':
@@ -59,57 +59,6 @@ podSecurityContext:
   runAsUser: 65532
   runAsGroup: 65532
   fsGroup: 65532
-
-job:
-  'sequelize-migrate-{{ $.Release.Revision }}':
-    enabled: 'false'
-    restartPolicy: 'Never'
-    ttlSecondsAfterFinished: 100
-    initContainer:
-      postgresql-app-ready:
-        &postgresql-app-ready-init-container # postgres-ready script installed by @advana/sequelize module
-        args:
-          - node_modules/.bin/postgres-ready
-        envFrom:
-          - secretRef:
-              name: public-env-db-postgresql
-          - secretRef:
-              name: secret-env-db-postgresql
-          - secretRef:
-              name: public-env-web
-    container:
-      migration-job:
-        args:
-          - node_modules/.bin/sequelize
-          - db:migrate
-        envFrom:
-          - secretRef:
-              name: public-env-db-postgresql
-          - secretRef:
-              name: secret-env-db-postgresql
-          - secretRef:
-              name: public-env-web
-
-  'sequelize-undo-migration-{{ $.Release.Revision }}':
-    enabled: 'false'
-    restartPolicy: 'Never'
-    ttlSecondsAfterFinished: 100
-    initContainer:
-      postgresql-app-ready: *postgresql-app-ready-init-container
-    container:
-      migration-job:
-        args:
-          - node_modules/.bin/sequelize
-          - db:migrate:undo:all
-          - --to
-          - $(APP_MIGRATION_FILE)
-        envFrom:
-          - secretRef:
-              name: public-env-db-postgresql
-          - secretRef:
-              name: secret-env-db-postgresql
-          - secretRef:
-              name: public-env-web
 
 deployment:
   web:
@@ -250,25 +199,9 @@ deployment:
 
 env:
   secret:
-    'public-env-db-postgresql':
-      secretName: public-env-db-postgresql
-    'public-env-db-redis':
-      secretName: public-env-db-redis
     'public-env-platform-ui':
       secretName: public-env-platform-ui
-    'public-env-sso':
-      secretName: public-env-sso
-    'public-env-web':
-      secretName: public-env-web
-    'secret-env-db-postgresql':
-      secretName: secret-env-db-postgresql
-    'secret-env-db-redis':
-      secretName: secret-env-db-redis
-    'secret-env-sso':
-      secretName: secret-env-sso
-    'secret-env-web':
-      secretName: secret-env-web
-
+    
 volume:
   emptyDir:
     'node-logs':
@@ -278,24 +211,6 @@ volume:
         mountPath: '/home/node/.npm/_logs/'
         readOnly: false
   secret:
-    'tls.crt':
-      secretName: '{{ (index $.Values.secret.ingress.tls "{{ $.Values.ingress.domain }}").secretName | default $.Values.ingress.domain }}' # reference existing secret
-      config:
-        defaultMode: 444
-        optional: false
-      volumeMount:
-        mountPath: '/etc/pki/tls/certs/tls.crt'
-        subPath: 'tls.crt' # only mounts a single file if defined
-        readOnly: true
-    'tls.key':
-      secretName: '{{ (index $.Values.secret.ingress.tls "{{ $.Values.ingress.domain }}").secretName | default $.Values.ingress.domain }}' # reference existing secret
-      config:
-        defaultMode: 400
-        optional: false
-      volumeMount:
-        mountPath: '/etc/pki/tls/private/tls.key'
-        subPath: 'tls.key' # only mounts a single file if defined
-        readOnly: true
     'secret-volume-ca-bundle-crt':
       secretName: secret-volume-ca-bundle-crt # reference existing secret if data is not defined
       config:
@@ -310,25 +225,6 @@ volume:
 secret:
   env:
     secret:
-      'public-env-db-postgresql':
-        data:
-          PG_HOST: '{{ $.Release.Name }}-postgresql'
-          PG_PORT: '5432'
-          PG_UM_DB: 'user-management-db'
-
-          PG_APP_HOST: '{{ $.Release.Name }}-postgresql'
-          PG_APP_PORT: '5432'
-          PG_APP_DB: 'application-data-db'
-
-          # postgres dump file for backup/restore
-          PG_APP_DUMP_FILE: ''
-          # define which migration file to revert to
-          APP_MIGRATION_FILE: ''
-
-      'public-env-db-redis':
-        data:
-          REDIS_URL: 'redis://{{ $.Release.Name }}-redis-master'
-
       'public-env-platform-ui':
         data:
           REACT_APP_NODE_ENV: 'nipr' # nipr, sipr or jwics
@@ -348,30 +244,6 @@ secret:
           REACT_APP_MEGA_MENU_BASE_DOMAIN: 'https://{{ $.Values.global.baseDomain }}'
           REACT_APP_MEGA_MENU_HEADER_SORT_ORDER: 'Domains,Tools,Communities,Help,About'
           REACT_APP_MEGA_MENU_HIGHLIGHT_COLOR: '#56B1AC'
-
-      'public-env-sso':
-        data:
-          DISABLE_SSO: 'false'
-          SAML_REALM: 'local-example-realm'
-          SAML_ISSUER: 'https://{{ $.Values.ingress.domain }}'
-          SAML_CALLBACK_URL: 'https://{{ $.Values.ingress.domain }}/login/callback'
-          SAML_ENTRYPOINT: 'https://sso.{{ $.Values.global.baseDomain }}/auth/realms/{{ (index $.Values.secret.env.secret "public-env-sso").data.SAML_REALM }}/protocol/saml'
-          COOKIE_DOMAIN: '{{ $.Values.global.baseDomain }}'
-
-      'public-env-web':
-        data:
-          VERSION: '{{ $.Chart.AppVersion }}'
-          EXPRESS_PORT: '8080'
-          SECURE_SESSION: 'true'
-          NODE_ENV: 'production'
-          TLS_CERT_CA_FILEPATH: '/etc/ssl/certs/ca-bundle.crt'
-          TLS_CERT_FILEPATH: '/etc/pki/tls/certs/tls.crt'
-          TLS_KEY_FILEPATH: '/etc/pki/tls/private/tls.key'
-
-          APPROVED_API_CALLERS: 'https://{{ $.Values.ingress.domain }} http://node-example.app.advana.cdao.us'
-          REACT_APP_API_ENDPOINT: 'https://{{ $.Values.ingress.domain }}/api'
-          REACT_APP_HIDE_LOGOUT_BUTTON: 'true'
-
   volume:
     secret:
       'secret-volume-ca-bundle-crt':

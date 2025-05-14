@@ -22,6 +22,10 @@ serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::231134345536:role/advana/k8s/s3.wildcard
 
+ingress:
+  gateways:  # set to use gateways instead of ingress
+    - istio-system/public
+
 deployment:
   web:
     replicaCount: 1 # unused if autoscaling is enabled
@@ -41,17 +45,6 @@ deployment:
 secret:
   env:
     secret:
-      "public-env-db-postgresql":
-        data:
-          PG_HOST: 'uot-jqggp-xmc47.coboi2otdxqo.us-gov-west-1.rds.amazonaws.com'
-          PG_DATABASE: "uot"
-#added for debugging
-          PG_APP_HOST: "test"
-          PG_APP_DB: "test"
-#end added for debugging
-      "public-env-db-redis":
-        data:
-          REDIS_URL: "rediss://darq-redis-rmkk02.serverless.usgw1.cache.amazonaws.com"
       "public-env-platform-ui":
         data:
           REACT_APP_NODE_ENV: "nipr" # nipr, sipr or jwics
@@ -59,13 +52,6 @@ secret:
           REACT_APP_CLASSIFICATION_BANNER: "DEV"
           REACT_APP_CLASSIFICATION_BANNER_COLOR: "GREEN"
           REACT_APP_CLASSIFICATION_BANNER_TEXT_COLOR: "WHITE"
-      "public-env-sso":
-        data:
-          DISABLE_SSO: "true"
-          SAML_REALM: "local-uot-test"
-      "public-env-web":
-        data:
-          APPROVED_API_CALLERS: "https://sso.{{ $.Values.global.baseDomain }} https://{{ $.Values.ingress.domain }} http://localhost:8080 http://localhost:3000"
   volume:
     secret:
       "secret-volume-ca-bundle-crt":
