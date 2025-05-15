@@ -16,9 +16,6 @@ npm-debug.log*
 # macOS system files
 .DS_Store
 
-# Helm chart artifacts
-chart-env/dev/secrets.yaml
-
 # Temporary files
 *.tmp
 *.swp
