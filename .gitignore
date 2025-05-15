@@ -1,0 +1,25 @@
+# Node.js dependencies
+node_modules/
+
+# TypeScript build artifacts
+dist/
+tsconfig.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+
+# macOS system files
+.DS_Store
+
+# Temporary files
+*.tmp
+*.swp
+
+# IDE-specific files
+.vscode/
+.idea/
