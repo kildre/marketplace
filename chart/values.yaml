@@ -130,23 +130,7 @@ deployment:
           - index.js
         envFrom:
           - secretRef:
-              name: public-env-db-postgresql
-          - secretRef:
-              name: public-env-db-redis
-          - secretRef:
               name: public-env-platform-ui
-          - secretRef:
-              name: public-env-sso
-          - secretRef:
-              name: public-env-web
-          - secretRef:
-              name: secret-env-db-postgresql
-          - secretRef:
-              name: secret-env-db-redis
-          - secretRef:
-              name: secret-env-sso
-          - secretRef:
-              name: secret-env-web
         startupProbe: # checks if container is reachable accounting for startup delays
           httpGet:
             scheme: HTTP
