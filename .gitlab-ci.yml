@@ -1,6 +1,7 @@
 include:
   - project: tenant/tekton-promotion-gitlab
-    file: routes/dragon-full.yml
+    file: routes/container-only.yml
+    #file: routes/dragon-full.yml
 
 stages:
   - '🧪 unit-test'
@@ -33,11 +34,11 @@ variables:
     value: '' # ${CI_COMMIT_SHA}
   CONTAINER_ONLY:
     description: 'only build container'
-    value: 'false'
+    value: 'true'
     options:
       - 'true'
       - 'false'
   UPSTREAM_PROJECT_DIR: '.'
   HELM_RELEASE_NAME: 'aurora'
   HELM_CHART_DIR: './chart'
-  DOCKERFILE_PATH: './dockerfile'
+  DOCKERFILE_PATH: './Dockerfile'
