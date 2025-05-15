@@ -1,6 +1,7 @@
 include:
   - project: tenant/tekton-promotion-gitlab
-    file: routes/container-only.yml
+    #file: routes/container-only.yml
+    file: routes/helm-only.yml
     #file: routes/dragon-full.yml
 
 stages:
@@ -25,20 +26,20 @@ workflow:
 variables:
   HELM_ONLY:
     description: 'only build chart'
-    value: 'false'
+    value: 'true'
     options:
       - 'true'
       - 'false'
   IMAGE_TAG_FOR_HELM_ONLY:
     description: 'Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)'
-    value: '' # ${CI_COMMIT_SHA}
+    value: '4768ebae27a665017a361a66b86d7ece246992ff' # ${CI_COMMIT_SHA}
   CONTAINER_ONLY:
     description: 'only build container'
-    value: 'true'
+    value: 'false'
     options:
       - 'true'
       - 'false'
   UPSTREAM_PROJECT_DIR: '.'
-  HELM_RELEASE_NAME: 'aurora'
+  HELM_RELEASE_NAME: 'advana-marketplace'
   HELM_CHART_DIR: './chart'
   DOCKERFILE_PATH: './Dockerfile'
