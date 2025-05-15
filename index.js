@@ -9,7 +9,7 @@ const app = (0, express_1.default)();
 const port = 8080;
 app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
 app.get('/', (_req, res) => {
-    res.sendFile(path_1.default.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path_1.default.join(__dirname, 'app', 'index.html'));
 });
 app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);
