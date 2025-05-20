@@ -4,6 +4,7 @@ node_modules/
 # TypeScript build artifacts
 dist/
 tsconfig.tsbuildinfo
+.next/
 
 # Logs
 logs/
