@@ -24,3 +24,7 @@ npm-debug.log*
 # IDE-specific files
 .vscode/
 .idea/
+
+
+# Root lock file (if unused)
+package-lock.json

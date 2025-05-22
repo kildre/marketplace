@@ -1,0 +1,57 @@
+@use "sass:color";
+// Variables
+$primary-color: #3758b2;
+$secondary-color: #ffffff;
+$tertiary-color: #083680;
+$font-stack: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+// Global styles
+// TEXT STYTLES
+h1 {
+  color: $primary-color;
+  font-size: 5rem;
+}
+h2 {
+  color:$tertiary-color; 
+  font-size: 2rem;
+}
+.ta-center {
+  text-align: center;
+}
+
+// SPACING
+// Margin
+.mt-3 {
+  margin-top:3rem;
+}
+
+body {
+  font-family: $font-stack;
+  background-color: $secondary-color;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+// Reusable class
+.button {
+  background-color: $primary-color;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+      background-color: brown;;
+  }
+}
+
+// Example container class
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}

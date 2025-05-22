@@ -1,5 +1,6 @@
 ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"   
-    # build stage should use -dev image to RUN commands
+
+# build stage should use -dev image to RUN commands
 # https://edu.chainguard.dev/chainguard/chainguard-images/overview/#why-minimal-container-images
 FROM "${BASE_IMAGE}-dev" AS build
 
@@ -10,7 +11,7 @@ WORKDIR /app
 COPY --chown=node:node . .
 
 # disable nextjs telemetry during the build (https://nextjs.org/telemetry)
-ENV NEXT_TELEMETRY_DISABLED 1
+## ENV NEXT_TELEMETRY_DISABLED 1
 # clean install ALL dependencies, build from src, then just install the prod 
 # dependencies. no need to delete node_modules or anything, npm ci takes care
 # of that for us. delete the .npmrc so we're not deploying that internal IP
@@ -33,15 +34,22 @@ USER node
 # make sure we're running in production mode
 ENV NODE_ENV production
 # disable nextjs telemetry during runtime (https://nextjs.org/telemetry)
-ENV NEXT_TELEMETRY_DISABLED 1
+## ENV NEXT_TELEMETRY_DISABLED 1
 
 # copy the entire build dir
 WORKDIR /app
-COPY --from=build /app .
+COPY --from=build /app/dist ./dist
+
+# If the base image doesn’t include `serve`, COPY it from build:
+COPY --from=build /app/node_modules/.bin/serve /usr/local/bin/serve
 
 # expose port for HTTP only: should match the helm chart's targetPort value
 # in deployment.web.service.ClusterIP.ports
 EXPOSE 8080
 
 # start the app as a basic node.js app
-CMD [ "index.js" ]
+# Run static site server
+CMD ["serve", "-s", "dist", "-l", "8080"]
+
+
+
