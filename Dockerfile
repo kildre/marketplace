@@ -1,51 +1,61 @@
-# Use Node.js as base image for local development
-# For production, change to: 
+# ---------- BASE SETUP ----------
 ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
-# ARG BASE_IMAGE="node:22"   
 
-# Build stage
-FROM "${BASE_IMAGE}" AS build
+################################################################################
+# BUILD STAGE
+################################################################################
+FROM "${BASE_IMAGE}-dev" AS build
 
-# Set working directory
+# Run as non‑root user
+USER node
+
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY app/package*.json ./
+# 1) Copy package files for caching
+COPY --chown=node:node app/package*.json ./app/
 
-# Install dependencies
+# 2) Install node_modules
 RUN npm install --prefer-offline --legacy-peer-deps
 
-# Copy source code
-COPY app/ .
+# 3) Copy the rest of your source
+COPY --chown=node:node . .
 
-# Build the application
+# 4) Build the Vite app (inside app/)
+WORKDIR /app/app
 RUN npm run build
 
-# Production stage
-FROM "${BASE_IMAGE}" AS runtime
+# 5) Clean up any unwanted files/modules
+WORKDIR /app
+RUN rm -rf \
+    .npmrc .yarnrc .husky secrets \
+    node_modules/resolve/test
 
-# Install serve globally for serving static files
-RUN npm install -g serve
+################################################################################
+# RUNTIME STAGE
+################################################################################
+FROM ${BASE_IMAGE} AS runtime
 
-# Set working directory
+# Run as non‑root user
+USER node
+
 WORKDIR /app
 
-# Copy built application from build stage
-COPY --from=build /app/dist ./dist
-
-# Create and switch to non-root user
-RUN groupadd -r nodeuser && useradd -r -g nodeuser nodeuser
-RUN chown -R nodeuser:nodeuser /app
-USER nodeuser
-
-# Set environment variables
+# Production env vars
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Expose port
+# Install static server
+RUN npm install -g serve@^14
+
+# Copy built assets from build stage
+COPY --from=build /app/app/dist ./dist
+
+# Expose the port your Helm chart (or k8s Service) expects
 EXPOSE 8080
 
-# Start the application
-CMD ["serve", "-s", "dist", "-l", "8080"]
+# Optional healthcheck for readiness/liveness probes
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/ || exit 1
 
-
-
+# Serve the React build
+CMD ["serve", "-s", "dist", "-l", "8080", "--no-clipboard", "--single"]

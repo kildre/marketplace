@@ -4,15 +4,13 @@ export const About = (): React.ReactElement => {
 
   return (
     <div className="container">
-      <h2>About Us</h2>
-      <p>
-        Welcome to our site! This project is built with React 19, Vite, and TypeScript. We've added SCSS for
-        styling and are using modern tooling for a fast and efficient developer experience.
-      </p>
-      <p>
-        This About page is just a placeholder — feel free to customize it with your own content or link it up
-        with a router.
-      </p>
+      <section aria-labelledby="about-heading">
+        <h1 id="about-heading">About the Advana Marketplace</h1>
+        <p>
+          Your one-stop shop for everything you need to innovate faster. Whether you’re a data scientist hunting for the perfect dataset
+          or a developer spinning up compute resources, our Storefront makes it as easy as “add to cart.”
+        </p>
+      </section>
     </div>
   );
 };

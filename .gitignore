@@ -34,3 +34,6 @@ coverage/
 
 # DO NOT ignore if you're using npm
 # package-lock.json
+
+# Project‑local overrides
+Dockerfile.local

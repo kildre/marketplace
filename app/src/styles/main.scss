@@ -9,7 +9,7 @@ $font-stack: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 // TEXT STYTLES
 h1 {
   color: $primary-color;
-  font-size: 5rem;
+  font-size: 3rem;
 }
 h2 {
   color:$tertiary-color; 
@@ -54,4 +54,43 @@ body {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+// HEADER STYLES
+.header {
+  background-color: $primary-color;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: $secondary-color;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: border 0.3s ease;
+  border: 2px solid transparent;
+  border-radius: 4px;
+
+  &:hover:not(.active) {
+    border-color: $secondary-color;
+  }
+
+  &.active {
+    text-decoration: underline;
+    border-color: transparent;
+  }
+
+  &.active:hover {
+    border-color: transparent;
+  }
 }
