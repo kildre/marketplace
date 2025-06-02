@@ -26,16 +26,17 @@ RUN rm -rf app/node_modules
 # ---------- RUNTIME STAGE ----------
 FROM ${BASE_IMAGE} AS runtime
 
-USER node
+# still root here
 WORKDIR /app
 
-# production env
-ENV NODE_ENV=production
-
-# install a simple static file server
+# install the static‐file server as root
 RUN npm install -g serve@^14
 
-# copy built artifacts
+# now switch to non‑root “node”
+USER node
+
+ENV NODE_ENV=production
+
 COPY --from=build /app/app/dist ./dist
 
 EXPOSE 8080
@@ -46,6 +47,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     if (res.statusCode >= 200 && res.statusCode < 400) process.exit(0); \
     else process.exit(1); \
     }).on('error', () => process.exit(1));"
-
 
 CMD ["serve", "-s", "dist", "-l", "8080", "--no-clipboard", "--single"]
