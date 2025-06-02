@@ -41,6 +41,11 @@ COPY --from=build /app/app/dist ./dist
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/ || exit 1
+    CMD node -e "const http = require('http'); \
+    http.get('http://localhost:8080', res => { \
+    if (res.statusCode >= 200 && res.statusCode < 400) process.exit(0); \
+    else process.exit(1); \
+    }).on('error', () => process.exit(1));"
+
 
 CMD ["serve", "-s", "dist", "-l", "8080", "--no-clipboard", "--single"]

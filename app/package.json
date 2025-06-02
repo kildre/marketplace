@@ -37,10 +37,10 @@
     "eslint": "^9.26.0",
     "jsdom": "^26.0.0",
     "sass": "^1.86.3",
+    "serve": "^14.2.4",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.3"
   }
 }
-
