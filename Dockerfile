@@ -26,7 +26,9 @@ RUN rm -rf app/node_modules
 # ---------- RUNTIME STAGE ----------
 FROM ${BASE_IMAGE} AS runtime
 
-# still root here
+# Force root (because this image’s default user is “node”)
+USER root
+
 WORKDIR /app
 
 # install the static‐file server as root
