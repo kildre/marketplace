@@ -5,7 +5,7 @@ ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-a
 FROM ${BASE_IMAGE}-dev AS build
 
 # ---------- Comment out Lines 1 - 5 Uncomment Line 8 for local build ----------
-# FROM node:18.20 AS build
+#FROM node:18.20 AS build
 
 USER node
 WORKDIR /app/app
@@ -23,41 +23,13 @@ COPY --chown=node:node app/ .
 RUN npm run build
 
 # ---------- RUNTIME STAGE ----------
-FROM nginx:alpine AS runtime
-
-# Create a non-root user for nginx
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
+FROM nginx:1.21 AS runtime
 
 # Copy the built application from build stage
 COPY --from=build /app/app/dist /usr/share/nginx/html
 
-# Create nginx configuration for SPA
-RUN echo 'server { \
-    listen 8080; \
-    server_name localhost; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    \
-    location / { \
-    try_files $uri $uri/ /index.html; \
-    } \
-    \
-    # Security headers \
-    add_header X-Frame-Options "SAMEORIGIN" always; \
-    add_header X-Content-Type-Options "nosniff" always; \
-    add_header X-XSS-Protection "1; mode=block" always; \
-    \
-    # Cache static assets \
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ { \
-    expires 1y; \
-    add_header Cache-Control "public, immutable"; \
-    } \
-    }' > /etc/nginx/conf.d/default.conf
-
-# Change nginx to run on port 8080 (non-privileged)
-RUN sed -i 's/listen       80;/listen       8080;/' /etc/nginx/conf.d/default.conf && \
-    sed -i 's/listen  \[::\]:80;/listen  [::]:8080;/' /etc/nginx/conf.d/default.conf
+# Copy nginx configuration (better to use external config file for HELM deployments)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Change ownership of nginx directories to allow non-root execution
 RUN chown -R nginx:nginx /var/cache/nginx && \
