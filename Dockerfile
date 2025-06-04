@@ -23,7 +23,7 @@ COPY --chown=node:node app/ .
 RUN npm run build
 
 # ---------- RUNTIME STAGE ----------
-FROM nginx:1.21 AS runtime
+FROM nginx:1.25-alpine AS runtime
 
 # Copy the built application from build stage
 COPY --from=build /app/app/dist /usr/share/nginx/html
