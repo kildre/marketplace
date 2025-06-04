@@ -25,6 +25,11 @@ RUN npm run build
 # ---------- RUNTIME STAGE ----------
 FROM nginx:1.25-alpine AS runtime
 
+# Force Alpine to pull the patched libxml2 (>= 2.11.8-r3)
+RUN apk update && \
+    apk add --no-cache libxml2=2.11.8-r3 && \
+    rm -rf /var/cache/apk/*
+
 # Copy the built application from build stage
 COPY --from=build /app/app/dist /usr/share/nginx/html
 
