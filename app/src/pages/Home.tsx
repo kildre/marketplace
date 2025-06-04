@@ -5,7 +5,7 @@ export const Home = (): React.ReactElement => {
     <div className="container">
       <section aria-labelledby="home-heading">
       <h1>Advana Marketplace</h1>
-      <p>Welcome to the Marketplace!</p>
+      <h3>Welcome to the Marketplace!</h3>
       </section>
     </div>
   );
