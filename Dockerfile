@@ -4,7 +4,6 @@ ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-a
 # ---------- BUILD STAGE ----------
 FROM ${BASE_IMAGE}-dev AS build
 
-# ---------- Comment out Lines 1 - 5 Uncomment Line 8 for local build ----------
 #FROM node:18.20 AS build
 
 USER node
@@ -23,20 +22,25 @@ COPY --chown=node:node app/ .
 RUN npm run build
 
 # ---------- RUNTIME STAGE ----------
-FROM nginx:1.25-alpine AS runtime
+# Switch to nginx Alpine image (currently 1.27.x which includes the latest security patches):
+FROM nginx:alpine AS runtime
 
-# Force Alpine to pull the patched libxml2 (>= 2.11.8-r3)
+# 1) (Optional) If you want to double-check versions, you can upgrade all installed Alpine packages
+#    so they move to the latest security-fixed releases in the Alpine 3.20 repo:
 RUN apk update && \
-    apk add --no-cache libxml2=2.11.8-r3 && \
+    apk upgrade libxml2 curl libcurl libcrypto3 libssl3 libexpat libxslt xz-libs && \
     rm -rf /var/cache/apk/*
 
-# Copy the built application from build stage
+# 2) (Optional) Sanity check that the vulnerable packages are now at fixed versions
+RUN apk info libxml2 curl libcurl libcrypto3 libssl3 libexpat libxslt xz-libs
+
+# 3) Copy the built application from the build stage
 COPY --from=build /app/app/dist /usr/share/nginx/html
 
-# Copy nginx configuration (better to use external config file for HELM deployments)
+# 4) Copy nginx configuration (better to use external config file for HELM deployments)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Change ownership of nginx directories to allow non-root execution
+# 5) Change ownership of nginx directories to allow non-root execution
 RUN chown -R nginx:nginx /var/cache/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     chown -R nginx:nginx /etc/nginx/conf.d && \
