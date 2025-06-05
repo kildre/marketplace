@@ -28,6 +28,17 @@ FROM ${BASE_IMAGE}
 #FROM node:18.20.4
 WORKDIR /app
 
+# ---- Switch to root to install serve globally ----
+USER root
+
+# Install a tiny static server (serve) globally
+RUN npm install --global serve
+
+# Create the /app directory and set ownership back to node
+RUN mkdir -p /app && chown -R node:node /app
+
+# Switch back to the non-root user
+USER node
 
 # Copy the built application from build stage
 COPY --from=build /app/app/dist ./dist
