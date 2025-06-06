@@ -1,55 +1,60 @@
-# ---------- ARGs ----------
+# ------------------------------
+# 1) BUILD STAGE
+# ------------------------------
+# —— PRODUCTION (us-gov-west-1 FIPS image) —— 
 ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
+FROM "${BASE_IMAGE}-dev" AS builder
 
-# ---------- BUILD STAGE ----------
-FROM ${BASE_IMAGE}-dev AS build
+# —— LOCAL DEV (official Node 22 image) —— 
+# FROM node:22 AS builder
 
-# ---------- Comment out Lines 1 - 5 Uncomment Line 8 for local build ----------
-#FROM node:18.20.4 AS build
+USER root
+ENV APP_UID=65532
+ENV APP_GID=65532
+ENV APP_ROOT="/app"
+ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
 
-USER node
-WORKDIR /app/app
+RUN mkdir -p "${APP_FRONTEND_DIR}"
+RUN node -v
+RUN npm -v
 
-# 1) Copy only the package files into the app directory
-COPY --chown=node:node app/package*.json ./
+# If you need a private registry, uncomment these two lines:
+# RUN npm config set strict-ssl=false
+# RUN npm set @advana:registry=https://nexus.cdao.us/repository/advana-npm-group/
 
-# 2) Install deps inside app/
-RUN npm install --prefer-offline --legacy-peer-deps
-
-# 3) Copy the rest of your source into app/
-COPY --chown=node:node app/ .
-
-# 4) Build the Vite/React app
+COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
+WORKDIR "${APP_FRONTEND_DIR}"
+RUN npm install --legacy-peer-deps
 RUN npm run build
 
-# ---------- RUNTIME STAGE ----------
-# Comment/Uncomment ${BASE_IMAGE} = production node:18.20 = local testing
-FROM ${BASE_IMAGE}
-#FROM node:18.20.4
-WORKDIR /app
+# ------------------------------
+# 2) SERVER STAGE
+# ------------------------------
+# —— PRODUCTION (us-gov-west-1 FIPS) —— 
+FROM "${BASE_IMAGE}" AS server
 
-# ---- Switch to root to install serve globally ----
+# —— LOCAL DEV (official Node 22) —— 
+# FROM node:22 AS server
+
+ENV APP_UID=65532
+ENV APP_GID=65532
+ENV APP_ROOT="/app"
+ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
+
 USER root
+RUN mkdir -p "${APP_FRONTEND_DIR}"
+COPY --chmod=775 --from=builder "${APP_FRONTEND_DIR}/dist" "${APP_FRONTEND_DIR}/dist"
 
-# Install a tiny static server (serve) globally
-RUN npm install --global serve
+WORKDIR "${APP_ROOT}"
+RUN npm install -g serve
 
-# Create the /app directory and set ownership back to node
-RUN mkdir -p /app && chown -R node:node /app
+RUN chmod -R g-s "${APP_ROOT}" \
+    && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}"
 
-# Switch back to the non-root user
-USER node
-
-# Copy the built application from build stage
-COPY --from=build /app/app/dist ./dist
-
-
-# Install a tiny static server (serve) globally
-RUN npm install --global serve
-
+USER "${APP_UID}":"${APP_GID}"
 EXPOSE 8080
-
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
+WORKDIR "${APP_FRONTEND_DIR}"
 CMD ["serve", "-s", "dist", "-l", "8080"]
