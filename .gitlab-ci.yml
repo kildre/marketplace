@@ -10,27 +10,19 @@ stages:
 
 workflow:
   rules:
-    # keep your existing push → always / MR → never logic
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main" # && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH || $CI_JOB_MANUAL = true
       when: always
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-
-    # only build & deploy your chart on non-HELM_ONLY runs
     - if: $HELM_ONLY == "false"
       variables:
         HELM_UPGRADE_EXTRA_ARGS: >-
           --set image.tag=${CI_COMMIT_SHA}
-          --create-namespace
-          --timeout 10m0s
-
-    # only deploy your chart (no container build) on HELM_ONLY runs
     - if: $HELM_ONLY == "true"
       variables:
         HELM_UPGRADE_EXTRA_ARGS: >-
           --set image.tag=${IMAGE_TAG_FOR_HELM_ONLY}
-          --create-namespace
-          --timeout 10m0s
+
 
 variables:
   HELM_ONLY:
