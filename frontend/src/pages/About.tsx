@@ -5,14 +5,14 @@ export const About = (): React.ReactElement => {
   return (
     <div className="container">
       <section aria-labelledby="about-heading">
-        <h1 id="about-heading">About the Advana Marketplace</h1>
+        <h1 id="about-heading" className="mb-1">About the Advana Marketplace</h1>
         <p>
           Your one-stop shop for everything you need to innovate faster. Whether you’re a data scientist hunting for the perfect dataset
           or a developer spinning up compute resources, our Storefront makes it as easy as “add to cart.”
         </p>
       </section>
       <section>
-        <h3><ul><li>1. Centralized Catalog
+        <ul><li>1. Centralized Catalog
 The portal exposes a curated catalog of:
 
 Applications (e.g., pre-built dashboards, modeling tools)
@@ -39,7 +39,7 @@ Audit & Compliance: Every request and action is logged; dashboards show who’s 
 Role-Based Access: Fine-grained policies ensure only authorized users see or can request sensitive data/services.
 
 Self-Service Extensions: Approved apps/data appear under “My Entitlements” for instant redeployment without re-approval, speeding up repeat use</li>
-</ul></h3>
+</ul>
      </section>
     </div>
   );
