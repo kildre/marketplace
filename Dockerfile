@@ -14,11 +14,11 @@ RUN mkdir -p "${APP_FRONTEND_DIR}"
 WORKDIR "${APP_FRONTEND_DIR}"
 
 # install ALL deps (including whatever you need to build and to serve)
-COPY package*.json ./
+COPY frontend/package*.json ./
 RUN npm install --legacy-peer-deps
 
 # copy source & build
-COPY --chmod=775 . .
+COPY --chmod=775 frontend/ . 
 RUN npm run build
 
 # ------------------------------
