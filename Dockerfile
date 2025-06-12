@@ -16,7 +16,7 @@ WORKDIR "${APP_FRONTEND_DIR}"
 
 # install ALL deps (including whatever you need to build and to serve)
 COPY frontend/package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm ci --legacy-peer-deps
 
 # copy source & build
 COPY --chmod=775 frontend/ . 
@@ -45,7 +45,7 @@ COPY --from=builder "${APP_FRONTEND_DIR}/package*.json" ./
 COPY --from=builder "${APP_FRONTEND_DIR}/serve.json" ./
 
 # Install production deps (so serve is available locally, not globally)
-RUN npm install --omit=dev --legacy-peer-deps
+RUN npm ci --omit=dev --legacy-peer-deps
 
 # Fix permissions
 RUN chmod -R g-s "${APP_ROOT}" \
