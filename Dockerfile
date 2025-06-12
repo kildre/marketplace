@@ -39,6 +39,7 @@ WORKDIR "${APP_FRONTEND_DIR}"
 # Copy only dist and package manifests
 COPY --from=builder "${APP_FRONTEND_DIR}/dist" ./dist
 COPY --from=builder "${APP_FRONTEND_DIR}/package*.json" ./
+COPY --from=builder "${APP_FRONTEND_DIR}/serve.json" ./
 
 # Install production deps (so serve is available locally, not globally)
 RUN npm install --omit=dev --legacy-peer-deps
@@ -55,6 +56,6 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
-# Launch via local serve binary
+# Launch via vite preview
 WORKDIR "${APP_FRONTEND_DIR}"
-CMD ["npx", "serve", "-s", "dist", "-l", "8080"]
+CMD ["npm", "run", "start"]

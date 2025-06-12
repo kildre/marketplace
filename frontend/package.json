@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --port 7500",
     "build": "vite build",
-    "start": "vite preview --port 7500",
+    "start": "serve -s dist -l 8080",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "vitest",
     "test:watch": "vitest --watch"
@@ -24,7 +24,8 @@
     "pg": "^8.14.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-router-dom": "^7.6.0"
+    "react-router-dom": "^6.28.0",
+    "serve": "^14.2.4"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
@@ -37,7 +38,6 @@
     "eslint": "^9.26.0",
     "jsdom": "^26.0.0",
     "sass": "^1.86.3",
-    "serve": "^14.2.4",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vite-tsconfig-paths": "^5.1.4",
