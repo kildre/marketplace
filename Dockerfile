@@ -8,7 +8,7 @@ ENV APP_GID=65532
 
 # key dirs & globally usable binaries/packages
 ENV APP_ROOT="/app"
-ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
+ENV APP_FRONTEND_DIR="/app/frontend"
 
 RUN mkdir -p "${APP_FRONTEND_DIR}"
 
@@ -33,7 +33,7 @@ USER root
 ENV APP_UID=65532
 ENV APP_GID=65532
 ENV APP_ROOT="/app"
-ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
+ENV APP_FRONTEND_DIR="/app/frontend"
 
 # Create directory
 RUN mkdir -p "${APP_FRONTEND_DIR}"
