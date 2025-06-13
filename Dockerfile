@@ -52,7 +52,7 @@ COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/dist" ./dist
 COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/package*.json" ./
 
 # install production dependencies (e.g. sirv or vite preview)
-RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
+RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
 # expose & healthcheck
 EXPOSE 8080
@@ -60,4 +60,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
 # launch
-CMD ["npm", "run", "start"]
+CMD ["npx", "sirv", "dist", "--port", "8080", "--host", "0.0.0.0", "--single", "--cors"]
