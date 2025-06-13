@@ -42,9 +42,8 @@ WORKDIR "${APP_FRONTEND_DIR}"
 # Copy only dist and package manifests
 COPY --from=builder "${APP_FRONTEND_DIR}/dist" ./dist
 COPY --from=builder "${APP_FRONTEND_DIR}/package*.json" ./
-COPY --from=builder "${APP_FRONTEND_DIR}/serve.json" ./
 
-# Install production deps (so serve is available locally, not globally)
+# Install production deps (so sirv is available locally, not globally)
 RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 
 # Fix permissions

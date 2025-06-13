@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --port 7500",
     "build": "vite build",
-    "start": "serve -s dist -l 8080",
+    "start": "sirv dist --port 8080 --host 0.0.0.0 --single --cors",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "vitest",
     "test:watch": "vitest --watch"
@@ -25,7 +25,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-router-dom": "^6.28.0",
-    "serve": "^14.2.4"
+    "sirv-cli": "^2.0.2"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
