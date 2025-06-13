@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=16.17.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "dev": "vite --port 7500",
     "build": "vite build",
