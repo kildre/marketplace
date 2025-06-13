@@ -1,29 +1,26 @@
 ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
 FROM "${BASE_IMAGE}-dev" AS builder
 
-USER root
-
 ENV APP_UID=65532
 ENV APP_GID=65532
-
-# Update npm to fix security vulnerabilities
-# GHSA-v6h2-p8h4-qcjw and CVE-2025-5889 fixed in npm 11.4.2-r0  
-RUN apk update && apk add --upgrade npm>=11.4.2-r0
 
 # key dirs & globally usable binaries/packages
 ENV APP_ROOT="/app"
 ENV APP_FRONTEND_DIR="/app/frontend"
 
-RUN mkdir -p "${APP_FRONTEND_DIR}"
+# Create directory as root, then switch to node user
+USER root
+RUN mkdir -p "${APP_FRONTEND_DIR}" && chown -R node:node "${APP_ROOT}"
 
+USER node
 WORKDIR "${APP_FRONTEND_DIR}"
 
 # install ALL deps (including whatever you need to build and to serve)
-COPY frontend/package*.json ./
+COPY --chown=node:node frontend/package*.json ./
 RUN npm ci --legacy-peer-deps && npm cache clean --force
 
 # copy source & build
-COPY --chown=${APP_UID}:${APP_GID} frontend/ . 
+COPY --chown=node:node frontend/ . 
 RUN npm run build
 
 # ------------------------------
@@ -32,33 +29,24 @@ RUN npm run build
 
 FROM "${BASE_IMAGE}" AS server
 
-
-USER root
 ENV APP_UID=65532
 ENV APP_GID=65532
 ENV APP_ROOT="/app"
 ENV APP_FRONTEND_DIR="/app/frontend"
 
-# Update npm to fix security vulnerabilities
-# GHSA-v6h2-p8h4-qcjw and CVE-2025-5889 fixed in npm 11.4.2-r0
-RUN apk update && apk add --upgrade npm>=11.4.2-r0
+# Create directory as root, then switch to node user
+USER root
+RUN mkdir -p "${APP_FRONTEND_DIR}" && chown -R node:node "${APP_ROOT}"
 
-# Create directory
-RUN mkdir -p "${APP_FRONTEND_DIR}"
+USER node
 WORKDIR "${APP_FRONTEND_DIR}"
 
 # Copy only dist and package manifests
-COPY --from=builder "${APP_FRONTEND_DIR}/dist" ./dist
-COPY --from=builder "${APP_FRONTEND_DIR}/package*.json" ./
+COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/dist" ./dist
+COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/package*.json" ./
 
 # Install production deps (so sirv is available locally, not globally)
 RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
-
-# Fix permissions
-RUN chmod -R g-s "${APP_ROOT}" \
-    && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}"
-
-USER "${APP_UID}":"${APP_GID}"
 
 # Listen on 8080; Kubernetes Ingress will handle TLS/routing
 EXPOSE 8080
