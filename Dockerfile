@@ -12,6 +12,9 @@ ENV APP_FRONTEND_DIR="/app/frontend"
 USER root
 RUN mkdir -p "${APP_FRONTEND_DIR}" && chown -R node:node "${APP_ROOT}"
 
+# Update npm to fix security vulnerabilities (GHSA-v6h2-p8h4-qcjw, CVE-2025-5889)
+RUN apk update && apk upgrade npm
+
 USER node
 WORKDIR "${APP_FRONTEND_DIR}"
 
@@ -37,6 +40,9 @@ ENV APP_FRONTEND_DIR="/app/frontend"
 # Create directory as root, then switch to node user
 USER root
 RUN mkdir -p "${APP_FRONTEND_DIR}" && chown -R node:node "${APP_ROOT}"
+
+# Update npm to fix security vulnerabilities (GHSA-v6h2-p8h4-qcjw, CVE-2025-5889)
+RUN apk update && apk upgrade npm
 
 USER node
 WORKDIR "${APP_FRONTEND_DIR}"
