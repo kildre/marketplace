@@ -6,6 +6,10 @@ USER root
 ENV APP_UID=65532
 ENV APP_GID=65532
 
+# Update npm to fix security vulnerabilities
+# GHSA-v6h2-p8h4-qcjw and CVE-2025-5889 fixed in npm 11.4.2-r0  
+RUN apk update && apk add --upgrade npm>=11.4.2-r0
+
 # key dirs & globally usable binaries/packages
 ENV APP_ROOT="/app"
 ENV APP_FRONTEND_DIR="/app/frontend"
@@ -34,6 +38,10 @@ ENV APP_UID=65532
 ENV APP_GID=65532
 ENV APP_ROOT="/app"
 ENV APP_FRONTEND_DIR="/app/frontend"
+
+# Update npm to fix security vulnerabilities
+# GHSA-v6h2-p8h4-qcjw and CVE-2025-5889 fixed in npm 11.4.2-r0
+RUN apk update && apk add --upgrade npm>=11.4.2-r0
 
 # Create directory
 RUN mkdir -p "${APP_FRONTEND_DIR}"
