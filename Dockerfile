@@ -1,24 +1,26 @@
 ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
+
+# ------------------------------
+# 1) BUILD STAGE
+# ------------------------------
 FROM "${BASE_IMAGE}-dev" AS builder
 
+# run as root to mkdir & chown
+USER root
 ENV APP_UID=65532
 ENV APP_GID=65532
-
-# key dirs & globally usable binaries/packages
 ENV APP_ROOT="/app"
-ENV APP_FRONTEND_DIR="/app/frontend"
+ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
 
-# Create directory as root, then switch to node user
-USER root
-RUN mkdir -p "${APP_FRONTEND_DIR}" && chown -R node:node "${APP_ROOT}"
+# create frontend dir and give ownership to node user
+RUN mkdir -p "${APP_FRONTEND_DIR}" \
+    && chown -R node:node "${APP_ROOT}"
 
-# Update npm to fix security vulnerabilities (GHSA-v6h2-p8h4-qcjw, CVE-2025-5889)
-RUN apk update && apk upgrade npm
-
+# switch to non-root
 USER node
 WORKDIR "${APP_FRONTEND_DIR}"
 
-# install ALL deps (including whatever you need to build and to serve)
+# install dependencies
 COPY --chown=node:node frontend/package*.json ./
 RUN npm ci --legacy-peer-deps && npm cache clean --force
 
@@ -29,37 +31,33 @@ RUN npm run build
 # ------------------------------
 # 2) RUNTIME STAGE
 # ------------------------------
-
 FROM "${BASE_IMAGE}" AS server
 
+# run as root to mkdir & chown
+USER root
 ENV APP_UID=65532
 ENV APP_GID=65532
 ENV APP_ROOT="/app"
-ENV APP_FRONTEND_DIR="/app/frontend"
+ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
 
-# Create directory as root, then switch to node user
-USER root
-RUN mkdir -p "${APP_FRONTEND_DIR}" && chown -R node:node "${APP_ROOT}"
+RUN mkdir -p "${APP_FRONTEND_DIR}" \
+    && chown -R node:node "${APP_ROOT}"
 
-# Update npm to fix security vulnerabilities (GHSA-v6h2-p8h4-qcjw, CVE-2025-5889)
-RUN apk update && apk upgrade npm
-
+# switch to non-root
 USER node
 WORKDIR "${APP_FRONTEND_DIR}"
 
-# Copy only dist and package manifests
+# copy build output and package manifests
 COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/dist" ./dist
 COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/package*.json" ./
 
-# Install production deps (so sirv is available locally, not globally)
+# install production dependencies (e.g. sirv or vite preview)
 RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 
-# Listen on 8080; Kubernetes Ingress will handle TLS/routing
+# expose & healthcheck
 EXPOSE 8080
-
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
-# Launch via vite preview
-WORKDIR "${APP_FRONTEND_DIR}"
+# launch
 CMD ["npm", "run", "start"]
