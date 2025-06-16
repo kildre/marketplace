@@ -39,6 +39,8 @@ ENV APP_UID=65532
 ENV APP_GID=65532
 ENV APP_ROOT="/app"
 ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
+ENV PATH="/usr/local/bin:$PATH"
+ENV NODE_ENV=production
 
 RUN mkdir -p "${APP_FRONTEND_DIR}" \
     && chown -R node:node "${APP_ROOT}"
@@ -59,5 +61,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
-# launch
-CMD ["npm", "start"]
+# Use node to run sirv directly instead of npm
+CMD ["node", "./node_modules/.bin/sirv", "dist", "--port", "8080", "--host", "0.0.0.0", "--single", "--cors"]
