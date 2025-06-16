@@ -61,5 +61,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
-# Use node to run sirv directly instead of npm
-CMD ["node", "./node_modules/.bin/sirv", "dist", "--port", "8080", "--host", "0.0.0.0", "--single", "--cors"]
+# Use JSON array format with shell to avoid module resolution issues
+CMD ["sh", "-c", "exec ./node_modules/.bin/sirv dist --port 8080 --host 0.0.0.0 --single --cors"]
