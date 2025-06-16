@@ -7,8 +7,9 @@ ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-a
 FROM alpine:3.19 AS esbuild-patch
 RUN apk add --no-cache curl tar
 WORKDIR /tmp/esbuild
-RUN curl -L -o esbuild.tgz https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.22.2.tgz \
-    && tar -xzf esbuild.tgz
+RUN curl -L -o esbuild.tar.gz https://github.com/evanw/esbuild/releases/download/v0.22.2/esbuild-linux-64.tgz \
+    && tar -xzf esbuild.tar.gz
+
 
 # ------------------------------
 # 2) BUILD STAGE
@@ -34,7 +35,7 @@ COPY --chown=node:node frontend/package*.json ./
 RUN npm ci --legacy-peer-deps && npm cache clean --force
 
 # Replace esbuild binary with clean version from tooling stage
-COPY --from=esbuild-patch /tmp/esbuild/package/bin/esbuild node_modules/@esbuild/linux-x64/bin/esbuild
+COPY --from=esbuild-patch /tmp/esbuild/esbuild /app/frontend/node_modules/@esbuild/linux-x64/bin/esbuild
 
 # Build app
 COPY --chown=node:node frontend/ . 
