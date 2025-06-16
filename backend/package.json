@@ -1,15 +1,16 @@
 {
-  "name": "backend",
+  "name": "advana-marketplace-backend",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=16.17.0",
+    "npm": ">=8.0.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^4.19.2"
   }
 }
