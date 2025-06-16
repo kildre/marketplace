@@ -6,13 +6,12 @@ ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-a
 FROM alpine:3.19 AS esbuild-patch
 RUN apk add --no-cache curl tar
 WORKDIR /tmp/esbuild
-RUN curl -L -o esbuild.tgz https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.21.4.tgz \
-    && tar -xzf esbuild.tgz
+RUN curl -L -o esbuild.tgz https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.21.5.tgz \
 
-# ------------------------------
-# 2) BUILD STAGE
-# ------------------------------
-FROM "${BASE_IMAGE}-dev" AS builder
+    # ------------------------------
+    # 2) BUILD STAGE
+    # ------------------------------
+    FROM "${BASE_IMAGE}-dev" AS builder
 
 USER root
 ENV APP_UID=65532
