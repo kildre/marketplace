@@ -1,73 +1,64 @@
-# ------------------------------
-# 1) TOOLING STAGE - esbuild patch (secure version)
-# ------------------------------
-FROM alpine:3.19 AS esbuild-patch
-RUN apk add --no-cache curl tar
-WORKDIR /tmp/esbuild
+# ---- BASE IMAGE ----
+ARG BASE_IMAGE="231134345536.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
 
-# Download patched esbuild binary (built with Go >= 1.23.8)
-RUN curl -L -o esbuild.tar.gz https://github.com/evanw/esbuild/releases/download/v0.22.2/esbuild-linux-64.tar.gz \
-    && tar -xzf esbuild.tar.gz
-
-# ------------------------------
-# 2) BUILD STAGE
-# ------------------------------
-ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
+# ---- BUILD STAGE ----
 FROM "${BASE_IMAGE}-dev" AS builder
 
-# Use root for setup
 USER root
+
 ENV APP_UID=65532
 ENV APP_GID=65532
 ENV APP_ROOT="/app"
 ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
+ENV APP_BACKEND_DIR="${APP_ROOT}/backend"
 
-RUN mkdir -p "${APP_FRONTEND_DIR}" \
-    && chown -R node:node "${APP_ROOT}"
+# Create necessary directories
+RUN mkdir -p "${APP_FRONTEND_DIR}" "${APP_BACKEND_DIR}"
 
-# Switch to node user
-USER node
+# Set up NPM configuration
+RUN npm config set strict-ssl=false
+RUN npm set @advana:registry=https://nexus.cdao.us/repository/advana-npm-group/
+
+# Copy frontend files and install dependencies
+COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
 WORKDIR "${APP_FRONTEND_DIR}"
-
-# Install dependencies
-COPY --chown=node:node frontend/package*.json ./
-RUN npm ci --legacy-peer-deps && npm cache clean --force
-
-# Replace esbuild binary with patched version
-COPY --from=esbuild-patch /tmp/esbuild/esbuild node_modules/@esbuild/linux-x64/bin/esbuild
-
-# Build application
-COPY --chown=node:node frontend/ .
+RUN npm install
 RUN npm run build
 
-# ------------------------------
-# 3) RUNTIME STAGE
-# ------------------------------
+# Move built frontend files to backend directory (to be served by Express)
+RUN mv dist "${APP_BACKEND_DIR}/dist"
+
+# Copy backend files and install dependencies
+COPY --chmod=775 ./backend/ "${APP_BACKEND_DIR}/"
+WORKDIR "${APP_BACKEND_DIR}"
+RUN npm install
+
+# ---- FINAL STAGE ----
 FROM "${BASE_IMAGE}" AS server
 
 USER root
+
 ENV APP_UID=65532
 ENV APP_GID=65532
 ENV APP_ROOT="/app"
-ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
-ENV PATH="/usr/local/bin:$PATH"
-ENV NODE_ENV=production
+ENV APP_BACKEND_DIR="${APP_ROOT}/backend"
 
-RUN mkdir -p "${APP_FRONTEND_DIR}" \
-    && chown -R node:node "${APP_ROOT}"
+# Create backend directory
+RUN mkdir -p "${APP_BACKEND_DIR}"
 
-USER node
-WORKDIR "${APP_FRONTEND_DIR}"
+# Copy everything from builder
+COPY --chmod=775 --from=builder "${APP_BACKEND_DIR}" "${APP_BACKEND_DIR}"
 
-# Copy build output and production deps
-COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/dist" ./dist
-COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/package*.json" ./
-RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
+# Set permissions
+RUN chmod -R g-s "${APP_ROOT}" \
+    && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}"
 
-# Expose and healthcheck
-EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
+USER "${APP_UID}":"${APP_GID}"
 
-# Start app
-CMD ["sh", "-c", "exec ./node_modules/.bin/sirv dist --port 8080 --host 0.0.0.0 --single --cors"]
+# Expose port used by Express
+EXPOSE 8990
+
+WORKDIR "${APP_BACKEND_DIR}"
+
+# Start the Express server
+CMD ["node", "index.js"]
