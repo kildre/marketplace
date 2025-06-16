@@ -1,22 +1,21 @@
-# Set base image for node-fips
-ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
-
 # ------------------------------
-# 1) TOOLING STAGE - esbuild patch
+# 1) TOOLING STAGE - esbuild patch (secure version)
 # ------------------------------
 FROM alpine:3.19 AS esbuild-patch
 RUN apk add --no-cache curl tar
 WORKDIR /tmp/esbuild
-RUN curl -L -o esbuild.tar.gz https://github.com/evanw/esbuild/releases/download/v0.22.2/esbuild-linux-64.tgz \
-    && tar -xzf esbuild.tar.gz
 
+# Download patched esbuild binary (built with Go >= 1.23.8)
+RUN curl -L -o esbuild.tar.gz https://github.com/evanw/esbuild/releases/download/v0.22.2/esbuild-linux-64.tar.gz \
+    && tar -xzf esbuild.tar.gz
 
 # ------------------------------
 # 2) BUILD STAGE
 # ------------------------------
+ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
 FROM "${BASE_IMAGE}-dev" AS builder
 
-# Use root to prep build environment
+# Use root for setup
 USER root
 ENV APP_UID=65532
 ENV APP_GID=65532
@@ -26,19 +25,19 @@ ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
 RUN mkdir -p "${APP_FRONTEND_DIR}" \
     && chown -R node:node "${APP_ROOT}"
 
-# Switch to non-root user
+# Switch to node user
 USER node
 WORKDIR "${APP_FRONTEND_DIR}"
 
-# Install deps
+# Install dependencies
 COPY --chown=node:node frontend/package*.json ./
 RUN npm ci --legacy-peer-deps && npm cache clean --force
 
-# Replace esbuild binary with clean version from tooling stage
-COPY --from=esbuild-patch /tmp/esbuild/esbuild /app/frontend/node_modules/@esbuild/linux-x64/bin/esbuild
+# Replace esbuild binary with patched version
+COPY --from=esbuild-patch /tmp/esbuild/esbuild node_modules/@esbuild/linux-x64/bin/esbuild
 
-# Build app
-COPY --chown=node:node frontend/ . 
+# Build application
+COPY --chown=node:node frontend/ .
 RUN npm run build
 
 # ------------------------------
@@ -60,11 +59,9 @@ RUN mkdir -p "${APP_FRONTEND_DIR}" \
 USER node
 WORKDIR "${APP_FRONTEND_DIR}"
 
-# Copy production files
+# Copy build output and production deps
 COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/dist" ./dist
 COPY --from=builder --chown=node:node "${APP_FRONTEND_DIR}/package*.json" ./
-
-# Install only production dependencies
 RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
 # Expose and healthcheck
