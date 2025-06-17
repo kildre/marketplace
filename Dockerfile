@@ -55,7 +55,13 @@ RUN chmod -R g-s "${APP_ROOT}" \
 
 # Ensure PATH is properly set for the non-root user and verify node/npm availability
 ENV PATH="/usr/local/bin:${PATH}"
-RUN which node && which npm
+RUN which node && which npm && ls -la $(which node) && ls -la $(which npm)
+
+# Create a simple start script that calls node directly
+RUN mkdir -p /app/scripts && \
+    echo '#!/bin/sh' > /app/scripts/start.sh && \
+    echo 'exec $(which node) index.js' >> /app/scripts/start.sh && \
+    chmod +x /app/scripts/start.sh
 
 USER "${APP_UID}":"${APP_GID}"
 
@@ -64,5 +70,5 @@ EXPOSE 8080
 
 WORKDIR "${APP_BACKEND_DIR}"
 
-# Start the Express server - shell form works with any PATH setup
-CMD npm start
+# Start the Express server - use our script that calls node directly
+CMD ["/app/scripts/start.sh"]
