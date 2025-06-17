@@ -56,7 +56,7 @@ RUN chmod -R g-s "${APP_ROOT}" \
 USER "${APP_UID}":"${APP_GID}"
 
 # Expose port used by Express
-EXPOSE 8990
+EXPOSE 8080
 
 WORKDIR "${APP_BACKEND_DIR}"
 

@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 8990;
+const PORT = process.env.PORT || 8080;
 
 // Serve static files from the React build
 app.use(express.static(path.join(__dirname, 'dist')));
