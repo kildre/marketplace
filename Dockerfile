@@ -53,8 +53,9 @@ COPY --chmod=775 --from=builder "${APP_BACKEND_DIR}" "${APP_BACKEND_DIR}"
 RUN chmod -R g-s "${APP_ROOT}" \
     && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}"
 
-# Ensure PATH is properly set for the non-root user
+# Ensure PATH is properly set for the non-root user and verify node/npm availability
 ENV PATH="/usr/local/bin:${PATH}"
+RUN which node && which npm
 
 USER "${APP_UID}":"${APP_GID}"
 
@@ -63,5 +64,5 @@ EXPOSE 8080
 
 WORKDIR "${APP_BACKEND_DIR}"
 
-# Start the Express server
-CMD ["node", "index.js"]
+# Start the Express server using shell form for better environment handling
+CMD ["npm", "start"]
