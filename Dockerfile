@@ -53,6 +53,9 @@ COPY --chmod=775 --from=builder "${APP_BACKEND_DIR}" "${APP_BACKEND_DIR}"
 RUN chmod -R g-s "${APP_ROOT}" \
     && chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}"
 
+# Ensure PATH is properly set for the non-root user
+ENV PATH="/usr/local/bin:${PATH}"
+
 USER "${APP_UID}":"${APP_GID}"
 
 # Expose port used by Express
