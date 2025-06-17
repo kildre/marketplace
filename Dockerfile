@@ -57,11 +57,6 @@ RUN chmod -R g-s "${APP_ROOT}" \
 ENV PATH="/usr/local/bin:${PATH}"
 RUN which node && which npm
 
-# Find and store the actual paths for node and npm
-RUN echo "#!/bin/sh" > /usr/local/bin/start-app.sh && \
-    echo "exec \$(which node) index.js" >> /usr/local/bin/start-app.sh && \
-    chmod +x /usr/local/bin/start-app.sh
-
 USER "${APP_UID}":"${APP_GID}"
 
 # Expose port used by Express
@@ -69,5 +64,5 @@ EXPOSE 8080
 
 WORKDIR "${APP_BACKEND_DIR}"
 
-# Start the Express server - use our startup script that finds node dynamically
-CMD ["/usr/local/bin/start-app.sh"]
+# Start the Express server - shell form works with any PATH setup
+CMD npm start
