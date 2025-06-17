@@ -64,5 +64,5 @@ EXPOSE 8080
 
 WORKDIR "${APP_BACKEND_DIR}"
 
-# Start the Express server using shell form for better environment handling
-CMD ["npm", "start"]
+# Start the Express server
+CMD npm start
