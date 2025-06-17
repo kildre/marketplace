@@ -1,6 +1,6 @@
 # ---- BASE IMAGE ----
-ARG BASE_IMAGE="231134345536.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
-
+#ARG BASE_IMAGE="231134345536.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
+ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
 # ---- BUILD STAGE ----
 FROM "${BASE_IMAGE}-dev" AS builder
 
