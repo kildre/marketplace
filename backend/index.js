@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // backend/index.js
 import express from 'express';
 import path from 'path';
@@ -11,11 +12,11 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // Serve static files from the React build
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 // All other requests return the React index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.listen(PORT, () => {
