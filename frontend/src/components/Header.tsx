@@ -6,6 +6,11 @@ const Header = (): React.ReactElement => {
 
   return (
     <header className="header">
+      <img 
+        src="/LOGOS.png" 
+        alt="Logo" 
+        className="header-logo"
+      />
       <nav className="nav">
         <Link 
           to="/" 
