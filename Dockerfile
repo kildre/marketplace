@@ -1,47 +1,46 @@
-ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"   
-    # build stage should use -dev image to RUN commands
-# https://edu.chainguard.dev/chainguard/chainguard-images/overview/#why-minimal-container-images
-FROM "${BASE_IMAGE}-dev" AS build
+ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
+FROM "${BASE_IMAGE}-dev" AS builder
+USER root
+ENV APP_UID=65532
+ENV APP_GID=65532
+# key dirs & globally usable binaries/packages
+ENV APP_ROOT="/app"
+ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
+ENV APP_BACKEND_DIR="${APP_ROOT}/backend"
+RUN mkdir -p \
+    "${APP_BACKEND_DIR}" \
+    "${APP_FRONTEND_DIR}"
+# smoke test
+RUN node -v
+RUN npm -v
+RUN npm config set strict-ssl=false
+RUN npm set @advana:registry=https://nexus.cdao.us/repository/advana-npm-group/
+# note on copy+chown: do not use $USER var, it will - surprisingly - be root
+COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
+RUN cd "${APP_FRONTEND_DIR}" \
+    && npm install
+COPY --chmod=775 ./backend/ "${APP_BACKEND_DIR}/"
+RUN cd "${APP_BACKEND_DIR}" \
+    && npm install \
+    && rm -rf ./node_modules/resolve/test 2>/dev/null || true
+RUN cd "${APP_FRONTEND_DIR}" \
+    && npm run build \
+    && mv dist "${APP_BACKEND_DIR}/build"
 
-# build the app as node
-USER node
-
-WORKDIR /app
-COPY --chown=node:node . .
-
-# disable nextjs telemetry during the build (https://nextjs.org/telemetry)
-ENV NEXT_TELEMETRY_DISABLED 1
-# clean install ALL dependencies, build from src, then just install the prod 
-# dependencies. no need to delete node_modules or anything, npm ci takes care
-# of that for us. delete the .npmrc so we're not deploying that internal IP
-
-RUN npm install --prefer-offline --legacy-peer-deps
-RUN npm run build
-RUN npm install --prefer-offline --omit=dev --legacy-peer-deps
-RUN rm -rf .npmrc .yarnrc .husky secrets
-
-#Remove test folder from resolve node_module to remediate anchore fail for https://github.com/advisories/GHSA-2jcg-qqmg-46q6
-#the package.json in this test folder has a library name that isn't safe to use
-RUN rm -rf .npmrc .yarnrc .husky secrets node_modules/resolve/test
-
-# runtime stage should use non-dev image to deploy minimal image
-FROM $BASE_IMAGE AS runtime
-
-# run the app as node
-USER node
-
-# make sure we're running in production mode
-ENV NODE_ENV production
-# disable nextjs telemetry during runtime (https://nextjs.org/telemetry)
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# copy the entire build dir
-WORKDIR /app
-COPY --from=build /app .
-
-# expose port for HTTP only: should match the helm chart's targetPort value
-# in deployment.web.service.ClusterIP.ports
+FROM "${BASE_IMAGE}" AS server
+ENV APP_UID=65532
+ENV APP_GID=65532
+USER root
+ENV PATH="/app/node_modules/.bin:/app/backend/node_modules/.bin:${PATH}"
+ENV APP_ROOT="/app"
+ENV APP_BACKEND_DIR="${APP_ROOT}/backend"
+RUN mkdir -p "${APP_BACKEND_DIR}"
+# copy builds
+COPY --chmod=775 --from=builder "${APP_BACKEND_DIR}" "${APP_BACKEND_DIR}"
+RUN chmod -R g-s "${APP_ROOT}"
+RUN chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}"
+USER "${APP_UID}":"${APP_GID}"
+# Express server port
 EXPOSE 8080
-
-# start the app as a basic node.js app
-CMD [ "index.js" ]
+WORKDIR "${APP_BACKEND_DIR}"
+CMD ["./index.js"]

@@ -126,8 +126,7 @@ deployment:
 
     container:
       web:
-        args:
-          - index.js
+        args: ["./index.js"]
         envFrom:
           - secretRef:
               name: public-env-platform-ui

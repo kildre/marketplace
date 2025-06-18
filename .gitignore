@@ -1,10 +1,11 @@
 # Node.js dependencies
 node_modules/
 
-# TypeScript build artifacts
+# Build output
 dist/
+
+# TypeScript artifacts
 tsconfig.tsbuildinfo
-.next/
 
 # Logs
 logs/
@@ -17,10 +18,22 @@ npm-debug.log*
 # macOS system files
 .DS_Store
 
-# Temporary files
+# Editor settings
+.vscode/
+.idea/
+
+# Temp files
 *.tmp
 *.swp
 
-# IDE-specific files
-.vscode/
-.idea/
+# Test coverage
+coverage/
+
+# ESLint cache
+.eslintcache
+
+# DO NOT ignore if you're using npm
+# package-lock.json
+
+# Project‑local overrides
+Dockerfile.local
