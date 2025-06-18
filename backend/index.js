@@ -12,11 +12,11 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // Serve static files from the React build
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // All other requests return the React index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
 });
 
 app.listen(PORT, () => {
