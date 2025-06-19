@@ -25,11 +25,14 @@ RUN cd "${APP_BACKEND_DIR}" \
     && rm -rf ./node_modules/resolve/test 2>/dev/null || true
 RUN cd "${APP_FRONTEND_DIR}" \
     && npm run build \
-    && mv dist "${APP_BACKEND_DIR}/build"
+    && mkdir -p "${APP_BACKEND_DIR}/build" \
+    && mv dist/* "${APP_BACKEND_DIR}/build/" \
+    && ls -la "${APP_BACKEND_DIR}/build/"
 
 FROM "${BASE_IMAGE}" AS server
 ENV APP_UID=65532
 ENV APP_GID=65532
+ENV NODE_ENV=production
 USER root
 ENV PATH="/app/node_modules/.bin:/app/backend/node_modules/.bin:${PATH}"
 ENV APP_ROOT="/app"
