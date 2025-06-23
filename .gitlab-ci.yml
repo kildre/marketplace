@@ -1,11 +1,11 @@
 include:
   - project: tenant/tekton-promotion-gitlab
-    #file: routes/container-only.yml
+    # file: routes/container-only.yml
     file: routes/helm-only.yml
     #file: routes/dragon-full.yml
 
 stages:
-  - '🧪 unit-test'
+  - "🧪 unit-test"
   - pipeline-trigger
 
 workflow:
@@ -23,24 +23,23 @@ workflow:
         HELM_UPGRADE_EXTRA_ARGS: >-
           --set image.tag=${IMAGE_TAG_FOR_HELM_ONLY}
 
-
 variables:
   HELM_ONLY:
-    description: 'only build chart'
-    value: 'true'
+    description: "only build chart"
+    value: "true"
     options:
-      - 'true'
-      - 'false'
+      - "true"
+      - "false"
   IMAGE_TAG_FOR_HELM_ONLY:
-    description: 'Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)'
-    value: '4050291feefcf5b4fb50dd2f991b13e57e77bfbe' # ${CI_COMMIT_SHA}
+    description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
+    value: "3ffc5f0b61419adc41685236a6fe56cc891eeee7" # ${CI_COMMIT_SHA}
   CONTAINER_ONLY:
-    description: 'only build container'
-    value: 'false'
+    description: "only build container"
+    value: "false"
     options:
-      - 'true'
-      - 'false'
-  UPSTREAM_PROJECT_DIR: '.'
-  HELM_RELEASE_NAME: 'advana-marketplace'
-  HELM_CHART_DIR: './chart'
-  DOCKERFILE_PATH: './Dockerfile'
+      - "true"
+      - "false"
+  UPSTREAM_PROJECT_DIR: "."
+  HELM_RELEASE_NAME: "advana-marketplace"
+  HELM_CHART_DIR: "./chart"
+  DOCKERFILE_PATH: "./Dockerfile"
