@@ -6,10 +6,7 @@ ENV APP_GID=65532
 # key dirs & globally usable binaries/packages
 ENV APP_ROOT="/app"
 ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
-ENV APP_BACKEND_DIR="${APP_ROOT}/backend"
-RUN mkdir -p \
-    "${APP_BACKEND_DIR}" \
-    "${APP_FRONTEND_DIR}"
+RUN mkdir -p "${APP_FRONTEND_DIR}"
 # smoke test
 RUN node -v
 RUN npm -v
@@ -18,32 +15,35 @@ RUN npm set @advana:registry=https://nexus.cdao.us/repository/advana-npm-group/
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
 RUN cd "${APP_FRONTEND_DIR}" \
-    && npm install
-COPY --chmod=775 ./backend/ "${APP_BACKEND_DIR}/"
-RUN cd "${APP_BACKEND_DIR}" \
     && npm install \
-    && rm -rf ./node_modules/resolve/test 2>/dev/null || true
-RUN cd "${APP_FRONTEND_DIR}" \
-    && npm run build \
-    && mkdir -p "${APP_BACKEND_DIR}/build" \
-    && mv dist/* "${APP_BACKEND_DIR}/build/" \
-    && ls -la "${APP_BACKEND_DIR}/build/"
+    && npm run build
 
-FROM "${BASE_IMAGE}" AS server
+# Use nginx for serving static files
+FROM nginx:alpine AS server
 ENV APP_UID=65532
 ENV APP_GID=65532
-ENV NODE_ENV=production
-USER root
-ENV PATH="/app/node_modules/.bin:/app/backend/node_modules/.bin:${PATH}"
-ENV APP_ROOT="/app"
-ENV APP_BACKEND_DIR="${APP_ROOT}/backend"
-RUN mkdir -p "${APP_BACKEND_DIR}"
-# copy builds
-COPY --chmod=775 --from=builder "${APP_BACKEND_DIR}" "${APP_BACKEND_DIR}"
-RUN chmod -R g-s "${APP_ROOT}"
-RUN chown -R "${APP_UID}":"${APP_GID}" "${APP_ROOT}"
-USER "${APP_UID}":"${APP_GID}"
-# Express server port
+
+# Copy the built React app from builder stage
+COPY --from=builder /app/frontend/dist /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Create user and group to match your existing setup
+RUN addgroup -g ${APP_GID} appgroup && \
+    adduser -D -u ${APP_UID} -G appgroup appuser
+
+# Set proper ownership
+RUN chown -R ${APP_UID}:${APP_GID} /usr/share/nginx/html
+RUN chown -R ${APP_UID}:${APP_GID} /var/cache/nginx
+RUN chown -R ${APP_UID}:${APP_GID} /var/log/nginx
+RUN chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d
+RUN touch /var/run/nginx.pid && chown -R ${APP_UID}:${APP_GID} /var/run/nginx.pid
+
+USER ${APP_UID}:${APP_GID}
+
+# Expose port 8080
 EXPOSE 8080
-WORKDIR "${APP_BACKEND_DIR}"
-CMD ["./index.js"]
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

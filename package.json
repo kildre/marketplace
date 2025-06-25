@@ -6,10 +6,11 @@
     "npm": ">=8.0.0"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "start": "sirv dist --host 0.0.0.0 --port 8080 --cors --single"
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview",
+    "docker:build": "docker build -t advana-marketplace .",
+    "docker:run": "docker run -p 8080:8080 advana-marketplace"
   },
   "dependencies": {
     "react": "^19.1.0",
