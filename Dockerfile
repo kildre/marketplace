@@ -26,8 +26,8 @@ ENV APP_GID=65532
 # Copy the built React app from builder stage
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy complete nginx configuration (eliminates user directive warning)
+COPY nginx.conf.full /etc/nginx/nginx.conf
 
 # Create user and group to match your existing setup
 RUN addgroup -g ${APP_GID} appgroup && \
