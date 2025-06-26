@@ -48,16 +48,25 @@ COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 # Copy complete nginx configuration (eliminates user directive warning)
 COPY nginx.conf.full /etc/nginx/nginx.conf
 
+# Copy startup script
+COPY start-nginx.sh /usr/local/bin/start-nginx.sh
+RUN chmod +x /usr/local/bin/start-nginx.sh
+
 # Create user and group to match your existing setup
 RUN addgroup -g ${APP_GID} appgroup && \
     adduser -D -u ${APP_UID} -G appgroup appuser
 
-# Set proper ownership
-RUN chown -R ${APP_UID}:${APP_GID} /usr/share/nginx/html
-RUN chown -R ${APP_UID}:${APP_GID} /var/cache/nginx
-RUN chown -R ${APP_UID}:${APP_GID} /var/log/nginx
-RUN chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d
-RUN touch /var/run/nginx.pid && chown -R ${APP_UID}:${APP_GID} /var/run/nginx.pid
+# Set proper ownership and fix potential permission issues
+RUN chown -R ${APP_UID}:${APP_GID} /usr/share/nginx/html && \
+    chown -R ${APP_UID}:${APP_GID} /var/cache/nginx && \
+    chown -R ${APP_UID}:${APP_GID} /var/log/nginx && \
+    chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d && \
+    # Create the pid file with correct permissions
+    touch /var/run/nginx.pid && \
+    chown -R ${APP_UID}:${APP_GID} /var/run/nginx.pid && \
+    # Ensure nginx can write to temp directories
+    mkdir -p /tmp/nginx && \
+    chown -R ${APP_UID}:${APP_GID} /tmp/nginx
 
 USER ${APP_UID}:${APP_GID}
 
@@ -68,5 +77,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Expose port 8080
 EXPOSE 8080
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start nginx with custom startup script
+CMD ["/usr/local/bin/start-nginx.sh"]

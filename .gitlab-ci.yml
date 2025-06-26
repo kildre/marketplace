@@ -42,4 +42,4 @@ variables:
   UPSTREAM_PROJECT_DIR: "."
   HELM_RELEASE_NAME: "advana-marketplace"
   HELM_CHART_DIR: "./chart"
-  DOCKERFILE_PATH: "./Dockerfile"
+  DOCKERFILE_PATH: "./Dockerfile.secure"  # Use the security-hardened version
