@@ -35,6 +35,7 @@ test_dockerfile() {
 test_dockerfile "Dockerfile" "advana-test-main"
 test_dockerfile "Dockerfile.secure" "advana-test-secure" 
 test_dockerfile "Dockerfile.distroless" "advana-test-distroless"
+test_dockerfile "Dockerfile.local" "advana-test-local"
 test_dockerfile "Dockerfile.minimal" "advana-test-minimal"
 
 echo "🎯 Testing completed!"
