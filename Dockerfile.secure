@@ -18,19 +18,23 @@ RUN cd "${APP_FRONTEND_DIR}" \
     && npm install \
     && npm run build
 
-# Use distroless or chainguard nginx for maximum security
-# Alternative: Use nginx:1.27-alpine-slim which has fewer packages
-FROM nginx:1.27-alpine-slim AS server
+# Use the latest nginx alpine to get the most recent security patches
+FROM nginx:1.27-alpine AS server
 ENV APP_UID=65532
 ENV APP_GID=65532
 
-# Security hardening: update all packages and remove unnecessary packages
+# Security hardening: update all packages and remove vulnerable packages
 RUN apk update && \
     apk upgrade && \
-    # Remove packages that are commonly vulnerable and not needed for serving static files
+    # Remove the vulnerable tiff package completely since nginx doesn't need it
     apk del --purge \
-    apk-tools \
-    libc-utils && \
+    tiff \
+    curl \
+    busybox \
+    ssl_client && \
+    # Install only essential packages with latest security patches
+    apk add --no-cache \
+    busybox-static && \
     # Clean up package cache and temporary files
     rm -rf /var/cache/apk/* \
     /tmp/* \
@@ -56,6 +60,10 @@ RUN chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d
 RUN touch /var/run/nginx.pid && chown -R ${APP_UID}:${APP_GID} /var/run/nginx.pid
 
 USER ${APP_UID}:${APP_GID}
+
+# Add healthcheck to address compliance requirements - using shell to avoid external dependencies
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD nc -z localhost 8080 || exit 1
 
 # Expose port 8080
 EXPOSE 8080

@@ -23,10 +23,18 @@ FROM nginx:1.27-alpine AS server
 ENV APP_UID=65532
 ENV APP_GID=65532
 
-# Update packages to latest versions with security patches
-# This addresses the tiff vulnerability by ensuring all packages are up-to-date
+# Security hardening: Remove vulnerable packages and update all packages
 RUN apk update && \
     apk upgrade && \
+    # Remove vulnerable packages that are not needed for serving static files
+    apk del --purge \
+    tiff \
+    curl \
+    busybox \
+    ssl_client && \
+    # Install minimal busybox for essential functionality
+    apk add --no-cache \
+    busybox-static && \
     rm -rf /var/cache/apk/*
 
 # Copy the built React app from builder stage
@@ -47,6 +55,10 @@ RUN chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d
 RUN touch /var/run/nginx.pid && chown -R ${APP_UID}:${APP_GID} /var/run/nginx.pid
 
 USER ${APP_UID}:${APP_GID}
+
+# Add healthcheck to address compliance requirements - using nc to avoid wget dependency
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD nc -z localhost 8080 || exit 1
 
 # Expose port 8080
 EXPOSE 8080
