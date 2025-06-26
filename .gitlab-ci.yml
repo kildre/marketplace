@@ -41,11 +41,12 @@ variables:
       - "false"
   DOCKERFILE_VERSION:
     description: "Choose Dockerfile version for security compliance"
-    value: "secure"
+    value: "distroless"  # Changed to distroless as it successfully removes tiff vulnerability
     options:
       - "main"
       - "secure"
       - "distroless"
+      - "minimal"
   UPSTREAM_PROJECT_DIR: "."
   HELM_RELEASE_NAME: "advana-marketplace"
   HELM_CHART_DIR: "./chart"
