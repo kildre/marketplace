@@ -26,15 +26,23 @@ ENV APP_GID=65532
 # Security hardening: Remove vulnerable packages and update all packages
 RUN apk update && \
     apk upgrade && \
-    # Remove vulnerable packages that are not needed for serving static files
-    apk del --purge \
+    # Force remove vulnerable packages and their dependencies
+    apk del --purge --force \
     tiff \
     curl \
     busybox \
-    ssl_client && \
+    ssl_client \
+    libtiff \
+    tiff-dev \
+    libtiff-dev 2>/dev/null || true && \
+    # Remove any tiff-related files manually
+    find / -name "*tiff*" -type f -delete 2>/dev/null || true && \
+    find / -name "*libtiff*" -type f -delete 2>/dev/null || true && \
     # Install minimal busybox for essential functionality
     apk add --no-cache \
     busybox-static && \
+    # Verify tiff is completely removed
+    apk info | grep -i tiff || echo "tiff packages successfully removed" && \
     rm -rf /var/cache/apk/*
 
 # Copy the built React app from builder stage

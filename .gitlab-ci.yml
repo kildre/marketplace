@@ -39,7 +39,14 @@ variables:
     options:
       - "true"
       - "false"
+  DOCKERFILE_VERSION:
+    description: "Choose Dockerfile version for security compliance"
+    value: "secure"
+    options:
+      - "main"
+      - "secure"
+      - "distroless"
   UPSTREAM_PROJECT_DIR: "."
   HELM_RELEASE_NAME: "advana-marketplace"
   HELM_CHART_DIR: "./chart"
-  DOCKERFILE_PATH: "./Dockerfile.secure"  # Use the security-hardened version
+  DOCKERFILE_PATH: "./Dockerfile.${DOCKERFILE_VERSION}"  # Dynamic Dockerfile selection
