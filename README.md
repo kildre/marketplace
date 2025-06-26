@@ -1,6 +1,78 @@
 # Advana-Marketplace
 
+A React-based marketplace application served with nginx.
 
+## Architecture
+
+This application uses:
+- **Frontend**: React with TypeScript, built with Vite
+- **Server**: nginx for serving static files
+- **Containerization**: Docker with nginx:alpine base image
+
+## Development
+
+### Prerequisites
+- Node.js >= 16.17.0
+- npm >= 8.0.0
+- Docker (for containerized deployment)
+
+### Local Development
+
+1. **Install dependencies and start development server:**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+2. **Build for production:**
+   ```bash
+   npm run build
+   ```
+
+3. **Preview production build locally:**
+   ```bash
+   npm run preview
+   ```
+
+### Docker Deployment
+
+1. **Build the Docker image:**
+   ```bash
+   docker build -t advana-marketplace .
+   ```
+
+2. **Run the container:**
+   ```bash
+   docker run -p 8080:8080 advana-marketplace
+   ```
+
+3. **Access the application:**
+   Open http://localhost:8080 in your browser
+
+### Available Scripts
+
+From the root directory:
+- `npm run dev` - Start frontend development server
+- `npm run build` - Build frontend for production  
+- `npm run preview` - Preview production build
+- `npm run docker:build` - Build Docker image
+- `npm run docker:run` - Run Docker container
+
+### Project Structure
+
+```
+├── frontend/           # React application
+│   ├── src/
+│   │   ├── components/ # React components
+│   │   ├── pages/      # Page components
+│   │   └── styles/     # SCSS styles
+│   ├── public/         # Static assets
+│   └── dist/           # Build output
+├── nginx.conf          # nginx configuration
+├── Dockerfile          # Container definition
+└── chart/              # Kubernetes Helm chart
+```
 
 ## Getting started
 
