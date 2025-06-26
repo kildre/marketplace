@@ -18,16 +18,25 @@ RUN cd "${APP_FRONTEND_DIR}" \
     && npm install \
     && npm run build
 
-# Use nginx for serving static files - using latest version to avoid tiff vulnerability in alpine-minirootfs-3.22.0
-FROM nginx:1.27-alpine AS server
+# Use distroless or chainguard nginx for maximum security
+# Alternative: Use nginx:1.27-alpine-slim which has fewer packages
+FROM nginx:1.27-alpine-slim AS server
 ENV APP_UID=65532
 ENV APP_GID=65532
 
-# Update packages to latest versions with security patches
-# This addresses the tiff vulnerability by ensuring all packages are up-to-date
+# Security hardening: update all packages and remove unnecessary packages
 RUN apk update && \
     apk upgrade && \
-    rm -rf /var/cache/apk/*
+    # Remove packages that are commonly vulnerable and not needed for serving static files
+    apk del --purge \
+        apk-tools \
+        libc-utils && \
+    # Clean up package cache and temporary files
+    rm -rf /var/cache/apk/* \
+           /tmp/* \
+           /var/tmp/* && \
+    # Remove unnecessary nginx modules/configs
+    rm -rf /etc/nginx/conf.d/default.conf
 
 # Copy the built React app from builder stage
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html
