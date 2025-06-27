@@ -1,7 +1,7 @@
 include:
   - project: promotion/tekton-promotion-gitlab
-    #file: routes/container-only.yml 
-    file: routes/helm-only.yml
+    file: routes/container-only.yml
+    # file: routes/helm-only.yml
     #file: routes/dragon-full.yml
 
 stages:
@@ -41,7 +41,7 @@ variables:
       - "false"
   DOCKERFILE_VERSION:
     description: "Choose Dockerfile version for security compliance"
-    value: "distroless"  # Changed to distroless as it successfully removes tiff vulnerability
+    value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
     options:
       - "main"
       - "secure"
@@ -50,4 +50,4 @@ variables:
   UPSTREAM_PROJECT_DIR: "."
   HELM_RELEASE_NAME: "advana-marketplace"
   HELM_CHART_DIR: "./chart"
-  DOCKERFILE_PATH: "./Dockerfile.${DOCKERFILE_VERSION}"  # Dynamic Dockerfile selection
+  DOCKERFILE_PATH: "./Dockerfile.${DOCKERFILE_VERSION}" # Dynamic Dockerfile selection

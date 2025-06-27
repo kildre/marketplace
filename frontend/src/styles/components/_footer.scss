@@ -1,0 +1,132 @@
+@use "../globals/colors" as *;
+
+// FOOTER STYLES
+.footer {
+  background-color: $primary-color;
+  color: $secondary-color;
+  margin-top: auto;
+}
+
+.footer-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.footer-logos {
+  flex-shrink: 0;
+}
+
+.footer-logo {
+  height: 150px;
+  width: auto;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 4rem;
+  margin-left: auto;
+}
+
+.footer-nav-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.footer-link {
+  color: $footer-gray-color;
+  text-decoration: underline;
+  font-size: 0.95rem;
+  font-weight: 400;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $secondary-color;
+  }
+}
+
+.footer-bottom {
+  background-color: $footer-dark-gray-color;
+  padding: 1rem 2rem;
+}
+
+.footer-gov-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.footer-gov-badge {
+  display: flex;
+}
+
+.footer-gov-badge::before {
+  content: "";
+  width: 50px;
+  height: 50px;
+  background-color: $secondary-color;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.footer-gov-text {
+  font-size: 0.9rem;
+  margin-left: 1.5rem;
+  opacity: 0.9;
+}
+
+.footer-gov-text__domain {
+  color: $footer-gray-color;
+  line-height: 0;
+}
+
+.footer-links {
+  margin: 0 auto;
+  margin-bottom: 1.5rem;
+}
+
+.footer-links-row {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-bottom-link {
+  color: $footer-gray-color;
+  display: block;
+  text-decoration: underline;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+  width: calc(1 / 7 * 100%);
+
+  &:hover {
+    color: $secondary-color;
+  }
+}
+
+.footer-external {
+  margin: 0 auto;
+  font-size: 0.9rem;
+  color: $footer-gray-color;
+}
+
+.footer-external-link {
+  color: $secondary-color;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.footer-external__external-icon::before {
+  background-image: url(/assets/icons/icon-external-link.png);
+  background-size: contain;
+  content: "";
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-left: 0.25rem;
+  vertical-align: middle;
+}
