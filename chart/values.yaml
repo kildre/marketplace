@@ -18,7 +18,7 @@ image:
   pullPolicy: IfNotPresent
 
 serviceAccount:
-  name: '{{ $.Release.Name }}'
+  name: "{{ $.Release.Name }}"
   create: true
   annotations:
     eks.amazonaws.com/role-arn: aws-role-arn
@@ -35,9 +35,9 @@ ingress:
   #   nginx.ingress.kubernetes.io/ssl-redirect: 'true'
   #   nginx.ingress.kubernetes.io/backend-protocol: 'HTTPS'
   #   nginx.ingress.kubernetes.io/proxy-body-size: '0'
-  domain: '{{ $.Values.global.appName }}.{{ $.Values.global.baseDomain }}'
+  domain: "{{ $.Values.global.appName }}.{{ $.Values.global.baseDomain }}"
   hosts:
-    '{{ $.Values.ingress.domain }}':
+    "{{ $.Values.ingress.domain }}":
       paths:
         - path: /
           pathType: Prefix
@@ -74,59 +74,59 @@ deployment:
       # maxUnavailable: "50%"
     podAnnotations:
       iam.amazonaws.com/role: aws-role-arn
-    serviceAccountName: '{{ $.Release.Name }}'
+    serviceAccountName: "{{ $.Release.Name }}"
     # initContainer:
-      # 01-postgresql-advana-ready:
-      #   # postgres-ready script installed by @advana/sequelize module
-      #   args:
-      #     - node_modules/.bin/postgres-ready
-      #     - --host
-      #     - $(PG_HOST)
-      #     - --port
-      #     - $(PG_PORT)
-      #     - --database
-      #     - $(PG_UM_DB)
-      #     - --user
-      #     - $(PG_USER)
-      #     - --password
-      #     - $(PG_PASSWORD)
-      #   envFrom:
-      #     - secretRef:
-      #         name: public-env-db-postgresql
-      #     - secretRef:
-      #         name: secret-env-db-postgresql
-      #     - secretRef:
-      #         name: public-env-web
+    # 01-postgresql-advana-ready:
+    #   # postgres-ready script installed by @advana/sequelize module
+    #   args:
+    #     - node_modules/.bin/postgres-ready
+    #     - --host
+    #     - $(PG_HOST)
+    #     - --port
+    #     - $(PG_PORT)
+    #     - --database
+    #     - $(PG_UM_DB)
+    #     - --user
+    #     - $(PG_USER)
+    #     - --password
+    #     - $(PG_PASSWORD)
+    #   envFrom:
+    #     - secretRef:
+    #         name: public-env-db-postgresql
+    #     - secretRef:
+    #         name: secret-env-db-postgresql
+    #     - secretRef:
+    #         name: public-env-web
 
-      # 02-postgresql-app-ready: *postgresql-app-ready-init-container
+    # 02-postgresql-app-ready: *postgresql-app-ready-init-container
 
-      # 03-postgresql-app-migration-ready:
-      #   # migration-ready script installed by @advana/sequelize module
-      #   args:
-      #     - node_modules/.bin/migration-ready
-      #   envFrom:
-      #     - secretRef:
-      #         name: public-env-db-postgresql
-      #     - secretRef:
-      #         name: secret-env-db-postgresql
-      #     - secretRef:
-      #         name: public-env-web
+    # 03-postgresql-app-migration-ready:
+    #   # migration-ready script installed by @advana/sequelize module
+    #   args:
+    #     - node_modules/.bin/migration-ready
+    #   envFrom:
+    #     - secretRef:
+    #         name: public-env-db-postgresql
+    #     - secretRef:
+    #         name: secret-env-db-postgresql
+    #     - secretRef:
+    #         name: public-env-web
 
-      # 04-redis-ready:
-      #   # redis-ready script installed by @advana/redis-client module
-      #   args:
-      #     - node_modules/.bin/redis-ready
-      #   envFrom:
-      #     - secretRef:
-      #         name: public-env-db-redis
-      #     - secretRef:
-      #         name: secret-env-db-redis
-      #     - secretRef:
-      #         name: public-env-web
+    # 04-redis-ready:
+    #   # redis-ready script installed by @advana/redis-client module
+    #   args:
+    #     - node_modules/.bin/redis-ready
+    #   envFrom:
+    #     - secretRef:
+    #         name: public-env-db-redis
+    #     - secretRef:
+    #         name: secret-env-db-redis
+    #     - secretRef:
+    #         name: public-env-web
 
     container:
       web:
-        args: ["./index.js"]
+        # args: ["./index.js"] # Removed - nginx doesn't need custom args
         envFrom:
           - secretRef:
               name: public-env-platform-ui
@@ -182,56 +182,56 @@ deployment:
 
 env:
   secret:
-    'public-env-platform-ui':
+    "public-env-platform-ui":
       secretName: public-env-platform-ui
-    
+
 volume:
   emptyDir:
-    'node-logs':
+    "node-logs":
       config:
         sizeLimit: 1Gi
       volumeMount:
-        mountPath: '/home/node/.npm/_logs/'
+        mountPath: "/home/node/.npm/_logs/"
         readOnly: false
   secret:
-    'secret-volume-ca-bundle-crt':
+    "secret-volume-ca-bundle-crt":
       secretName: secret-volume-ca-bundle-crt # reference existing secret if data is not defined
       config:
         defaultMode: 444
         optional: true
       volumeMount:
-        mountPath: '/etc/ssl/certs/ca-bundle.crt'
-        subPath: 'ca-bundle.crt' # only mounts a single file if defined
+        mountPath: "/etc/ssl/certs/ca-bundle.crt"
+        subPath: "ca-bundle.crt" # only mounts a single file if defined
         readOnly: true
 
 # public values that are stored as a secret object for convenience, remove if using values from vault
 secret:
   env:
     secret:
-      'public-env-platform-ui':
+      "public-env-platform-ui":
         data:
-          REACT_APP_NODE_ENV: 'nipr' # nipr, sipr or jwics
-          REACT_APP_ENCLAVE: 'advana' # advana or jupiter
-          REACT_APP_FAVICON_URL: 'favicon.ico'
-          REACT_APP_CLASSIFICATION_BANNER: 'UNDEFINED CLASSIFICATION'
-          REACT_APP_CLASSIFICATION_BANNER_COLOR: 'BLACK'
-          REACT_APP_CLASSIFICATION_BANNER_TEXT_COLOR: 'WHITE'
-          REACT_APP_COOKIE_DOMAIN: '.{{ $.Values.global.baseDomain }}'
+          REACT_APP_NODE_ENV: "nipr" # nipr, sipr or jwics
+          REACT_APP_ENCLAVE: "advana" # advana or jupiter
+          REACT_APP_FAVICON_URL: "favicon.ico"
+          REACT_APP_CLASSIFICATION_BANNER: "UNDEFINED CLASSIFICATION"
+          REACT_APP_CLASSIFICATION_BANNER_COLOR: "BLACK"
+          REACT_APP_CLASSIFICATION_BANNER_TEXT_COLOR: "WHITE"
+          REACT_APP_COOKIE_DOMAIN: ".{{ $.Values.global.baseDomain }}"
 
-          REACT_APP_LOGIN_ROUTE: 'https://{{ $.Values.ingress.domain }}/login'
-          REACT_APP_CMS_ENDPOINT: 'https://{{ $.Values.ingress.domain }}/api'
-          REACT_APP_USER_TOKEN_ENDPOINT: 'https://{{ $.Values.ingress.domain }}/api/auth/token'
+          REACT_APP_LOGIN_ROUTE: "https://{{ $.Values.ingress.domain }}/login"
+          REACT_APP_CMS_ENDPOINT: "https://{{ $.Values.ingress.domain }}/api"
+          REACT_APP_USER_TOKEN_ENDPOINT: "https://{{ $.Values.ingress.domain }}/api/auth/token"
 
-          REACT_APP_BANNERS_ENDPOINT: 'https://admin.{{ $.Values.global.baseDomain }}/api/banners'
-          REACT_APP_MEGA_MENU_ENDPOINT: 'https://admin.{{ $.Values.global.baseDomain }}/api/menu/links'
-          REACT_APP_MEGA_MENU_BASE_DOMAIN: 'https://{{ $.Values.global.baseDomain }}'
-          REACT_APP_MEGA_MENU_HEADER_SORT_ORDER: 'Domains,Tools,Communities,Help,About'
-          REACT_APP_MEGA_MENU_HIGHLIGHT_COLOR: '#56B1AC'
+          REACT_APP_BANNERS_ENDPOINT: "https://admin.{{ $.Values.global.baseDomain }}/api/banners"
+          REACT_APP_MEGA_MENU_ENDPOINT: "https://admin.{{ $.Values.global.baseDomain }}/api/menu/links"
+          REACT_APP_MEGA_MENU_BASE_DOMAIN: "https://{{ $.Values.global.baseDomain }}"
+          REACT_APP_MEGA_MENU_HEADER_SORT_ORDER: "Domains,Tools,Communities,Help,About"
+          REACT_APP_MEGA_MENU_HIGHLIGHT_COLOR: "#56B1AC"
   volume:
     secret:
-      'secret-volume-ca-bundle-crt':
+      "secret-volume-ca-bundle-crt":
         data:
-          'ca-bundle.crt': |
+          "ca-bundle.crt": |
             -----BEGIN CERTIFICATE-----
             ca-bundle-pem
             -----END CERTIFICATE-----
@@ -248,9 +248,9 @@ postgresql:
     tag: 15.0.0-debian-11-r3
     pullPolicy: IfNotPresent
   auth:
-    database: 'application-data-db'
+    database: "application-data-db"
   tls:
-    certificatesSecret: 'existing-tls-secret'
+    certificatesSecret: "existing-tls-secret"
   primary:
     resources:
       limits:
@@ -313,7 +313,7 @@ redis:
       tag: 7.0.5-debian-11-r14
       pullPolicy: IfNotPresent
   tls:
-    existingSecret: 'existing-tls-secret'
+    existingSecret: "existing-tls-secret"
   metrics:
     image:
       registry: docker.io
