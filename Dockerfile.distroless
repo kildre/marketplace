@@ -76,12 +76,13 @@ RUN chown -R ${APP_UID}:${APP_GID} /usr/share/nginx/html && \
     chown -R ${APP_UID}:${APP_GID} /var/cache/nginx && \
     chown -R ${APP_UID}:${APP_GID} /var/log/nginx && \
     chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d && \
-    # Create the pid file with correct permissions
-    touch /var/run/nginx.pid && \
-    chown -R ${APP_UID}:${APP_GID} /var/run/nginx.pid && \
-    # Ensure nginx can write to temp directories
+    # Create writable directories for nginx in /tmp
     mkdir -p /tmp/nginx && \
-    chown -R ${APP_UID}:${APP_GID} /tmp/nginx
+    chown -R ${APP_UID}:${APP_GID} /tmp/nginx && \
+    # Make /tmp writable for nginx user and create PID file
+    chmod 777 /tmp && \
+    touch /tmp/nginx.pid && \
+    chown ${APP_UID}:${APP_GID} /tmp/nginx.pid
 
 USER ${APP_UID}:${APP_GID}
 
