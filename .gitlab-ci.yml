@@ -32,7 +32,7 @@ variables:
       - "false"
   IMAGE_TAG_FOR_HELM_ONLY:
     description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-    value: "3b5a4fc711aed3a7db61d12d43200e66ce6213bc" # ${CI_COMMIT_SHA}
+    value: "5c1ec443c6b540bfdae321b4f489aa2ce949e4b4" # ${CI_COMMIT_SHA}
   CONTAINER_ONLY:
     description: "only build container"
     value: "false"
