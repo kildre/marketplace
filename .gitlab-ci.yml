@@ -32,7 +32,7 @@ variables:
       - "false"
   IMAGE_TAG_FOR_HELM_ONLY:
     description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-    value: "3ffc5f0b61419adc41685236a6fe56cc891eeee7" # ${CI_COMMIT_SHA}
+    value: "3b5a4fc711aed3a7db61d12d43200e66ce6213bc" # ${CI_COMMIT_SHA}
   CONTAINER_ONLY:
     description: "only build container"
     value: "false"
@@ -41,7 +41,7 @@ variables:
       - "false"
   DOCKERFILE_VERSION:
     description: "Choose Dockerfile version for security compliance"
-    value: "distroless"  # Changed to distroless as it successfully removes tiff vulnerability
+    value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
     options:
       - "main"
       - "secure"
@@ -50,4 +50,4 @@ variables:
   UPSTREAM_PROJECT_DIR: "."
   HELM_RELEASE_NAME: "advana-marketplace"
   HELM_CHART_DIR: "./chart"
-  DOCKERFILE_PATH: "./Dockerfile.${DOCKERFILE_VERSION}"  # Dynamic Dockerfile selection
+  DOCKERFILE_PATH: "./Dockerfile.${DOCKERFILE_VERSION}" # Dynamic Dockerfile selection

@@ -1,0 +1,15 @@
+@use "colors" as *;
+
+// Global styles
+// TEXT STYTLES
+h1 {
+  color: $primary-color;
+  font-size: 3rem;
+}
+h2 {
+  color: $tertiary-color;
+  font-size: 2rem;
+}
+.ta-center {
+  text-align: center;
+}
