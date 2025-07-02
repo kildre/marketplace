@@ -1,6 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
+import { axe, toHaveNoViolations } from "jest-axe";
 import { Home } from "./home";
+
+// Extend Jest matchers
+expect.extend(toHaveNoViolations);
 
 describe("Home", () => {
   const renderHomeWithRouter = () => {
@@ -35,7 +39,7 @@ describe("Home", () => {
       "Welcome to the Advana Marketplace!"
     );
     expect(welcomeHeading).toBeInTheDocument();
-    expect(welcomeHeading.tagName).toBe("H3");
+    expect(welcomeHeading.tagName).toBe("H2");
   });
 
   test("should have proper semantic structure", () => {
@@ -66,10 +70,10 @@ describe("Home", () => {
     renderHomeWithRouter();
 
     const h1 = screen.getByRole("heading", { level: 1 });
-    const h3 = screen.getByRole("heading", { level: 3 });
+    const h2 = screen.getByRole("heading", { level: 2 });
 
     expect(h1).toHaveTextContent("Advana Marketplace");
-    expect(h3).toHaveTextContent("Welcome to the Advana Marketplace!");
+    expect(h2).toHaveTextContent("Welcome to the Advana Marketplace!");
   });
 
   test("should be accessible", () => {
@@ -113,9 +117,9 @@ describe("Home", () => {
 
     // Check heading elements are within section
     const h1 = container.querySelector("h1");
-    const h3 = container.querySelector("h3");
+    const h2 = container.querySelector("h2");
     expect(h1?.parentElement).toBe(section);
-    expect(h3?.parentElement).toBe(section);
+    expect(h2?.parentElement).toBe(section);
   });
 
   test("should render component snapshot consistently", () => {
@@ -124,9 +128,40 @@ describe("Home", () => {
     // Verify the component structure doesn't change unexpectedly
     expect(container.innerHTML).toContain('class="container"');
     expect(container.innerHTML).toContain('aria-labelledby="home-heading"');
-    expect(container.innerHTML).toContain("<h1>");
-    expect(container.innerHTML).toContain("<h3>");
+    expect(container.innerHTML).toContain('id="home-heading"');
+    expect(container.innerHTML).toContain("<h1");
+    expect(container.innerHTML).toContain("<h2>");
     expect(container.innerHTML).toContain("Advana Marketplace");
     expect(container.innerHTML).toContain("Welcome to the Advana Marketplace!");
+  });
+
+  test("should have no accessibility violations", async () => {
+    const { container } = renderHomeWithRouter();
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test("should meet WCAG accessibility standards", async () => {
+    const { container } = renderHomeWithRouter();
+
+    // Test heading hierarchy
+    const h1 = container.querySelector("h1");
+    const h2 = container.querySelector("h2");
+    expect(h1).toBeInTheDocument();
+    expect(h2).toBeInTheDocument();
+
+    // Test semantic structure
+    const section = container.querySelector("section");
+    expect(section).toHaveAttribute("aria-labelledby");
+
+    // Run comprehensive accessibility tests
+    const results = await axe(container, {
+      rules: {
+        "heading-order": { enabled: true },
+        "page-has-heading-one": { enabled: true },
+        "landmark-unique": { enabled: true },
+      },
+    });
+    expect(results).toHaveNoViolations();
   });
 });

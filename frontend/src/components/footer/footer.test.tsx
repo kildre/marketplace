@@ -1,6 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
+import { axe, toHaveNoViolations } from "jest-axe";
 import { Footer } from "./footer-component";
+
+// Extend Jest matchers
+expect.extend(toHaveNoViolations);
 
 describe("Footer", () => {
   const footerComponent = (
@@ -93,5 +97,29 @@ describe("Footer", () => {
       "rel",
       "noopener noreferrer"
     );
+  });
+
+  test("should have no accessibility violations", async () => {
+    const { container } = render(footerComponent);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test("should have proper ARIA attributes and semantic structure", async () => {
+    const { container } = render(footerComponent);
+
+    // Test that footer has proper semantic structure
+    const footer = container.querySelector("footer");
+    expect(footer).toBeInTheDocument();
+
+    // Test navigation has proper structure
+    const navLinks = container.querySelectorAll("a");
+    navLinks.forEach((link) => {
+      expect(link).toHaveAttribute("href");
+    });
+
+    // Run axe-core accessibility tests
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

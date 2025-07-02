@@ -4,8 +4,8 @@ export const Home = (): React.ReactElement => {
   return (
     <div className="container">
       <section aria-labelledby="home-heading">
-        <h1>Advana Marketplace</h1>
-        <h3>Welcome to the Advana Marketplace!</h3>
+        <h1 id="home-heading">Advana Marketplace</h1>
+        <h2>Welcome to the Advana Marketplace!</h2>
       </section>
     </div>
   );
