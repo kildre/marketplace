@@ -1,6 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter, MemoryRouter } from "react-router-dom";
+import { axe, toHaveNoViolations } from 'jest-axe';
 import { Header } from "./header-component";
+
+// Extend Jest matchers
+expect.extend(toHaveNoViolations);
 
 describe("Header", () => {
   const renderHeaderWithRouter = (initialEntries = ["/"]) => {
@@ -99,5 +103,17 @@ describe("Header", () => {
     expect(screen.getByText("Home")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
     expect(screen.getByAltText("Logo")).toBeInTheDocument();
+  });
+
+  test("should have no accessibility violations", async () => {
+    const { container } = renderHeaderWithRouter();
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  test("should have no accessibility violations on different routes", async () => {
+    const { container } = renderHeaderWithRouter(["/about"]);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });
