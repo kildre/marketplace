@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
-const Header = (): React.ReactElement => {
+export const Header = (): React.ReactElement => {
   const location = useLocation();
 
   return (
@@ -26,5 +26,3 @@ const Header = (): React.ReactElement => {
     </header>
   );
 };
-
-export default Header;
