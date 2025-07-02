@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter, MemoryRouter } from "react-router-dom";
-import { Header } from "./header";
+import { Header } from "./header-component";
 
 describe("Header", () => {
   const renderHeaderWithRouter = (initialEntries = ["/"]) => {

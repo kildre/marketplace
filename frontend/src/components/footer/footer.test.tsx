@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import { Footer } from "./footer";
+import { Footer } from "./footer-component";
 
 describe("Footer", () => {
   const footerComponent = (
