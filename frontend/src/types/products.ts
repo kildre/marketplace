@@ -1,22 +1,25 @@
 // @src/types/product.ts
 
+export type ProductType = 'Consumption Based' | 'License Based' | 'Consumption Based Tool';
+export type CartStatus = 'available' | 'unavailable';
+
 export interface Product {
   id: number;
-  type: 'Usage Based Tool' | 'Seat Based Tool' | 'Bundle';
+  type: ProductType;
   name: string;
   description: string;
   price: number;
-  unit?: string;
+  unit: number; 
   inCart: boolean;
   currentlyInCart: number;
-  cartStatus?: 'available' | 'unavailable';
-  includesInfo?: boolean;
+  cartStatus?: CartStatus;
+  rom?: string;  // Optional ROM label (e.g., "Custom ROM")
 }
 
 export interface ProductItems {
   items: Product[];
-  item_count: number;
-  page_count: number;
-  prev_page: number | null;
-  next_page: number | null;
+  itemCount: number;
+  pageCount: number;
+  prevPage: number | null;
+  nextPage: number | null;
 }
