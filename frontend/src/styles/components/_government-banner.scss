@@ -1,0 +1,162 @@
+@use "../globals/colors" as *;
+
+// GOVERNMENT BANNER STYLES
+.gov-banner {
+  background-color: $gray-banner;
+}
+
+.gov-banner__container {
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.gov-banner__header {
+  padding: 0.5rem 0;
+}
+
+.gov-banner__header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gov-banner__flag-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.gov-banner__flag-image {
+  width: 1rem;
+  height: auto;
+  max-height: 1rem;
+}
+
+.gov-banner__header-text {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.gov-banner__text {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.gov-banner__button {
+  background: none;
+  border: none;
+  color: $tertiary-color;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 400;
+
+  &:focus {
+    outline: 2px solid $tertiary-color;
+    outline-offset: 2px;
+  }
+}
+
+.gov-banner__button-text {
+  display: inline-block;
+  margin: 0;
+  text-decoration: underline;
+}
+
+.gov-banner__button-icon {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.gov-banner__chevron {
+  width: 0.75rem;
+  height: auto;
+  transition: transform 0.2s ease;
+
+  &--expanded {
+    transform: rotate(180deg);
+  }
+}
+
+.gov-banner__guidance {
+  padding: 1rem 0;
+}
+
+.gov-banner__guidance-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.gov-banner__guidance-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.gov-banner__icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.gov-banner__guidance-text {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #1b1b1b;
+
+  p {
+    margin: 0;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 767px) {
+  .gov-banner__header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .gov-banner__header-text {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .gov-banner__guidance-content {
+    gap: 1rem;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .gov-banner {
+    border-bottom: 2px solid #000;
+  }
+
+  .gov-banner__button {
+    border: 1px solid #005ea2;
+    padding: 0.25rem;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .gov-banner__button-icon {
+    transition: none;
+  }
+}
