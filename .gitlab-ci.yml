@@ -1,6 +1,6 @@
 include:
   - project: promotion/tekton-promotion-gitlab
-    #file: routes/container-only.yml
+    # file: routes/container-only.yml
     file: routes/helm-only.yml
     # file: routes/dragon-full.yml
 
@@ -32,7 +32,7 @@ variables:
       - "false"
   IMAGE_TAG_FOR_HELM_ONLY:
     description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-    value: "44db97a9f6ba4bed4d3ff4d523c7fab180fdf2db" # ${CI_COMMIT_SHA}
+    value: "408d5fe09402b6ce49b8ec1ef352f0cd8e0ff5f2" # ${CI_COMMIT_SHA}
   CONTAINER_ONLY:
     description: "only build container"
     value: "false"

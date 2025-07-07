@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { GovernmentBanner } from "./components/government-banner/government-banner";
 import { Header } from "./components/header/header-component";
 import { Footer } from "./components/footer/footer-component";
 import { Home } from "./pages/home/home";
@@ -9,6 +10,7 @@ import "./styles/main.scss";
 function App(): React.ReactElement {
   return (
     <div className="app-wrapper">
+      <GovernmentBanner />
       <Header />
       <main className="main-content">
         <Routes>

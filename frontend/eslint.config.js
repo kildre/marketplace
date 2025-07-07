@@ -31,6 +31,7 @@ export default [
         console: "readonly",
         process: "readonly",
         HTMLElement: "readonly",
+        HTMLCanvasElement: "readonly",
         React: "readonly",
       },
     },
