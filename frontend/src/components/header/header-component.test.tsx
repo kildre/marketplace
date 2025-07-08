@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from 'jest-axe';
 import { Header } from "./header-component";
 
@@ -7,7 +8,11 @@ expect.extend(toHaveNoViolations);
 
 describe("Header", () => {
   const renderHeader = () => {
-    return render(<Header />);
+    return render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>
+    );
   };
 
   test("should render successfully", () => {
@@ -24,6 +29,17 @@ describe("Header", () => {
     expect(logo).toBeInTheDocument();
     expect(logo).toHaveAttribute("src", "/assets/logos/LOGOS.png");
     expect(logo).toHaveClass("header-logo");
+  });
+
+  test("should wrap logo in a link to home page", () => {
+    renderHeader();
+
+    const logoLink = screen.getByLabelText("Go to home page");
+    const logo = screen.getByAltText("Logo");
+    
+    expect(logoLink).toBeInTheDocument();
+    expect(logoLink).toHaveAttribute("href", "/");
+    expect(logoLink).toContainElement(logo);
   });
 
   test("should render header with correct CSS class", () => {
