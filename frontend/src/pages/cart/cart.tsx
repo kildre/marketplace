@@ -1,4 +1,3 @@
-import React from "react";
 import { PageTitle } from "../../components/page-title/page-title";
 
 export const Cart = (): React.ReactElement => {
