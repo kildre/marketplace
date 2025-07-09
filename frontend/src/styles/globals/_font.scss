@@ -3,13 +3,16 @@
 // Global styles
 // TEXT STYTLES
 h1 {
-  color: $primary-color;
-  font-size: 3rem;
+  color: black;
+  font-size: 2rem;
+  margin: 0;
 }
+
 h2 {
   color: $tertiary-color;
   font-size: 2rem;
 }
+
 .ta-center {
   text-align: center;
 }

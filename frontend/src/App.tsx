@@ -3,8 +3,10 @@ import { Routes, Route } from "react-router-dom";
 import { GovernmentBanner } from "./components/government-banner/government-banner";
 import { Header } from "./components/header/header-component";
 import { Footer } from "./components/footer/footer-component";
-import { Home } from "./pages/home/home";
-import { About } from "./pages/About";
+import { ProductCatalog } from "./pages/product-catalog/product-catalog";
+import { Cart } from "./pages/cart/cart";
+import { Requests } from "./pages/requests/requests";
+import { RequestDetail } from "./pages/request-detail/request-detail";
 import "./styles/main.scss";
 
 function App(): React.ReactElement {
@@ -14,8 +16,10 @@ function App(): React.ReactElement {
       <Header />
       <main className="main-content">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/" element={<ProductCatalog />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/requests" element={<Requests />} />
+          <Route path="/request-detail" element={<RequestDetail />} />
         </Routes>
       </main>
       <Footer />

@@ -1,23 +1,23 @@
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
-import { Home } from "./home";
+import { ProductCatalog } from "./product-catalog";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 
-describe("Home", () => {
-  const renderHomeWithRouter = () => {
+describe("ProductCatalog", () => {
+  const renderProductCatalogWithRouter = () => {
     return render(
       <BrowserRouter>
-        <Home />
+        <ProductCatalog />
       </BrowserRouter>
     );
   };
 
   test("should render successfully", () => {
-    const { container } = renderHomeWithRouter();
-    const homeContainer = container.querySelector(".container");
+    const { container } = renderProductCatalogWithRouter();
+    const homeContainer = container.querySelector(".product-catalog-page");
     const section = container.querySelector("section");
 
     expect(homeContainer).toBeInTheDocument();
@@ -25,63 +25,51 @@ describe("Home", () => {
   });
 
   test("should render main heading", () => {
-    renderHomeWithRouter();
+    renderProductCatalogWithRouter();
 
-    const mainHeading = screen.getByText("Advana Marketplace");
+    const mainHeading = screen.getByText("Product Catalog");
     expect(mainHeading).toBeInTheDocument();
     expect(mainHeading.tagName).toBe("H1");
   });
 
-  test("should render welcome subheading", () => {
-    renderHomeWithRouter();
-
-    const welcomeHeading = screen.getByText(
-      "Welcome to the Advana Marketplace!"
-    );
-    expect(welcomeHeading).toBeInTheDocument();
-    expect(welcomeHeading.tagName).toBe("H2");
-  });
-
   test("should have proper semantic structure", () => {
-    const { container } = renderHomeWithRouter();
+    const { container } = renderProductCatalogWithRouter();
 
     const section = container.querySelector("section");
-    expect(section).toHaveAttribute("aria-labelledby", "home-heading");
+    expect(section).toHaveAttribute(
+      "aria-labelledby",
+      "product-catalog-heading"
+    );
   });
 
   test("should have correct CSS classes", () => {
-    const { container } = renderHomeWithRouter();
+    const { container } = renderProductCatalogWithRouter();
 
-    const containerDiv = container.querySelector(".container");
+    const containerDiv = container.querySelector(".product-catalog-page");
     expect(containerDiv).toBeInTheDocument();
-    expect(containerDiv).toHaveClass("container");
+    expect(containerDiv).toHaveClass("product-catalog-page");
   });
 
   test("should render without router (standalone)", () => {
-    render(<Home />);
+    render(<ProductCatalog />);
 
-    expect(screen.getByText("Advana Marketplace")).toBeInTheDocument();
-    expect(
-      screen.getByText("Welcome to the Advana Marketplace!")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Product Catalog")).toBeInTheDocument();
   });
 
   test("should have proper heading hierarchy", () => {
-    renderHomeWithRouter();
+    renderProductCatalogWithRouter();
 
     const h1 = screen.getByRole("heading", { level: 1 });
-    const h2 = screen.getByRole("heading", { level: 2 });
 
-    expect(h1).toHaveTextContent("Advana Marketplace");
-    expect(h2).toHaveTextContent("Welcome to the Advana Marketplace!");
+    expect(h1).toHaveTextContent("Product Catalog");
   });
 
   test("should be accessible", () => {
-    renderHomeWithRouter();
+    renderProductCatalogWithRouter();
 
-    // Check for proper heading structure
+    // Check for proper heading structure - ProductCatalog has 1 heading
     const headings = screen.getAllByRole("heading");
-    expect(headings).toHaveLength(2);
+    expect(headings).toHaveLength(1);
 
     // Check for semantic section
     const section = screen.getByRole("region");
@@ -89,66 +77,56 @@ describe("Home", () => {
   });
 
   test("should render all text content correctly", () => {
-    renderHomeWithRouter();
+    renderProductCatalogWithRouter();
 
     // Test exact text content
-    expect(screen.getByText("Advana Marketplace")).toBeInTheDocument();
-    expect(
-      screen.getByText("Welcome to the Advana Marketplace!")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Product Catalog")).toBeInTheDocument();
 
     // Test text is visible
-    expect(screen.getByText("Advana Marketplace")).toBeVisible();
-    expect(
-      screen.getByText("Welcome to the Advana Marketplace!")
-    ).toBeVisible();
+    expect(screen.getByText("Product Catalog")).toBeVisible();
   });
 
   test("should have correct DOM structure", () => {
-    const { container } = renderHomeWithRouter();
+    const { container } = renderProductCatalogWithRouter();
 
     // Check the overall structure
     const outerDiv = container.firstChild;
-    expect(outerDiv).toHaveClass("container");
+    expect(outerDiv).toHaveClass("product-catalog-page");
 
     const section = container.querySelector("section");
     expect(section).toBeInTheDocument();
-    expect(section?.parentElement).toHaveClass("container");
+    expect(section?.parentElement).toHaveClass("product-catalog-page");
 
-    // Check heading elements are within section
+    // Check heading element is within section
     const h1 = container.querySelector("h1");
-    const h2 = container.querySelector("h2");
     expect(h1?.parentElement).toBe(section);
-    expect(h2?.parentElement).toBe(section);
   });
 
   test("should render component snapshot consistently", () => {
-    const { container } = renderHomeWithRouter();
+    const { container } = renderProductCatalogWithRouter();
 
     // Verify the component structure doesn't change unexpectedly
-    expect(container.innerHTML).toContain('class="container"');
-    expect(container.innerHTML).toContain('aria-labelledby="home-heading"');
-    expect(container.innerHTML).toContain('id="home-heading"');
+    expect(container.innerHTML).toContain('class="product-catalog-page"');
+    expect(container.innerHTML).toContain(
+      'aria-labelledby="product-catalog-heading"'
+    );
+    expect(container.innerHTML).toContain('id="product-catalog-heading"');
     expect(container.innerHTML).toContain("<h1");
-    expect(container.innerHTML).toContain("<h2>");
-    expect(container.innerHTML).toContain("Advana Marketplace");
-    expect(container.innerHTML).toContain("Welcome to the Advana Marketplace!");
+    expect(container.innerHTML).toContain("Product Catalog");
   });
 
   test("should have no accessibility violations", async () => {
-    const { container } = renderHomeWithRouter();
+    const { container } = renderProductCatalogWithRouter();
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
   test("should meet WCAG accessibility standards", async () => {
-    const { container } = renderHomeWithRouter();
+    const { container } = renderProductCatalogWithRouter();
 
     // Test heading hierarchy
     const h1 = container.querySelector("h1");
-    const h2 = container.querySelector("h2");
     expect(h1).toBeInTheDocument();
-    expect(h2).toBeInTheDocument();
 
     // Test semantic structure
     const section = container.querySelector("section");
