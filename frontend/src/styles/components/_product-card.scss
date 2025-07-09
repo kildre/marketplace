@@ -1,0 +1,275 @@
+@use '../globals/colors' as *;
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  width: 297px;
+  height: 384px;
+  min-height: 384px;
+  border-radius: 8px;
+  gap: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: none;
+  background-color: #f0f7f9 !important; // Light blue
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  padding: 16px;
+  
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.in-cart-pill {
+  position: absolute;
+  top: 22px;
+  left: 23px;
+  background-color: $product-card-primary; // Use the primary color variable
+  color: white;
+  font-family: sans-serif!important;
+  font-size: 0.75rem!important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  line-height: 1;
+}
+
+.icon-container {
+  width: 293px;
+  height: 85px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 16px 0; // Center the icon and add bottom margin
+  align-self: center;
+}
+
+.type-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.type-chip {
+  font-size: 0.75rem!important; // 12px
+  color: #6c757d;
+  font-weight: 400;
+  text-align: left;
+  line-height: 1.2;
+  position: relative;
+  padding-left: 8px; // Add space for the graphic
+  margin: 0; // Remove margin since container handles spacing
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 14px;
+    border-radius: 1px;
+    background-color: $product-card-primary; // Use variable instead of hardcoded
+  }
+}
+
+.product-title {
+  position: relative;
+  top: -5px;
+  font-weight: 900!important;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  color: $product-card-primary; // Use variable
+  line-height: 1.2;
+  text-align: left; // Ensure left alignment
+}
+
+.price-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #9e9e9e;
+  margin: 0;
+}
+
+.description-text {
+  font-size: 0.75rem!important;
+  color: #666;
+  line-height: 1.5;
+  padding: 8px 0;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.add-to-cart-button {
+  border-radius: 25px !important;
+  text-transform: none;
+  font-weight: 500;
+  padding: 12px 24px;
+  width: 100%;
+  border: 2px solid $product-card-primary !important; // Use variable
+  color: $product-card-primary !important; // Use variable
+  
+  &:hover {
+    background-color: $product-card-primary !important; // Use variable
+    color: white !important;
+  }
+}
+
+.bottom-section {
+  margin-top: auto; // Push to bottom of card
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cart-status-text {
+  position: relative;
+  top: 10px;
+  font-size: 0.75rem!important;
+  color: #9e9e9e;
+  font-weight: 400;
+  margin:0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  height: $quantity-input-height; // Use variable
+  padding: 0;
+  font-size: .75rem!important;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  
+  .quantity-button {
+    min-width: 50px;
+    height: 48px;
+    border: none;
+    border-radius: 0;
+    background-color: white;
+    color: #666;
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin: 0;
+    
+    &:hover {
+      background-color: #f5f5f5;
+      color: $product-card-primary; // Use variable
+    }
+    
+    &.decrease {
+      border-right: 1px solid #e0e0e0;
+    }
+    
+    &.increase {
+      border-left: 1px solid #e0e0e0;
+    }
+  }
+  
+  .quantity-display {
+    font-size: 1.125rem;
+    font-weight: 400;
+    color: #333;
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    background-color: white;
+  }
+}
+
+// Additional styling for the select dropdown (if needed in future)
+.product-card .MuiFormControl-root {
+
+  
+  .MuiSelect-select {
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    border-radius: 4px;
+  }
+  
+  .MuiOutlinedInput-notchedOutline {
+    border-color: #e0e0e0;
+  }
+  
+  &:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #bdbdbd;
+  }
+  
+  &.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: $product-card-primary; // Use variable
+    border-width: 1px;
+  }
+}
+
+// Screen reader only text for accessibility
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Utility class for quantity input styling
+.quantity-input-clean {
+  .MuiInputBase-root {
+    height: $quantity-input-height;
+    min-height: $quantity-input-height;
+    border: none;
+    display: flex;
+    align-items: center;
+    
+    fieldset {
+      border: none;
+    }
+    
+    &:hover fieldset {
+      border: none;
+    }
+    
+    &.Mui-focused fieldset {
+      border: none;
+    }
+  }
+  
+  .MuiInputBase-input {
+    height: $quantity-input-height;
+    min-height: $quantity-input-height;
+    padding: 0 12px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: $quantity-input-height;
+    font-size: 16px;
+    box-sizing: border-box;
+    
+    // Hide spinner arrows for WebKit browsers
+    &::-webkit-outer-spin-button, 
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    // Hide spinner arrows for Firefox
+    &[type=number] {
+      -moz-appearance: textfield;
+    }
+  }
+}

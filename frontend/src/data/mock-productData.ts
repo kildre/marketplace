@@ -35,6 +35,7 @@ const data: Product[] = [
     inCart: false,
     currentlyInCart: 0,
     cartStatus: 'available',
+    rom: 'Custom ROM',
   },
   {
     id: 4,
