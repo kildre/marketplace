@@ -1,4 +1,3 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { GovernmentBanner } from "./components/government-banner/government-banner";
 import { Header } from "./components/header/header-component";
