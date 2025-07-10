@@ -1,13 +1,7 @@
 /// <reference lib="dom" />
-import React, { useRef, useEffect } from 'react';
-import {
-  Card,
-  Typography,
-  Button,
-  Box,
-  TextField,
-} from '@mui/material';
-import { Product } from '../../types/products';
+import React, { useRef, useEffect } from "react";
+import { Card, Typography, Button, Box, TextField } from "@mui/material";
+import { Product } from "../../types/products";
 
 interface ProductCardProps {
   product: Product;
@@ -15,7 +9,7 @@ interface ProductCardProps {
   onUpdateCartQuantity?: (product: Product, newQuantity: number) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ 
+export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onAddToCart,
   onUpdateCartQuantity,
@@ -50,7 +44,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     // Update the ref immediately
     currentQuantityRef.current += 1;
     onUpdateCartQuantity?.(product, currentQuantityRef.current);
-    
+
     increaseIntervalRef.current = window.setInterval(() => {
       // Use the ref value and update it immediately
       currentQuantityRef.current += 1;
@@ -63,7 +57,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     // Update the ref immediately
     currentQuantityRef.current = Math.max(0, currentQuantityRef.current - 1);
     onUpdateCartQuantity?.(product, currentQuantityRef.current);
-    
+
     decreaseIntervalRef.current = window.setInterval(() => {
       // Use the ref value and update it immediately
       currentQuantityRef.current = Math.max(0, currentQuantityRef.current - 1);
@@ -88,44 +82,44 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const handleQuantityChange = (event: { target: { value: string } }) => {
     const value = event.target.value;
     const numValue = parseInt(value, 10);
-    
+
     // Only update if it's a valid number >= 0 or if the input is empty (for clearing)
-    if (value === '' || (!isNaN(numValue) && numValue >= 0)) {
-      const newQuantity = value === '' ? 0 : numValue;
+    if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
+      const newQuantity = value === "" ? 0 : numValue;
       onUpdateCartQuantity?.(product, newQuantity);
     }
   };
 
   const formatPrice = (price: number, rom?: string) => {
-    if (price === 0) return 'Free';
+    if (price === 0) return "Free";
     if (rom) return rom;
     return `$${price.toLocaleString()}`;
   };
 
   const getIconPath = (type: string) => {
     switch (type) {
-      case 'Usage Based Tool':
-        return '/assets/icons/icon_user-tool.png';
-      case 'Bundle':
-        return '/assets/icons/icon_bundle.png';
-      case 'Seat Based Tool':
-        return '/assets/icons/icon_seat-based-tool.png';
+      case "Usage Based Tool":
+        return "/assets/icons/icon_user-tool.png";
+      case "Bundle":
+        return "/assets/icons/icon_bundle.png";
+      case "Seat Based Tool":
+        return "/assets/icons/icon_seat-based-tool.png";
       default:
-        return '/assets/icons/icon_user-tool.png';
+        return "/assets/icons/icon_user-tool.png";
     }
   };
 
-  const isUnavailable = product.cartStatus === 'unavailable';
+  const isUnavailable = product.cartStatus === "unavailable";
 
   return (
-    <Card 
+    <Card
       className="product-card"
       role="article"
       aria-label={`${product.name} product card`}
     >
       {/* IN CART pill - only show when items are in cart */}
       {product.currentlyInCart > 0 && (
-        <Box 
+        <Box
           className="in-cart-pill"
           role="status"
           aria-label={`${product.currentlyInCart} items in cart`}
@@ -133,49 +127,62 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           IN CART
         </Box>
       )}
-      
+
       <Box className="icon-container">
-        <img 
+        <img
           src={getIconPath(product.type)}
           alt={`${product.type} icon`}
           style={{
-            width: '61px',
-            height: '61px',
-            objectFit: 'contain'
+            width: "61px",
+            height: "61px",
+            objectFit: "contain",
           }}
         />
       </Box>
-      
+
       <Box className="type-price-row">
-        <Typography className="type-chip" aria-label={`Product type: ${product.type}`}>
+        <Typography
+          className="type-chip"
+          aria-label={`Product type: ${product.type}`}
+        >
           {product.type}
         </Typography>
-        <Typography className="price-text" aria-label={`Price: ${formatPrice(product.price, product.rom)}`}>
+        <Typography
+          className="price-text"
+          aria-label={`Price: ${formatPrice(product.price, product.rom)}`}
+        >
           {formatPrice(product.price, product.rom)}
         </Typography>
       </Box>
-      
+
       <Typography className="product-title" id={`product-title-${product.id}`}>
         {product.name}
       </Typography>
 
-      <Typography className="description-text" aria-describedby={`product-title-${product.id}`}>
+      <Typography
+        className="description-text"
+        aria-describedby={`product-title-${product.id}`}
+      >
         {product.description}
       </Typography>
 
       <Box className="bottom-section">
         {product.currentlyInCart > 0 && (
-          <Typography className="cart-status-text" aria-live="polite" aria-atomic="true">
+          <Typography
+            className="cart-status-text"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             CURRENTLY IN CART: {product.currentlyInCart}
           </Typography>
         )}
 
-        <Box 
+        <Box
           className="quantity-selector"
           role="group"
           aria-label={`Quantity selector for ${product.name}`}
         >
-          <Button 
+          <Button
             className="quantity-button decrease"
             onMouseDown={startDecreasing}
             onMouseUp={stopDecreasing}
@@ -187,24 +194,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           >
             −
           </Button>
-            <TextField
+          <TextField
             type="number"
             value={product.currentlyInCart || 0}
             onChange={handleQuantityChange}
             slotProps={{
               input: {
-                style: { textAlign: 'center' },
-                'aria-label': `Quantity for ${product.name}`,
-              }
+                style: { textAlign: "center" },
+                "aria-label": `Quantity for ${product.name}`,
+              },
             }}
             inputProps={{
               min: 0,
-              'aria-describedby': `quantity-help-${product.id}`
+              "aria-describedby": `quantity-help-${product.id}`,
             }}
             className="quantity-input quantity-input-clean"
             size="small"
-            />
-          <Button 
+          />
+          <Button
             className="quantity-button increase"
             onMouseDown={startIncreasing}
             onMouseUp={stopIncreasing}
@@ -228,7 +235,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           disabled={isUnavailable}
           className="add-to-cart-button"
           aria-label={`Add ${product.name} to cart`}
-          aria-describedby={isUnavailable ? `unavailable-${product.id}` : undefined}
+          aria-describedby={
+            isUnavailable ? `unavailable-${product.id}` : undefined
+          }
         >
           Add to Cart
         </Button>

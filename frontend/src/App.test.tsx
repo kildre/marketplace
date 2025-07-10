@@ -15,6 +15,10 @@ vi.mock("./components/header/header-component", () => ({
   Header: () => <div data-testid="header">Header</div>,
 }));
 
+vi.mock("./components/sidebar/sidebar", () => ({
+  Sidebar: () => <div data-testid="sidebar">Sidebar</div>,
+}));
+
 vi.mock("./components/footer/footer-component", () => ({
   Footer: () => <div data-testid="footer">Footer</div>,
 }));
@@ -62,6 +66,7 @@ describe("App", () => {
 
     expect(screen.getByTestId("government-banner")).toBeInTheDocument();
     expect(screen.getByTestId("header")).toBeInTheDocument();
+    expect(screen.getByTestId("sidebar")).toBeInTheDocument();
     expect(screen.getByTestId("footer")).toBeInTheDocument();
   });
 
@@ -131,6 +136,9 @@ describe("App", () => {
       ).toBeInTheDocument();
       expect(
         container.querySelector('[data-testid="header"]')
+      ).toBeInTheDocument();
+      expect(
+        container.querySelector('[data-testid="sidebar"]')
       ).toBeInTheDocument();
       expect(
         container.querySelector('[data-testid="footer"]')

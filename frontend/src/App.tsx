@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { GovernmentBanner } from "./components/government-banner/government-banner";
 import { Header } from "./components/header/header-component";
+import { Sidebar } from "./components/sidebar/sidebar";
 import { Footer } from "./components/footer/footer-component";
 import { ProductCatalog } from "./pages/product-catalog/product-catalog";
 import { Cart } from "./pages/cart/cart";
@@ -14,6 +15,7 @@ function App(): React.ReactElement {
       <GovernmentBanner />
       <Header />
       <main className="main-content">
+        <Sidebar />
         <Routes>
           <Route path="/" element={<ProductCatalog />} />
           <Route path="/cart" element={<Cart />} />

@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import { toHaveNoViolations } from 'jest-axe';
+import { vi } from 'vitest';
 
 // Extend Jest matchers for accessibility testing
 expect.extend(toHaveNoViolations);
