@@ -103,7 +103,9 @@ describe("Requests", () => {
     const { container } = renderRequestsWithRouter();
 
     // Verify the component structure doesn't change unexpectedly
-    expect(container.innerHTML).toContain('class="requests-page"');
+    expect(container.innerHTML).toContain(
+      'class="requests-page marketplace-content"'
+    );
     expect(container.innerHTML).toContain('aria-labelledby="requests-heading"');
     expect(container.innerHTML).toContain('id="requests-heading"');
     expect(container.innerHTML).toContain("<h1");

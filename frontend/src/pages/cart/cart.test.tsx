@@ -103,7 +103,9 @@ describe("Cart", () => {
     const { container } = renderCartWithRouter();
 
     // Verify the component structure doesn't change unexpectedly
-    expect(container.innerHTML).toContain('class="cart-page"');
+    expect(container.innerHTML).toContain(
+      'class="cart-page marketplace-content"'
+    );
     expect(container.innerHTML).toContain('aria-labelledby="cart-heading"');
     expect(container.innerHTML).toContain('id="cart-heading"');
     expect(container.innerHTML).toContain("<h1");

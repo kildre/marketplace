@@ -18,7 +18,7 @@ describe("ProductCatalog", () => {
   test("should render successfully", () => {
     const { container } = renderProductCatalogWithRouter();
     const catalogContainer = container.querySelector(".product-catalog-page");
-    const muiContainer = container.querySelector(".MuiContainer-root");
+    const muiContainer = container.querySelector(".product-card__container");
 
     expect(catalogContainer).toBeInTheDocument();
     expect(muiContainer).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe("ProductCatalog", () => {
     // Check that product cards are rendered
     const productCards = screen.getAllByText(/AWS|C3AI|Databricks/);
     expect(productCards.length).toBeGreaterThan(0);
-    
+
     // Check for specific products from mock data
     expect(screen.getByText("AWS")).toBeInTheDocument();
     expect(screen.getByText("C3AI")).toBeInTheDocument();
@@ -66,8 +66,8 @@ describe("ProductCatalog", () => {
   test("should render product cards in a grid layout", () => {
     const { container } = renderProductCatalogWithRouter();
 
-    // Check for Material-UI Box with grid layout
-    const gridContainer = container.querySelector(".MuiBox-root");
+    // Check for product container
+    const gridContainer = container.querySelector(".product-card__container");
     expect(gridContainer).toBeInTheDocument();
   });
 
@@ -124,7 +124,10 @@ describe("ProductCatalog", () => {
     expect(section).toHaveClass("section__page-title");
 
     // Check for proper labeling
-    expect(section).toHaveAttribute("aria-labelledby", "product-catalog-heading");
+    expect(section).toHaveAttribute(
+      "aria-labelledby",
+      "product-catalog-heading"
+    );
   });
 
   test("should render all text content correctly", () => {
@@ -146,11 +149,14 @@ describe("ProductCatalog", () => {
     // Check the overall structure
     const outerDiv = container.firstChild;
     expect(outerDiv).toHaveClass("product-catalog-page");
+    expect(outerDiv).toHaveClass("marketplace-content");
 
-    // Check for Material-UI Container
-    const muiContainer = container.querySelector(".MuiContainer-root");
-    expect(muiContainer).toBeInTheDocument();
-    expect(muiContainer?.parentElement).toHaveClass("product-catalog-page");
+    // Check for product container
+    const productContainer = container.querySelector(
+      ".product-card__container"
+    );
+    expect(productContainer).toBeInTheDocument();
+    expect(productContainer?.parentElement).toHaveClass("product-catalog-page");
 
     // Check for PageTitle section
     const section = container.querySelector("section.section__page-title");
@@ -160,16 +166,20 @@ describe("ProductCatalog", () => {
     const h1 = container.querySelector("h1");
     expect(h1?.parentElement).toBe(section);
 
-    // Check for grid layout
-    const gridBox = container.querySelector(".MuiBox-root");
-    expect(gridBox).toBeInTheDocument();
+    // Check for product wrapper divs
+    const productWrappers = container.querySelectorAll(
+      ".product-card__container > div"
+    );
+    expect(productWrappers.length).toBeGreaterThan(0);
   });
 
   test("should render component snapshot consistently", () => {
     const { container } = renderProductCatalogWithRouter();
 
     // Verify the component structure doesn't change unexpectedly
-    expect(container.innerHTML).toContain('class="product-catalog-page"');
+    expect(container.innerHTML).toContain(
+      'class="product-catalog-page marketplace-content"'
+    );
     expect(container.innerHTML).toContain('class="section__page-title"');
     expect(container.innerHTML).toContain(
       'aria-labelledby="product-catalog-heading"'
@@ -177,18 +187,17 @@ describe("ProductCatalog", () => {
     expect(container.innerHTML).toContain('id="product-catalog-heading"');
     expect(container.innerHTML).toContain("<h1");
     expect(container.innerHTML).toContain("Product Catalog");
-    expect(container.innerHTML).toContain("MuiContainer-root");
-    expect(container.innerHTML).toContain("MuiBox-root");
+    expect(container.innerHTML).toContain("product-card__container");
   });
 
   test("should have no accessibility violations", async () => {
     const { container } = renderProductCatalogWithRouter();
-    
+
     // Test accessibility excluding the ProductCard form elements which have their own accessibility concerns
     const results = await axe(container, {
       rules: {
         // Disable label checking since that's handled by ProductCard component tests
-        "label": { enabled: false },
+        label: { enabled: false },
         "label-title-only": { enabled: false },
       },
     });
@@ -205,7 +214,10 @@ describe("ProductCatalog", () => {
 
     // Test semantic structure with PageTitle
     const section = container.querySelector("section.section__page-title");
-    expect(section).toHaveAttribute("aria-labelledby", "product-catalog-heading");
+    expect(section).toHaveAttribute(
+      "aria-labelledby",
+      "product-catalog-heading"
+    );
 
     // Test that products are accessible
     const productElements = screen.getAllByText(/AWS|C3AI/);
@@ -219,7 +231,7 @@ describe("ProductCatalog", () => {
         "landmark-unique": { enabled: true },
         "color-contrast": { enabled: true },
         // Disable label checking since ProductCard components handle their own form accessibility
-        "label": { enabled: false },
+        label: { enabled: false },
         "label-title-only": { enabled: false },
       },
     });
@@ -242,12 +254,14 @@ describe("ProductCatalog", () => {
   test("should use responsive grid layout", () => {
     const { container } = renderProductCatalogWithRouter();
 
-    // Check for Material-UI responsive grid structure
-    const gridContainer = container.querySelector(".MuiBox-root");
+    // Check for product container structure
+    const gridContainer = container.querySelector(".product-card__container");
     expect(gridContainer).toBeInTheDocument();
-    
-    // Verify that products are wrapped in Box components for grid layout
-    const productBoxes = container.querySelectorAll(".MuiBox-root .MuiBox-root");
+
+    // Verify that products are wrapped in div elements for layout
+    const productBoxes = container.querySelectorAll(
+      ".product-card__container > div"
+    );
     expect(productBoxes.length).toBeGreaterThan(0);
   });
 });
