@@ -1,5 +1,5 @@
 /// <reference lib="dom" />
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Card, Typography, Button, Box, TextField } from "@mui/material";
 import { Product } from "../../types/products";
 
@@ -11,16 +11,20 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
-  onAddToCart,
+  onAddToCart: _onAddToCart,
   onUpdateCartQuantity,
 }) => {
   const increaseIntervalRef = useRef<number | null>(null);
   const decreaseIntervalRef = useRef<number | null>(null);
-  const currentQuantityRef = useRef<number>(product.currentlyInCart || 0);
+  
+  // Local state for input quantity - defaults to current cart quantity, otherwise 1 for new items
+  const [inputQuantity, setInputQuantity] = useState<number>(
+    product.currentlyInCart > 0 ? product.currentlyInCart : 1
+  );
 
-  // Keep the ref synchronized with the product prop
+  // Update input quantity when product.currentlyInCart changes from external sources
   useEffect(() => {
-    currentQuantityRef.current = product.currentlyInCart || 0;
+    setInputQuantity(product.currentlyInCart > 0 ? product.currentlyInCart : 1);
   }, [product.currentlyInCart]);
 
   // Cleanup intervals on component unmount
@@ -36,32 +40,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   }, []);
 
   const handleAddToCart = () => {
-    onAddToCart?.(product);
+    // Set the product's cart quantity to exactly what's in the input field
+    onUpdateCartQuantity?.(product, inputQuantity);
   };
 
   const startIncreasing = (event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
-    // Update the ref immediately
-    currentQuantityRef.current += 1;
-    onUpdateCartQuantity?.(product, currentQuantityRef.current);
+    // Update the input quantity immediately
+    setInputQuantity(prev => prev + 1);
 
     increaseIntervalRef.current = window.setInterval(() => {
-      // Use the ref value and update it immediately
-      currentQuantityRef.current += 1;
-      onUpdateCartQuantity?.(product, currentQuantityRef.current);
+      setInputQuantity(prev => prev + 1);
     }, 150); // Repeat every 150ms
   };
 
   const startDecreasing = (event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
-    // Update the ref immediately
-    currentQuantityRef.current = Math.max(0, currentQuantityRef.current - 1);
-    onUpdateCartQuantity?.(product, currentQuantityRef.current);
+    // Update the input quantity immediately, minimum 0
+    setInputQuantity(prev => Math.max(0, prev - 1));
 
     decreaseIntervalRef.current = window.setInterval(() => {
-      // Use the ref value and update it immediately
-      currentQuantityRef.current = Math.max(0, currentQuantityRef.current - 1);
-      onUpdateCartQuantity?.(product, currentQuantityRef.current);
+      setInputQuantity(prev => Math.max(0, prev - 1));
     }, 150); // Repeat every 150ms
   };
 
@@ -86,8 +85,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     // Only update if it's a valid number >= 0 or if the input is empty (for clearing)
     if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
       const newQuantity = value === "" ? 0 : numValue;
-      onUpdateCartQuantity?.(product, newQuantity);
+      setInputQuantity(newQuantity);
     }
+  };
+
+  // Determine button text based on cart status and input changes
+  const getButtonText = () => {
+    // If item is not in cart, always show "Add to Cart"
+    if (product.currentlyInCart === 0) {
+      return "Add to Cart";
+    }
+    
+    // If item is in cart and quantity has changed, show "Update Cart"
+    if (inputQuantity !== product.currentlyInCart) {
+      return "Update Cart";
+    }
+    
+    // If item is in cart but quantity hasn't changed, show "Add to Cart"
+    return "Add to Cart";
   };
 
   const formatPrice = (price: number, rom?: string) => {
@@ -190,13 +205,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             onTouchStart={startDecreasing}
             onTouchEnd={stopDecreasing}
             aria-label={`Decrease quantity for ${product.name}`}
-            disabled={product.currentlyInCart === 0}
+            disabled={inputQuantity <= 0}
           >
             −
           </Button>
           <TextField
             type="number"
-            value={product.currentlyInCart || 0}
+            value={inputQuantity}
             onChange={handleQuantityChange}
             slotProps={{
               input: {
@@ -226,7 +241,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Hidden helper text for screen readers */}
         <span id={`quantity-help-${product.id}`} className="sr-only">
-          Enter quantity (minimum 0)
+          Enter quantity (minimum 0, use 0 to remove from cart)
         </span>
 
         <Button
@@ -234,12 +249,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           onClick={handleAddToCart}
           disabled={isUnavailable}
           className="add-to-cart-button"
-          aria-label={`Add ${product.name} to cart`}
+          aria-label={`${getButtonText()} ${product.name}`}
           aria-describedby={
             isUnavailable ? `unavailable-${product.id}` : undefined
           }
         >
-          Add to Cart
+          {getButtonText()}
         </Button>
 
         {/* Hidden helper text for unavailable items */}
