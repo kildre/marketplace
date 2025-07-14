@@ -625,4 +625,101 @@ describe("ProductCard", () => {
       expect(quantityInput).toHaveValue(1);
     });
   });
+
+  describe("Button Disabled State Logic", () => {
+    test("should enable Add to Cart button when product is not in cart", () => {
+      renderProductCard(mockProduct);
+
+      const addButton = screen.getByRole("button", {
+        name: "Add to Cart Test Product",
+      });
+      expect(addButton).not.toBeDisabled();
+      expect(addButton).toHaveTextContent("Add to Cart");
+    });
+
+    test("should disable Add to Cart button when product is in cart and quantity unchanged", () => {
+      renderProductCard(mockProductInCart);
+
+      const addButton = screen.getByRole("button", {
+        name: "Add to Cart Product In Cart",
+      });
+      expect(addButton).toBeDisabled();
+      expect(addButton).toHaveTextContent("Add to Cart");
+    });
+
+    test("should enable Update Cart button when product is in cart and quantity changed", () => {
+      renderProductCard(mockProductInCart);
+
+      const quantityInput = screen.getByRole("spinbutton");
+      
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "3" } });
+      });
+
+      const updateButton = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(updateButton).not.toBeDisabled();
+      expect(updateButton).toHaveTextContent("Update Cart");
+    });
+
+    test("should disable button again when quantity is changed back to original", () => {
+      renderProductCard(mockProductInCart);
+
+      const quantityInput = screen.getByRole("spinbutton");
+      
+      // Change quantity
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "3" } });
+      });
+
+      // Verify it's enabled and shows Update Cart
+      let button = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(button).not.toBeDisabled();
+      expect(button).toHaveTextContent("Update Cart");
+
+      // Change back to original quantity
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "5" } });
+      });
+
+      // Should be disabled and show Add to Cart again
+      button = screen.getByRole("button", {
+        name: "Add to Cart Product In Cart",
+      });
+      expect(button).toBeDisabled();
+      expect(button).toHaveTextContent("Add to Cart");
+    });
+
+    test("should always disable button when product is unavailable", () => {
+      renderProductCard(mockProductUnavailable);
+
+      const addButton = screen.getByRole("button", {
+        name: "Add to Cart Unavailable Product",
+      });
+      expect(addButton).toBeDisabled();
+    });
+
+    test("should enable Update Cart when using stepper buttons", () => {
+      renderProductCard(mockProductInCart);
+
+      const increaseButton = screen.getByRole("button", {
+        name: "Increase quantity for Product In Cart",
+      });
+
+      // Click increase button to change quantity
+      act(() => {
+        fireEvent.mouseDown(increaseButton);
+        fireEvent.mouseUp(increaseButton);
+      });
+
+      const updateButton = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(updateButton).not.toBeDisabled();
+      expect(updateButton).toHaveTextContent("Update Cart");
+    });
+  });
 });

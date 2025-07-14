@@ -105,6 +105,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     return "Add to Cart";
   };
 
+  // Determine if button should be disabled
+  const isButtonDisabled = () => {
+    // Always disabled if product is unavailable
+    if (isUnavailable) {
+      return true;
+    }
+    
+    // If item is not in cart, button should be enabled
+    if (product.currentlyInCart === 0) {
+      return false;
+    }
+    
+    // If item is in cart but quantity hasn't changed, button should be disabled
+    if (inputQuantity === product.currentlyInCart) {
+      return true;
+    }
+    
+    // If item is in cart and quantity has changed, button should be enabled
+    return false;
+  };
+
   const formatPrice = (price: number, rom?: string) => {
     if (price === 0) return "Free";
     if (rom) return rom;
@@ -247,7 +268,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <Button
           variant="outlined"
           onClick={handleAddToCart}
-          disabled={isUnavailable}
+          disabled={isButtonDisabled()}
           className="add-to-cart-button"
           aria-label={`${getButtonText()} ${product.name}`}
           aria-describedby={
