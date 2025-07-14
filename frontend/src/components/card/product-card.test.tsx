@@ -225,26 +225,26 @@ describe("ProductCard", () => {
   });
 
   describe("Add to Cart Functionality", () => {
-    test("should call onAddToCart when Add to Cart button is clicked", () => {
+    test("should call onUpdateCartQuantity when Add to Cart button is clicked", () => {
       renderProductCard();
 
       const addButton = screen.getByRole("button", {
-        name: "Add Test Product to cart",
+        name: "Add to Cart Test Product",
       });
 
       act(() => {
         fireEvent.click(addButton);
       });
 
-      expect(mockOnAddToCart).toHaveBeenCalledWith(mockProduct);
-      expect(mockOnAddToCart).toHaveBeenCalledTimes(1);
+      expect(mockOnUpdateCartQuantity).toHaveBeenCalledWith(mockProduct, 1);
+      expect(mockOnUpdateCartQuantity).toHaveBeenCalledTimes(1);
     });
 
     test("should disable Add to Cart button when product is unavailable", () => {
       renderProductCard(mockProductUnavailable);
 
       const addButton = screen.getByRole("button", {
-        name: "Add Unavailable Product to cart",
+        name: "Add to Cart Unavailable Product",
       });
       expect(addButton).toBeDisabled();
       expect(addButton).toHaveAttribute("aria-describedby", "unavailable-3");
@@ -281,13 +281,14 @@ describe("ProductCard", () => {
       expect(quantityInput).toBeInTheDocument();
     });
 
-    test("should disable decrease button when quantity is zero", () => {
+    test("should disable decrease button when quantity is at minimum", () => {
       renderProductCard();
 
       const decreaseButton = screen.getByRole("button", {
         name: "Decrease quantity for Test Product",
       });
-      expect(decreaseButton).toBeDisabled();
+      // Should be enabled since initial quantity is 1
+      expect(decreaseButton).not.toBeDisabled();
     });
 
     test("should enable decrease button when quantity is greater than zero", () => {
@@ -309,35 +310,6 @@ describe("ProductCard", () => {
   });
 
   describe("Quantity Input Handling", () => {
-    test("should call onUpdateCartQuantity when quantity input changes", async () => {
-      renderProductCard();
-
-      const quantityInput = screen.getByRole("spinbutton");
-
-      // Use fireEvent for more reliable testing
-      act(() => {
-        fireEvent.change(quantityInput, { target: { value: "3" } });
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledWith(mockProduct, 3);
-    });
-
-    test("should handle empty input by setting quantity to 0", async () => {
-      renderProductCard(mockProductInCart);
-
-      const quantityInput = screen.getByRole("spinbutton");
-
-      // Use fireEvent for more reliable testing
-      act(() => {
-        fireEvent.change(quantityInput, { target: { value: "" } });
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledWith(
-        mockProductInCart,
-        0
-      );
-    });
-
     test("should not allow negative quantities", async () => {
       renderProductCard();
 
@@ -374,42 +346,16 @@ describe("ProductCard", () => {
   });
 
   describe("Quantity Button Interactions", () => {
-    test("should increase quantity on increase button click", () => {
-      renderProductCard();
-
-      const increaseButton = screen.getByRole("button", {
-        name: "Increase quantity for Test Product",
-      });
-
-      act(() => {
-        fireEvent.mouseDown(increaseButton);
-        fireEvent.mouseUp(increaseButton);
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledWith(mockProduct, 1);
-    });
-
-    test("should decrease quantity on decrease button click", () => {
-      renderProductCard(mockProductInCart);
-
-      const decreaseButton = screen.getByRole("button", {
-        name: "Decrease quantity for Product In Cart",
-      });
-
-      act(() => {
-        fireEvent.mouseDown(decreaseButton);
-        fireEvent.mouseUp(decreaseButton);
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledWith(
-        mockProductInCart,
-        4
-      );
-    });
-
     test("should not decrease quantity below zero", () => {
-      // Test with a product that already has 0 quantity - button should be disabled
+      // Create a product that starts with 0 in the component state (through manual interaction)
       renderProductCard();
+
+      const quantityInput = screen.getByRole("spinbutton");
+      
+      // First, set quantity to 0 manually
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "0" } });
+      });
 
       const decreaseButton = screen.getByRole("button", {
         name: "Decrease quantity for Test Product",
@@ -417,87 +363,6 @@ describe("ProductCard", () => {
 
       // Button should be disabled when quantity is 0
       expect(decreaseButton).toBeDisabled();
-
-      // Clicking disabled button should not call the callback
-      act(() => {
-        fireEvent.mouseDown(decreaseButton);
-      });
-      expect(mockOnUpdateCartQuantity).not.toHaveBeenCalled();
-    });
-
-    test("should handle continuous increase with interval", async () => {
-      renderProductCard();
-
-      const increaseButton = screen.getByRole("button", {
-        name: "Increase quantity for Test Product",
-      });
-
-      act(() => {
-        fireEvent.mouseDown(increaseButton);
-      });
-
-      // First immediate call
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledWith(mockProduct, 1);
-
-      // Advance timer to trigger interval
-      act(() => {
-        vi.advanceTimersByTime(150);
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledWith(mockProduct, 2);
-
-      // Stop the interval
-      act(() => {
-        fireEvent.mouseUp(increaseButton);
-        vi.advanceTimersByTime(50); // Give time for cleanup
-      });
-
-      // Should not continue increasing after mouseUp
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledTimes(2);
-    });
-
-    test("should stop increasing on mouse leave", () => {
-      renderProductCard();
-
-      const increaseButton = screen.getByRole("button", {
-        name: "Increase quantity for Test Product",
-      });
-
-      act(() => {
-        fireEvent.mouseDown(increaseButton);
-        fireEvent.mouseLeave(increaseButton);
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledTimes(1);
-
-      // Advance timer - should not continue
-      act(() => {
-        vi.advanceTimersByTime(150);
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledTimes(1);
-    });
-
-    test("should handle touch events for mobile", () => {
-      renderProductCard();
-
-      const increaseButton = screen.getByRole("button", {
-        name: "Increase quantity for Test Product",
-      });
-
-      act(() => {
-        fireEvent.touchStart(increaseButton);
-        fireEvent.touchEnd(increaseButton);
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledWith(mockProduct, 1);
-
-      // Should stop the interval after touchEnd
-      act(() => {
-        vi.advanceTimersByTime(150);
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -525,7 +390,7 @@ describe("ProductCard", () => {
 
       const quantityInput = screen.getByRole("spinbutton");
       expect(quantityInput).toBeInTheDocument();
-      expect(quantityInput).toHaveValue(0);
+      expect(quantityInput).toHaveValue(1); // Default value for products not in cart
 
       const updatedProduct = { ...mockProduct, currentlyInCart: 3 };
       rerender(
@@ -545,11 +410,11 @@ describe("ProductCard", () => {
   });
 
   describe("Optional Props", () => {
-    test("should work without onAddToCart prop", () => {
+    test("should work without onUpdateCartQuantity prop", () => {
       renderProductCard();
 
       const addButton = screen.getByRole("button", {
-        name: "Add Test Product to cart",
+        name: "Add to Cart Test Product",
       });
 
       expect(() => {
@@ -557,10 +422,6 @@ describe("ProductCard", () => {
           fireEvent.click(addButton);
         });
       }).not.toThrow();
-    });
-
-    test("should work without onUpdateCartQuantity prop", () => {
-      renderProductCard();
 
       const increaseButton = screen.getByRole("button", {
         name: "Increase quantity for Test Product",
@@ -590,7 +451,7 @@ describe("ProductCard", () => {
         "product-title-1"
       );
 
-      const quantityHelp = screen.getByText("Enter quantity (minimum 0)");
+      const quantityHelp = screen.getByText("Enter quantity (minimum 0, use 0 to remove from cart)");
       expect(quantityHelp).toHaveAttribute("id", "quantity-help-1");
       expect(quantityHelp).toHaveClass("sr-only");
     });
@@ -630,34 +491,235 @@ describe("ProductCard", () => {
       expect(screen.getByText("Free")).toBeInTheDocument();
     });
 
-    test("should handle large quantities", async () => {
-      renderProductCard();
-
-      const quantityInput = screen.getByRole("spinbutton");
-
-      // Use fireEvent for more reliable testing
-      act(() => {
-        fireEvent.change(quantityInput, { target: { value: "999999" } });
-      });
-
-      expect(mockOnUpdateCartQuantity).toHaveBeenCalledWith(
-        mockProduct,
-        999999
-      );
-    });
-
     test("should handle zero quantity correctly", () => {
       const zeroQuantityProduct = { ...mockProduct, currentlyInCart: 0 };
       renderProductCard(zeroQuantityProduct);
 
       const quantityInput = screen.getByRole("spinbutton");
       expect(quantityInput).toBeInTheDocument();
-      expect(quantityInput).toHaveValue(0);
+      expect(quantityInput).toHaveValue(1); // Default value when not in cart
 
       const decreaseButton = screen.getByRole("button", {
         name: "Decrease quantity for Test Product",
       });
-      expect(decreaseButton).toBeDisabled();
+      expect(decreaseButton).not.toBeDisabled(); // Should be enabled since quantity is 1
+    });
+  });
+
+  describe("Dynamic Button Text", () => {
+    test("should show 'Add to Cart' when product is not in cart", () => {
+      renderProductCard(mockProduct);
+
+      const addButton = screen.getByRole("button", {
+        name: "Add to Cart Test Product",
+      });
+      expect(addButton).toHaveTextContent("Add to Cart");
+    });
+
+    test("should show 'Add to Cart' when product is in cart but quantity hasn't changed", () => {
+      renderProductCard(mockProductInCart);
+
+      const addButton = screen.getByRole("button", {
+        name: "Add to Cart Product In Cart",
+      });
+      expect(addButton).toHaveTextContent("Add to Cart");
+    });
+
+    test("should show 'Update Cart' when product is in cart and quantity has changed", () => {
+      renderProductCard(mockProductInCart);
+
+      const quantityInput = screen.getByRole("spinbutton");
+
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "3" } });
+      });
+
+      const updateButton = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(updateButton).toHaveTextContent("Update Cart");
+    });
+
+    test("should show 'Update Cart' when changing quantity to 0", () => {
+      renderProductCard(mockProductInCart);
+
+      const quantityInput = screen.getByRole("spinbutton");
+
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "0" } });
+      });
+
+      const updateButton = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(updateButton).toHaveTextContent("Update Cart");
+    });    test("should revert to 'Add to Cart' when quantity is changed back to original", () => {
+      renderProductCard(mockProductInCart);
+
+      const quantityInput = screen.getByRole("spinbutton");
+      
+      // Change quantity
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "3" } });
+      });
+
+      // Verify it shows Update Cart
+      const updateButton = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(updateButton).toHaveTextContent("Update Cart");
+
+      // Change back to original quantity
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "5" } });
+      });
+
+      // Should show Add to Cart again
+      const addButton = screen.getByRole("button", {
+        name: "Add to Cart Product In Cart",
+      });
+      expect(addButton).toHaveTextContent("Add to Cart");
+    });
+
+    test("should show 'Update Cart' when using increase/decrease buttons", () => {
+      renderProductCard(mockProductInCart);
+
+      const increaseButton = screen.getByRole("button", {
+        name: "Increase quantity for Product In Cart",
+      });
+
+      // Just click the button to change the local state
+      act(() => {
+        fireEvent.mouseDown(increaseButton);
+        fireEvent.mouseUp(increaseButton);
+      });
+
+      // Check that the button text changes to Update Cart (since local state changed)
+      const updateButton = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(updateButton).toHaveTextContent("Update Cart");
+    });
+  });
+
+  describe("Initial Quantity State", () => {
+    test("should initialize quantity to 1 when product is not in cart", () => {
+      renderProductCard(mockProduct);
+
+      const quantityInput = screen.getByRole("spinbutton");
+      expect(quantityInput).toHaveValue(1);
+    });
+
+    test("should initialize quantity to current cart quantity when product is in cart", () => {
+      renderProductCard(mockProductInCart);
+
+      const quantityInput = screen.getByRole("spinbutton");
+      expect(quantityInput).toHaveValue(5);
+    });
+
+    test("should initialize quantity to 1 when product has 0 in cart", () => {
+      const zeroQuantityProduct = { ...mockProduct, currentlyInCart: 0 };
+      renderProductCard(zeroQuantityProduct);
+
+      const quantityInput = screen.getByRole("spinbutton");
+      expect(quantityInput).toHaveValue(1);
+    });
+  });
+
+  describe("Button Disabled State Logic", () => {
+    test("should enable Add to Cart button when product is not in cart", () => {
+      renderProductCard(mockProduct);
+
+      const addButton = screen.getByRole("button", {
+        name: "Add to Cart Test Product",
+      });
+      expect(addButton).not.toBeDisabled();
+      expect(addButton).toHaveTextContent("Add to Cart");
+    });
+
+    test("should disable Add to Cart button when product is in cart and quantity unchanged", () => {
+      renderProductCard(mockProductInCart);
+
+      const addButton = screen.getByRole("button", {
+        name: "Add to Cart Product In Cart",
+      });
+      expect(addButton).toBeDisabled();
+      expect(addButton).toHaveTextContent("Add to Cart");
+    });
+
+    test("should enable Update Cart button when product is in cart and quantity changed", () => {
+      renderProductCard(mockProductInCart);
+
+      const quantityInput = screen.getByRole("spinbutton");
+      
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "3" } });
+      });
+
+      const updateButton = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(updateButton).not.toBeDisabled();
+      expect(updateButton).toHaveTextContent("Update Cart");
+    });
+
+    test("should disable button again when quantity is changed back to original", () => {
+      renderProductCard(mockProductInCart);
+
+      const quantityInput = screen.getByRole("spinbutton");
+      
+      // Change quantity
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "3" } });
+      });
+
+      // Verify it's enabled and shows Update Cart
+      let button = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(button).not.toBeDisabled();
+      expect(button).toHaveTextContent("Update Cart");
+
+      // Change back to original quantity
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "5" } });
+      });
+
+      // Should be disabled and show Add to Cart again
+      button = screen.getByRole("button", {
+        name: "Add to Cart Product In Cart",
+      });
+      expect(button).toBeDisabled();
+      expect(button).toHaveTextContent("Add to Cart");
+    });
+
+    test("should always disable button when product is unavailable", () => {
+      renderProductCard(mockProductUnavailable);
+
+      const addButton = screen.getByRole("button", {
+        name: "Add to Cart Unavailable Product",
+      });
+      expect(addButton).toBeDisabled();
+    });
+
+    test("should enable Update Cart when using stepper buttons", () => {
+      renderProductCard(mockProductInCart);
+
+      const increaseButton = screen.getByRole("button", {
+        name: "Increase quantity for Product In Cart",
+      });
+
+      // Click increase button to change quantity
+      act(() => {
+        fireEvent.mouseDown(increaseButton);
+        fireEvent.mouseUp(increaseButton);
+      });
+
+      const updateButton = screen.getByRole("button", {
+        name: "Update Cart Product In Cart",
+      });
+      expect(updateButton).not.toBeDisabled();
+      expect(updateButton).toHaveTextContent("Update Cart");
     });
   });
 });

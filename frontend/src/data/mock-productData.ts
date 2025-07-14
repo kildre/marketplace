@@ -46,7 +46,7 @@ const data: Product[] = [
     unit: 500,
     inCart: false,
     currentlyInCart: 0,
-    cartStatus: 'unavailable',
+    cartStatus: 'available',
   },
   {
     id: 5,
@@ -91,29 +91,6 @@ const data: Product[] = [
     inCart: false,
     currentlyInCart: 0,
     cartStatus: 'available',
-  },
-  {
-    id: 9,
-    type: 'Consumption Based',
-    name: 'Custom Analytics Package',
-    description: 'Comprehensive analytics package with multiple tools and services.',
-    price: 850,
-    unit: 50,
-    inCart: false,
-    currentlyInCart: 0,
-    cartStatus: 'available',
-    rom: 'Custom ROM v2.1',
-  },
-  {
-    id: 10,
-    type: 'License Based',
-    name: 'Enterprise Security Suite',
-    description: 'Complete security solution for enterprise environments.',
-    price: 1200,
-    unit: 25,
-    inCart: false,
-    currentlyInCart: 0,
-    cartStatus: 'unavailable',
   }
 ];
 
