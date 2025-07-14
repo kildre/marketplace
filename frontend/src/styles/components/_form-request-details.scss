@@ -1,0 +1,62 @@
+@use "../globals/colors" as *;
+// Form Request Details Styles
+.form-request-details__container {
+  .MuiAlert-message {
+    font-weight: 700;
+  }
+
+  #request-details-header {
+    background: $product-card-background;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 1rem;
+  }
+
+  label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $footer-dark-gray-color;
+    margin-bottom: 0.5rem;
+
+    &[for="organization-other"] {
+      margin-top: 1rem;
+    }
+  }
+
+  .MuiSelect-root,
+  .MuiInputBase-root {
+    border-radius: 8px;
+  }
+
+  .MuiPaper-root {
+    box-shadow: none;
+  }
+
+  .form-request-details__accordion-details {
+    padding: 1rem 1.5rem;
+  }
+
+  .form-request-details__organization {
+    p {
+      color: $light-gray-text-color;
+      margin: -5px 0 5px;
+    }
+
+    span {
+      color: red;
+    }
+  }
+
+  .form-request-details__poc-details {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    margin: 1rem 0;
+  }
+
+  .form-request-details__poc-detail-item {
+    width: calc(1 / 3 * 100% - 0.5rem);
+  }
+}
