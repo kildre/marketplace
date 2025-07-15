@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useCart } from "../../contexts/CartContext";
 
 export const Header = (): React.ReactElement => {
+  const { cartCount } = useCart();
+
   return (
     <header className="header">
       <Link to="/" aria-label="Go to home page">
@@ -20,7 +23,7 @@ export const Header = (): React.ReactElement => {
           alt="Cart Icon"
           className="header__cart-icon"
         />
-        <span className="header__cart-count">(0)</span>
+        <span className="header__cart-count">({cartCount})</span>
       </Link>
     </header>
   );

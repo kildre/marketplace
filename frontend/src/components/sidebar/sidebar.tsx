@@ -1,7 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
+import { useCart } from "../../contexts/CartContext";
 
 export const Sidebar = (): React.ReactElement => {
   const location = useLocation();
+  const { cartCount } = useCart();
 
   const isActive = (path: string): boolean => {
     return location.pathname === path;
@@ -36,7 +38,7 @@ export const Sidebar = (): React.ReactElement => {
               aria-label="Go to cart page"
               aria-current={isActive("/cart") ? "page" : undefined}
             >
-              Cart <span className="sidebar__cart-count">(0)</span>
+              Cart <span className="sidebar__cart-count">({cartCount})</span>
             </Link>
           </li>
           <li

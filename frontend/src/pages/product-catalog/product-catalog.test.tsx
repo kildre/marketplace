@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { ProductCatalog } from "./product-catalog";
+import { CartProvider } from "../../contexts/CartContext";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
@@ -10,7 +11,9 @@ describe("ProductCatalog", () => {
   const renderProductCatalogWithRouter = () => {
     return render(
       <BrowserRouter>
-        <ProductCatalog />
+        <CartProvider>
+          <ProductCatalog />
+        </CartProvider>
       </BrowserRouter>
     );
   };
@@ -74,36 +77,42 @@ describe("ProductCatalog", () => {
   test("should handle add to cart functionality", () => {
     renderProductCatalogWithRouter();
 
-    // Find an "Add to Cart" button (assuming ProductCard has this button)
+    // Find an "Add to Cart" button from ProductCard components
     const addToCartButtons = screen.getAllByText(/Add to Cart/i);
     expect(addToCartButtons.length).toBeGreaterThan(0);
 
     // Click on the first add to cart button
     fireEvent.click(addToCartButtons[0]);
 
-    // The state should update (we can test this indirectly by checking if the component re-renders)
+    // The button should still be present after clicking
     expect(addToCartButtons[0]).toBeInTheDocument();
   });
 
   test("should handle update cart quantity functionality", () => {
     renderProductCatalogWithRouter();
 
-    // Test updating cart quantity by simulating ProductCard interactions
-    // Since we can't directly test the internal state, we'll simulate the callback behavior
+    // Look for quantity input fields from ProductCard components
+    const quantityInputs = screen.queryAllByDisplayValue("1");
+    const increaseButtons = screen.queryAllByLabelText(/Increase quantity/i);
+    const decreaseButtons = screen.queryAllByLabelText(/Decrease quantity/i);
 
-    // Find any quantity input or update buttons (assuming ProductCard has these)
-    const quantityInputs = screen.queryAllByDisplayValue(/[0-9]+/);
-    const updateButtons = screen.queryAllByText(/Update|Change|\+-/i);
-
-    // Test that the component renders without errors when quantity updates are triggered
+    // Test that quantity controls are present
     if (quantityInputs.length > 0) {
+      // Test changing quantity in input field
       fireEvent.change(quantityInputs[0], { target: { value: "2" } });
       expect(quantityInputs[0]).toBeInTheDocument();
     }
 
-    if (updateButtons.length > 0) {
-      fireEvent.click(updateButtons[0]);
-      expect(updateButtons[0]).toBeInTheDocument();
+    if (increaseButtons.length > 0) {
+      // Test increase button
+      fireEvent.click(increaseButtons[0]);
+      expect(increaseButtons[0]).toBeInTheDocument();
+    }
+
+    if (decreaseButtons.length > 0) {
+      // Test decrease button
+      fireEvent.click(decreaseButtons[0]);
+      expect(decreaseButtons[0]).toBeInTheDocument();
     }
 
     // Verify the component continues to render properly after state updates
@@ -113,23 +122,23 @@ describe("ProductCatalog", () => {
   test("should update product cart status when quantity changes", () => {
     renderProductCatalogWithRouter();
 
-    // Test cart quantity updates through component callback simulation
-    // This tests the handleUpdateCartQuantity function indirectly
-
     // Check that products are initially rendered
     const productNames = screen.getAllByText(/AWS|C3AI/);
     expect(productNames.length).toBeGreaterThan(0);
 
-    // Simulate various cart quantity scenarios that would trigger handleUpdateCartQuantity
-    // Look for quantity controls or cart interaction elements
-    const cartElements = screen.queryAllByText(/cart|Cart|quantity|Quantity/i);
+    // Look for cart interaction elements like "Add to Cart" buttons
+    const addToCartButtons = screen.queryAllByText(/Add to Cart/i);
+    const quantityInputs = screen.queryAllByDisplayValue("1");
 
-    // Test that updating cart quantities doesn't break the component
-    cartElements.forEach((element) => {
-      if (element.tagName === "BUTTON" || element.tagName === "INPUT") {
-        fireEvent.click(element);
-      }
-    });
+    // Test adding items to cart
+    if (addToCartButtons.length > 0) {
+      fireEvent.click(addToCartButtons[0]);
+    }
+
+    // Test updating quantities
+    if (quantityInputs.length > 0) {
+      fireEvent.change(quantityInputs[0], { target: { value: "3" } });
+    }
 
     // Verify products are still rendered after cart updates
     expect(screen.getByText("AWS")).toBeInTheDocument();
@@ -139,24 +148,34 @@ describe("ProductCatalog", () => {
   test("should handle cart quantity edge cases", () => {
     renderProductCatalogWithRouter();
 
+    // Find quantity input fields from ProductCard components
+    const quantityInputs = screen.queryAllByDisplayValue("1");
+
     // Test edge cases for cart quantity updates
-    // This covers the logic in handleUpdateCartQuantity for setting inCart based on quantity
+    if (quantityInputs.length > 0) {
+      const firstInput = quantityInputs[0];
 
-    // Find input fields that might represent quantity
-    const allInputs = screen.queryAllByRole("textbox");
-    const numberInputs = screen.queryAllByRole("spinbutton");
+      // Test zero quantity (should remove from cart)
+      fireEvent.change(firstInput, { target: { value: "0" } });
 
-    // Test with various input values
-    [...allInputs, ...numberInputs].forEach((input) => {
-      // Test zero quantity (should set inCart to false)
-      fireEvent.change(input, { target: { value: "0" } });
+      // Test positive quantity (should add/update in cart)
+      fireEvent.change(firstInput, { target: { value: "5" } });
 
-      // Test positive quantity (should set inCart to true)
-      fireEvent.change(input, { target: { value: "3" } });
+      // Test large quantity
+      fireEvent.change(firstInput, { target: { value: "100" } });
+    }
 
-      // Test negative quantity edge case
-      fireEvent.change(input, { target: { value: "-1" } });
-    });
+    // Test interaction with increase/decrease buttons
+    const increaseButtons = screen.queryAllByLabelText(/Increase quantity/i);
+    const decreaseButtons = screen.queryAllByLabelText(/Decrease quantity/i);
+
+    if (increaseButtons.length > 0) {
+      fireEvent.click(increaseButtons[0]);
+    }
+
+    if (decreaseButtons.length > 0) {
+      fireEvent.click(decreaseButtons[0]);
+    }
 
     // Verify component stability after edge case testing
     expect(screen.getByText("Product Catalog")).toBeInTheDocument();
@@ -234,10 +253,19 @@ describe("ProductCatalog", () => {
     const products = screen.getAllByText(/AWS|C3AI/);
     expect(products.length).toBeGreaterThan(0);
 
-    // Verify that the cart functionality is available
-    // This is indirectly tested by checking that ProductCard components are rendered
-    // The actual cart functionality would be tested in ProductCard component tests
-    expect(screen.getByText("AWS")).toBeInTheDocument();
+    // Verify that cart functionality is available through ProductCard components
+    const addToCartButtons = screen.queryAllByText(/Add to Cart/i);
+    
+    if (addToCartButtons.length > 0) {
+      // Test that cart interactions work
+      fireEvent.click(addToCartButtons[0]);
+      
+      // After clicking add to cart, the product should still be visible
+      expect(screen.getByText("AWS")).toBeInTheDocument();
+    }
+
+    // Test that cart context is properly connected
+    expect(screen.getByText("Product Catalog")).toBeInTheDocument();
   });
 
   test("should use responsive grid layout", () => {

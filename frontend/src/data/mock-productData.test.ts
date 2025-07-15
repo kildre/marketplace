@@ -23,7 +23,7 @@ describe("mock-productData", () => {
 
     test("should have correct itemCount", () => {
       expect(mockProducts.itemCount).toBe(mockProducts.items.length);
-      expect(mockProducts.itemCount).toBe(10);
+      expect(mockProducts.itemCount).toBe(8);
     });
 
     test("should have correct pagination values", () => {
@@ -138,8 +138,6 @@ describe("mock-productData", () => {
       expect(productNames).toContain("Palantir");
       expect(productNames).toContain("Tableau");
       expect(productNames).toContain("UI Path");
-      expect(productNames).toContain("Custom Analytics Package");
-      expect(productNames).toContain("Enterprise Security Suite");
     });
 
     test("should have correct product types for specific items", () => {
@@ -147,45 +145,27 @@ describe("mock-productData", () => {
       const databricks = mockProducts.items.find(
         (p) => p.name === "Databricks"
       );
-      const customAnalytics = mockProducts.items.find(
-        (p) => p.name === "Custom Analytics Package"
-      );
 
       expect(aws?.type).toBe("License Based");
       expect(databricks?.type).toBe("Consumption Based Tool");
-      expect(customAnalytics?.type).toBe("Consumption Based");
     });
 
-    test("should have unavailable products", () => {
-      const unavailableProducts = mockProducts.items.filter(
-        (product) => product.cartStatus === "unavailable"
-      );
-
-      expect(unavailableProducts.length).toBeGreaterThan(0);
-      expect(unavailableProducts.some((p) => p.name === "DataRobot")).toBe(
-        true
-      );
-      expect(
-        unavailableProducts.some((p) => p.name === "Enterprise Security Suite")
-      ).toBe(true);
-    });
-
-    test("should have available products", () => {
+    test("should have all products as available", () => {
       const availableProducts = mockProducts.items.filter(
         (product) => product.cartStatus === "available"
       );
 
-      expect(availableProducts.length).toBeGreaterThan(0);
+      expect(availableProducts.length).toBe(mockProducts.items.length);
       expect(availableProducts.some((p) => p.name === "AWS")).toBe(true);
       expect(availableProducts.some((p) => p.name === "Tableau")).toBe(true);
     });
 
-    test("should have ROM field for specific products", () => {
-      const customAnalytics = mockProducts.items.find(
-        (p) => p.name === "Custom Analytics Package"
+    test("should have ROM field for Databricks", () => {
+      const databricks = mockProducts.items.find(
+        (p) => p.name === "Databricks"
       );
 
-      expect(customAnalytics?.rom).toBe("Custom ROM v2.1");
+      expect(databricks?.rom).toBe("Custom ROM");
     });
   });
 

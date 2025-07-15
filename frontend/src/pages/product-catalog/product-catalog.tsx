@@ -1,34 +1,29 @@
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { PageTitle } from "../../components/page-title/page-title";
 import { ProductCard } from "../../components/card/product-card";
 import { mockProducts } from "../../data/mock-productData";
 import { Product } from "../../types/products";
+import { useCart } from "../../contexts/CartContext";
 
 export const ProductCatalog = (): React.ReactElement => {
-  const [products, setProducts] = useState(mockProducts.items);
+  const { updateCartQuantity, getProductCartQuantity, isProductInCart } = useCart();
 
-  const handleAddToCart = (product: Product) => {
-    // Update the product's cart status
-    setProducts((prevProducts: Product[]) =>
-      prevProducts.map(
-        (p: Product): Product =>
-          p.id === product.id
-            ? { ...p, inCart: true, currentlyInCart: p.currentlyInCart + 1 }
-            : p
-      )
-    );
+  // Create products with current cart quantities from context
+  const products = useMemo(() => {
+    return mockProducts.items.map(product => ({
+      ...product,
+      currentlyInCart: getProductCartQuantity(product.id),
+      inCart: isProductInCart(product.id)
+    }));
+  }, [getProductCartQuantity, isProductInCart]);
+
+  const handleAddToCart = (_product: Product) => {
+    // This function is kept for compatibility but not used
+    // The product card will use handleUpdateCartQuantity directly
   };
 
   const handleUpdateCartQuantity = (product: Product, newQuantity: number) => {
-    // Update the product's cart quantity
-    setProducts((prevProducts: Product[]) =>
-      prevProducts.map(
-        (p: Product): Product =>
-          p.id === product.id
-            ? { ...p, currentlyInCart: newQuantity, inCart: newQuantity > 0 }
-            : p
-      )
-    );
+    updateCartQuantity(product, newQuantity);
   };
 
   return (
