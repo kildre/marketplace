@@ -13,4 +13,7 @@
 @use "components/product-card";
 @use "components/sidebar";
 @use "components/form-request-details";
-@use "components/cart";
+@use "components/form-personal-information";
+
+// Use page styles
+@use "pages/cart";
