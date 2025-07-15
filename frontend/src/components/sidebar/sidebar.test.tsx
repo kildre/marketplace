@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { Sidebar } from "./sidebar";
+import { CartProvider } from "../../contexts/CartContext";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
@@ -10,7 +11,9 @@ describe("Sidebar", () => {
   const renderSidebarWithRouter = (initialRoute = "/") => {
     return render(
       <MemoryRouter initialEntries={[initialRoute]}>
-        <Sidebar />
+        <CartProvider>
+          <Sidebar />
+        </CartProvider>
       </MemoryRouter>
     );
   };
@@ -18,7 +21,9 @@ describe("Sidebar", () => {
   const renderSidebarWithBrowserRouter = () => {
     return render(
       <BrowserRouter>
-        <Sidebar />
+        <CartProvider>
+          <Sidebar />
+        </CartProvider>
       </BrowserRouter>
     );
   };

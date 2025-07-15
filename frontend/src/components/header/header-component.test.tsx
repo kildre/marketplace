@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { Header } from "./header-component";
+import { CartProvider } from "../../contexts/CartContext";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
@@ -10,7 +11,9 @@ describe("Header", () => {
   const renderHeader = () => {
     return render(
       <MemoryRouter>
-        <Header />
+        <CartProvider>
+          <Header />
+        </CartProvider>
       </MemoryRouter>
     );
   };
