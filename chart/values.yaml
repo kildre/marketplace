@@ -45,6 +45,28 @@ ingress:
           serviceType: ClusterIP
           serviceName: http
 
+crossplane: 
+  postgres:
+    enabled: false
+    apiVersion: database.advana.cdao.us/v1alpha1
+    kind: Postgres
+    metadata:
+      name: "{{ $.Release.Name }}"
+      namespace: "{{ $.Release.Name }}"
+    spec:
+      region: "{{ $.Values.global.awsRegion }}"
+      dbName: "marketplace"
+      allocatedStorage: 40  # units: GiB
+      # deletionPolicy: Delete
+      deletionPolicy: Orphan
+      tags:
+        application: "{{ $.Release.Name }}"
+        description: "RDS Postgres for {{ $.Release.Name }}"
+        poc: "yolo@foo.bar"
+        pocTeam: "{{ $.Release.Name }} team"
+      writeConnectionSecretToRef:
+        name: secret-env-crossplane
+
 securityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
