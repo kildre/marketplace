@@ -1,0 +1,60 @@
+@use "../globals/colors" as *;
+// Form Personal Information Styles
+.form-personal-information {
+  background: $product-card-background;
+  border-radius: 8px;
+  padding: 0 1.5rem 1.5rem;
+
+  &__section {
+    display: inline-block;
+    width: 100%;
+  }
+
+  h4 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-top: 1.5rem;
+  }
+
+  p {
+    font-size: 0.8rem;
+    color: $light-gray-text-color;
+    margin-bottom: 0.8rem;
+    margin-top: 0;
+
+    span {
+      color: black;
+      font-weight: 500;
+      float: right;
+    }
+  }
+
+  h5 {
+    color: $text-base-gray;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 0.8rem;
+    margin-bottom: 0;
+
+    span {
+      color: black;
+      font-weight: 100;
+      float: right;
+    }
+  }
+
+  // Icon for warning
+  .cost-warning::before {
+    content: "";
+    display: block;
+    background-image: url(../../public/assets/icons/icon-warning.svg);
+    background-repeat: no-repeat;
+    background-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-right: 0.25rem;
+    float: left;
+    position: relative;
+    top: 2px;
+  }
+}

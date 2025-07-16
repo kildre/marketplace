@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { PageTitle } from "../../components/page-title/page-title";
+import { PageTitle } from "@/components/page-title/page-title";
 import { useCart } from "../../contexts/CartContext";
 import { Typography, Box, Button, Card } from "@mui/material";
-import { CartForm } from "../../components/cart-form/cart-form";
+import { CartForm } from "@/components/cart-form/cart-form";
+import { FormPersonalInformation } from "@/components/form-personal-information/form-personal-information";
 
 export const Cart = (): React.ReactElement => {
   const { cartItems, cartCount, removeFromCart, clearCart } = useCart();
@@ -32,86 +33,90 @@ export const Cart = (): React.ReactElement => {
         Return to Catalog
       </Link>
       <PageTitle title="Cart" />
-      <CartForm />
-      
-      <Box mb={2}>
-        <Typography variant="h6">
-          Cart Items ({cartCount} {cartCount === 1 ? 'product' : 'products'})
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          Total quantities will be shown during checkout
-        </Typography>
-      </Box>
+      <div className="cart-page__content-wrapper">
+        <div className="cart-page__content-left">
+          <CartForm />
 
-      <Box display="flex" flexDirection="column" gap={2}>
-        {cartItems.map(({ product, quantity }) => (
-          <Card 
-            key={product.id} 
-            className="cart-item-card"
-            sx={{ 
-              padding: 2, 
-              display: 'flex', 
-              alignItems: 'center',
-              border: '1px solid #e0e0e0',
-              borderRadius: '8px'
-            }}
-          >
-            <Box className="icon-container" mr={2}>
-              <img
-                src={getIconPath(product.type)}
-                alt={`${product.type} icon`}
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  objectFit: "contain",
+          <Box mb={2}>
+            <Typography variant="h6">
+              Cart Items ({cartCount} {cartCount === 1 ? "product" : "products"}
+              )
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Total quantities will be shown during checkout
+            </Typography>
+          </Box>
+
+          <Box display="flex" flexDirection="column" gap={2}>
+            {cartItems.map(({ product, quantity }) => (
+              <Card
+                key={product.id}
+                className="cart-item-card"
+                sx={{
+                  padding: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "8px",
                 }}
-              />
-            </Box>
-            
-            <Box flex={1}>
-              <Typography variant="h6" component="h3">
-                {product.name}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {product.type} • {formatPrice(product.price, product.rom)}
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                {product.description}
-              </Typography>
-              <Typography variant="body2" color="primary" sx={{ mt: 1 }}>
-                Quantity: {quantity}
-              </Typography>
-            </Box>
+              >
+                <Box className="icon-container" mr={2}>
+                  <img
+                    src={getIconPath(product.type)}
+                    alt={`${product.type} icon`}
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      objectFit: "contain",
+                    }}
+                  />
+                </Box>
 
-            <Button
-              variant="outlined"
-              color="error"
-              size="small"
-              onClick={() => removeFromCart(product.id)}
-              sx={{ ml: 2 }}
-            >
-              Remove
+                <Box flex={1}>
+                  <Typography variant="h6" component="h3">
+                    {product.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {product.type} • {formatPrice(product.price, product.rom)}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    {product.description}
+                  </Typography>
+                  <Typography variant="body2" color="primary" sx={{ mt: 1 }}>
+                    Quantity: {quantity}
+                  </Typography>
+                </Box>
+
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  onClick={() => removeFromCart(product.id)}
+                  sx={{ ml: 2 }}
+                >
+                  Remove
+                </Button>
+              </Card>
+            ))}
+          </Box>
+
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mt={4}
+            pt={2}
+            borderTop="1px solid #e0e0e0"
+          >
+            <Button variant="outlined" color="secondary" onClick={clearCart}>
+              Clear Cart
             </Button>
-          </Card>
-        ))}
-      </Box>
-
-      <Box 
-        display="flex" 
-        justifyContent="space-between" 
-        alignItems="center"
-        mt={4}
-        pt={2}
-        borderTop="1px solid #e0e0e0"
-      >
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={clearCart}
-        >
-          Clear Cart
-        </Button>
-      </Box>
+          </Box>
+        </div>
+        <div className="cart-page__content-right">
+          <FormPersonalInformation />
+        </div>
+      </div>
     </div>
   );
 };

@@ -27,6 +27,69 @@ interface FormRequestDetailsProps {
   ) => void;
 }
 
+const organizationOptions = [
+  { value: "AFRICOM", label: "AFRICOM" },
+  { value: "Air Force", label: "Air Force" },
+  { value: "Army", label: "Army" },
+  { value: "CAPE", label: "CAPE" },
+  { value: "CBDP", label: "CBDP" },
+  { value: "CDAO", label: "CDAO" },
+  { value: "CENTCOM", label: "CENTCOM" },
+  { value: "CYBERCOM", label: "CYBERCOM" },
+  { value: "DARPA", label: "DARPA" },
+  { value: "DAU", label: "DAU" },
+  { value: "DCAA", label: "DCAA" },
+  { value: "DCMA", label: "DCMA" },
+  { value: "DCSA", label: "DCSA" },
+  { value: "DECA", label: "DECA" },
+  { value: "DEHA", label: "DEHA" },
+  { value: "DEMA", label: "DEMA" },
+  { value: "DFAS", label: "DFAS" },
+  { value: "DHA", label: "DHA" },
+  { value: "DHP", label: "DHP" },
+  { value: "DHRA", label: "DHRA" },
+  { value: "DISA", label: "DISA" },
+  { value: "DLA", label: "DLA" },
+  { value: "DLSA", label: "DLSA" },
+  { value: "DMA", label: "DMA" },
+  { value: "DMDC", label: "DMDC" },
+  { value: "DMEA", label: "DMEA" },
+  { value: "DMPO", label: "DMPO" },
+  { value: "DoDEA", label: "DoDEA" },
+  { value: "DoDIG", label: "DoDIG" },
+  { value: "DoT&E", label: "DoT&E" },
+  { value: "DPAA", label: "DPAA" },
+  { value: "DSCA", label: "DSCA" },
+  { value: "DSS", label: "DSS" },
+  { value: "DTIC", label: "DTIC" },
+  { value: "DTRA", label: "DTRA" },
+  { value: "DTRMC", label: "DTRMC" },
+  { value: "DTSA", label: "DTSA" },
+  { value: "EUCOM", label: "EUCOM" },
+  { value: "INDOPACOM", label: "INDOPACOM" },
+  { value: "JCS", label: "JCS" },
+  { value: "MDA", label: "MDA" },
+  { value: "Navy", label: "Navy" },
+  { value: "NGA", label: "NGA" },
+  { value: "NGB", label: "NGB" },
+  { value: "NORTHCOM", label: "NORTHCOM" },
+  { value: "NSA", label: "NSA" },
+  { value: "OLDCC", label: "OLDCC" },
+  { value: "OSD", label: "OSD" },
+  { value: "PFPA", label: "PFPA" },
+  { value: "SOCOM", label: "SOCOM" },
+  { value: "SOUTHCOM", label: "SOUTHCOM" },
+  { value: "Space Force", label: "Space Force" },
+  { value: "SPACECOM", label: "SPACECOM" },
+  { value: "STRATCOM", label: "STRATCOM" },
+  { value: "TRANSCOM", label: "TRANSCOM" },
+  { value: "USACE", label: "USACE" },
+  { value: "USMC", label: "USMC" },
+  { value: "USSOCOM", label: "USSOCOM" },
+  { value: "WHS", label: "WHS" },
+  { value: "Other", label: "Other" },
+];
+
 export const FormRequestDetails = ({
   formValues,
   handleChange,
@@ -68,20 +131,21 @@ export const FormRequestDetails = ({
               displayEmpty
               id="organization-select"
               name="organization"
+              size="small"
               value={formValues.organization}
               onChange={handleChange}
               renderValue={(selected) => {
                 if (selected.length === 0) {
                   return <em>- Select -</em>;
                 }
-
                 return selected;
               }}
             >
-              <MenuItem value={"Org 1"}>Org 1</MenuItem>
-              <MenuItem value={"Org 2"}>Org 2</MenuItem>
-              <MenuItem value={"Org 3"}>Org 3</MenuItem>
-              <MenuItem value={"Other"}>Other</MenuItem>
+              {organizationOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           {formValues.organization === "Other" && (
@@ -94,6 +158,7 @@ export const FormRequestDetails = ({
                 name="organizationOther"
                 variant="outlined"
                 fullWidth
+                size="small"
                 className="form-request-details__organization-other"
                 value={formValues.organizationOther}
                 onChange={handleChange}
@@ -107,7 +172,7 @@ export const FormRequestDetails = ({
                 id="poc-name"
                 name="pocName"
                 variant="outlined"
-                fullWidth
+                size="small"
                 value={formValues.pocName}
                 onChange={handleChange}
               />
@@ -119,7 +184,7 @@ export const FormRequestDetails = ({
                 name="pocPhone"
                 variant="outlined"
                 type="tel"
-                fullWidth
+                size="small"
                 value={formValues.pocPhone}
                 onChange={handleChange}
               />
@@ -131,7 +196,7 @@ export const FormRequestDetails = ({
                 name="pocEmail"
                 variant="outlined"
                 type="email"
-                fullWidth
+                size="small"
                 value={formValues.pocEmail}
                 onChange={handleChange}
               />
@@ -144,6 +209,7 @@ export const FormRequestDetails = ({
             name="useCaseDescription"
             variant="outlined"
             fullWidth
+            size="small"
             value={formValues.useCaseDescription}
             onChange={handleChange}
             minRows={6}

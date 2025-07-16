@@ -102,11 +102,43 @@ describe("FormRequestDetails", () => {
       fireEvent.mouseDown(organizationSelect);
 
       const options = screen.getAllByRole("option");
-      expect(options).toHaveLength(4);
-      expect(screen.getByRole("option", { name: "Org 1" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "Org 2" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "Org 3" })).toBeInTheDocument();
+      expect(options.length).toBeGreaterThan(50); // Should have many organization options
+
+      // Check for some key organizations
+      expect(
+        screen.getByRole("option", { name: "AFRICOM" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: "Air Force" })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("option", { name: "Army" })).toBeInTheDocument();
+      expect(screen.getByRole("option", { name: "Navy" })).toBeInTheDocument();
+      expect(screen.getByRole("option", { name: "CDAO" })).toBeInTheDocument();
       expect(screen.getByRole("option", { name: "Other" })).toBeInTheDocument();
+    });
+
+    test("should render organization options from organizationOptions array", () => {
+      renderFormRequestDetails();
+
+      const organizationSelect = screen.getByRole("combobox");
+      fireEvent.mouseDown(organizationSelect);
+
+      // Test that specific organizations from the array are present
+      const expectedOrganizations = [
+        "AFRICOM",
+        "Air Force",
+        "Army",
+        "CDAO",
+        "Navy",
+        "Space Force",
+        "USMC",
+        "SOCOM",
+        "Other",
+      ];
+
+      expectedOrganizations.forEach((org) => {
+        expect(screen.getByRole("option", { name: org })).toBeInTheDocument();
+      });
     });
 
     test("should render all POC detail fields", () => {
@@ -154,7 +186,7 @@ describe("FormRequestDetails", () => {
     });
 
     test("should not show organization warning when organization is selected", () => {
-      renderFormRequestDetails({ ...defaultFormValues, organization: "Org 1" });
+      renderFormRequestDetails({ ...defaultFormValues, organization: "Army" });
 
       const alerts = screen.queryAllByRole("alert");
       expect(alerts).toHaveLength(0);
@@ -181,10 +213,10 @@ describe("FormRequestDetails", () => {
     });
 
     test("should display selected organization value", () => {
-      renderFormRequestDetails({ ...defaultFormValues, organization: "Org 1" });
+      renderFormRequestDetails({ ...defaultFormValues, organization: "Army" });
 
       const organizationSelect = screen.getByRole("combobox");
-      expect(organizationSelect).toHaveTextContent("Org 1");
+      expect(organizationSelect).toHaveTextContent("Army");
     });
 
     test("should call handleChange when organization is selected", async () => {
@@ -193,8 +225,8 @@ describe("FormRequestDetails", () => {
       const organizationSelect = screen.getByRole("combobox");
       fireEvent.mouseDown(organizationSelect);
 
-      const org1Option = screen.getByRole("option", { name: "Org 1" });
-      fireEvent.click(org1Option);
+      const armyOption = screen.getByRole("option", { name: "Army" });
+      fireEvent.click(armyOption);
 
       expect(mockHandleChange).toHaveBeenCalled();
 
@@ -202,7 +234,7 @@ describe("FormRequestDetails", () => {
       const lastCall =
         mockHandleChange.mock.calls[mockHandleChange.mock.calls.length - 1];
       expect(lastCall.length).toBe(2); // Material-UI Select passes (event, child)
-      expect(lastCall[1].props.value).toBe("Org 1");
+      expect(lastCall[1].props.value).toBe("Army");
     });
 
     test("should show organizationOther field when Other is selected", () => {
@@ -219,7 +251,7 @@ describe("FormRequestDetails", () => {
     });
 
     test("should hide organizationOther field when Other is not selected", () => {
-      renderFormRequestDetails({ ...defaultFormValues, organization: "Org 1" });
+      renderFormRequestDetails({ ...defaultFormValues, organization: "Army" });
 
       const organizationOtherField = screen.queryByLabelText(
         /please specify the organization/i
@@ -310,7 +342,7 @@ describe("FormRequestDetails", () => {
   describe("Form Values Display", () => {
     test("should display form values correctly", () => {
       const formValues = {
-        organization: "Org 2",
+        organization: "Navy",
         organizationOther: "",
         pocName: "Jane Smith",
         pocPhone: "555-9876",
@@ -320,7 +352,7 @@ describe("FormRequestDetails", () => {
 
       renderFormRequestDetails(formValues);
 
-      expect(screen.getByRole("combobox")).toHaveTextContent("Org 2");
+      expect(screen.getByRole("combobox")).toHaveTextContent("Navy");
       expect(screen.getByDisplayValue("Jane Smith")).toBeInTheDocument();
       expect(screen.getByDisplayValue("555-9876")).toBeInTheDocument();
       expect(screen.getByDisplayValue("jane@example.com")).toBeInTheDocument();
@@ -537,7 +569,7 @@ describe("FormRequestDetails", () => {
 
     test("should work with complete form values", () => {
       const completeFormValues = {
-        organization: "Org 1",
+        organization: "CDAO",
         organizationOther: "",
         pocName: "John Doe",
         pocPhone: "555-1234",

@@ -1,0 +1,16 @@
+// Cart Page Styles
+.cart-page__content-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+
+  .cart-page__content-left {
+    display: block;
+    width: calc(70% - 0.5rem);
+  }
+
+  .cart-page__content-right {
+    display: block;
+    width: 30%;
+  }
+}

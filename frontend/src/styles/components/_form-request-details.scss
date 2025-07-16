@@ -1,6 +1,9 @@
 @use "../globals/colors" as *;
 // Form Request Details Styles
 .form-request-details__container {
+  input::-webkit-contacts-auto-fill-button {
+    visibility: hidden;
+  }
   .MuiAlert-message {
     font-weight: 700;
   }
@@ -28,6 +31,10 @@
   .MuiSelect-root,
   .MuiInputBase-root {
     border-radius: 8px;
+  }
+
+  .MuiTextField-root {
+    width: 100%;
   }
 
   .MuiPaper-root {
