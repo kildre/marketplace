@@ -1,0 +1,41 @@
+@use "../globals/colors" as *;
+// Selected Applications component styles
+.form-selected-applications__container {
+  margin-bottom: 2rem;
+
+  #selected-applications-header {
+    background: $product-card-background;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 0;
+  }
+
+  .MuiPaper-root {
+    box-shadow: none;
+  }
+
+  .form-selected-applications__accordion-details {
+    padding: 1rem 1.5rem;
+  }
+
+  .cart-item-card {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+
+  .cart-item-card__icon {
+    align-self: center;
+    width: 61px;
+    height: 61px;
+  }
+
+  .cart-item-card__details {
+    width: 400px;
+  }
+
+  .cart-item-card__price {
+    text-align: right;
+  }
+}
