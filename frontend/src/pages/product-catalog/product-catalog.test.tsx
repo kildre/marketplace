@@ -255,11 +255,11 @@ describe("ProductCatalog", () => {
 
     // Verify that cart functionality is available through ProductCard components
     const addToCartButtons = screen.queryAllByText(/Add to Cart/i);
-    
+
     if (addToCartButtons.length > 0) {
       // Test that cart interactions work
       fireEvent.click(addToCartButtons[0]);
-      
+
       // After clicking add to cart, the product should still be visible
       expect(screen.getByText("AWS")).toBeInTheDocument();
     }

@@ -4,8 +4,17 @@
   input::-webkit-contacts-auto-fill-button {
     visibility: hidden;
   }
+
+  .MuiAlert-standard {
+    margin-bottom: 1rem;
+  }
+
   .MuiAlert-message {
     font-weight: 700;
+  }
+
+  .MuiAccordion-root::before {
+    display: none;
   }
 
   #request-details-header {
@@ -13,7 +22,7 @@
     border-radius: 8px;
     font-size: 1.25rem;
     font-weight: 700;
-    margin-top: 1rem;
+    margin-top: 0;
   }
 
   label {
