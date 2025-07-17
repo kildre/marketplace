@@ -11,7 +11,9 @@
   .product-card {
     display: flex;
     flex-direction: column;
-    width: calc(33.333% - 3.333rem); // Adjust for gap: (2rem * 2) / 3 = 1.333rem per card
+    width: calc(
+      33.333% - 3.333rem
+    ); // Adjust for gap: (2rem * 2) / 3 = 1.333rem per card
     min-height: 384px;
     border-radius: 16px;
     gap: 4px;
@@ -178,6 +180,7 @@
       background-color: white;
     }
   }
+
   .add-to-cart-button {
     background-color: white;
     font-size: 0.875rem;
