@@ -6,17 +6,19 @@ import { Product } from "../../types/products";
 import { useCart } from "../../contexts/CartContext";
 
 export const ProductCatalog = (): React.ReactElement => {
-  const { updateCartQuantity, getProductCartQuantity, isProductInCart } = useCart();
+  const { updateCartQuantity, getProductCartQuantity, isProductInCart } =
+    useCart();
 
   // Create products with current cart quantities from context
   const products = useMemo(() => {
-    return mockProducts.items.map(product => ({
+    return mockProducts.items.map((product) => ({
       ...product,
       currentlyInCart: getProductCartQuantity(product.id),
-      inCart: isProductInCart(product.id)
+      inCart: isProductInCart(product.id),
     }));
   }, [getProductCartQuantity, isProductInCart]);
 
+  /* v8 ignore next 4 */
   const handleAddToCart = (_product: Product) => {
     // This function is kept for compatibility but not used
     // The product card will use handleUpdateCartQuantity directly

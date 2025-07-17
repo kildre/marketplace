@@ -129,6 +129,11 @@
     justify-content: flex-start;
   }
 
+  .button--clear-cart {
+    background-color: $product-card-primary;
+    border-radius: 8px;
+  }
+
   // Fixing overflow issue on collapsed accordion
   .MuiCollapse-hidden {
     display: none;

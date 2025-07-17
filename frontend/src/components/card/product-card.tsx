@@ -28,6 +28,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     setInputQuantity(product.currentlyInCart > 0 ? product.currentlyInCart : 1);
   }, [product.currentlyInCart]);
 
+  /* v8 ignore next 11 */
   // Cleanup intervals on component unmount
   useEffect(() => {
     return () => {

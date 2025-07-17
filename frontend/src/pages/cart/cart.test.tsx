@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { vi } from "vitest";
@@ -39,6 +39,18 @@ vi.mock(
   })
 );
 
+vi.mock(
+  "../../components/form-selected-applications/form-selected-applications",
+  () => ({
+    FormSelectedApplications: () => (
+      <div data-testid="form-selected-applications">
+        <h3>Selected Applications</h3>
+        <div>Cart Items Content</div>
+      </div>
+    ),
+  })
+);
+
 // Mock the useCart hook
 const mockUseCart = vi.fn();
 vi.mock("../../contexts/CartContext", () => ({
@@ -49,55 +61,6 @@ vi.mock("../../contexts/CartContext", () => ({
 }));
 
 describe("Cart", () => {
-  const mockProduct = {
-    id: 1,
-    type: "Usage Based Tool",
-    name: "Test Product",
-    description: "Test description",
-    price: 100,
-    unit: 50,
-    inCart: true,
-    currentlyInCart: 2,
-    cartStatus: "available",
-  };
-
-  const mockProduct2 = {
-    id: 2,
-    type: "Bundle",
-    name: "Another Product",
-    description: "Another test description",
-    price: 200,
-    unit: 25,
-    inCart: true,
-    currentlyInCart: 1,
-    cartStatus: "available",
-  };
-
-  const mockProductWithROM = {
-    id: 3,
-    type: "Seat Based Tool",
-    name: "ROM Product",
-    description: "Product with ROM pricing",
-    price: 0,
-    rom: "$5K - $10K",
-    unit: 1,
-    inCart: true,
-    currentlyInCart: 1,
-    cartStatus: "available",
-  };
-
-  const mockFreeProduct = {
-    id: 4,
-    type: "Usage Based Tool",
-    name: "Free Product",
-    description: "Free product description",
-    price: 0,
-    unit: 1,
-    inCart: true,
-    currentlyInCart: 1,
-    cartStatus: "available",
-  };
-
   const renderCartWithRouter = () => {
     return render(
       <BrowserRouter>
@@ -115,10 +78,7 @@ describe("Cart", () => {
   describe("Empty Cart", () => {
     beforeEach(() => {
       mockUseCart.mockReturnValue({
-        cartItems: [],
         cartCount: 0,
-        removeFromCart: vi.fn(),
-        clearCart: vi.fn(),
       });
     });
 
@@ -185,18 +145,9 @@ describe("Cart", () => {
   });
 
   describe("Cart with Items", () => {
-    const mockRemoveFromCart = vi.fn();
-    const mockClearCart = vi.fn();
-
     beforeEach(() => {
       mockUseCart.mockReturnValue({
-        cartItems: [
-          { product: mockProduct, quantity: 2 },
-          { product: mockProduct2, quantity: 1 },
-        ],
         cartCount: 2,
-        removeFromCart: mockRemoveFromCart,
-        clearCart: mockClearCart,
       });
     });
 
@@ -208,69 +159,13 @@ describe("Cart", () => {
       expect(screen.getByText("Cart Form Content")).toBeInTheDocument();
     });
 
-    test("should render cart items count", () => {
+    test("should render FormSelectedApplications when cart has items", () => {
       renderCartWithRouter();
 
-      expect(screen.getByText("Cart Items (2 products)")).toBeInTheDocument();
-      expect(
-        screen.getByText("Total quantities will be shown during checkout")
-      ).toBeInTheDocument();
-    });
-
-    test("should render cart items", () => {
-      renderCartWithRouter();
-
-      expect(screen.getByText("Test Product")).toBeInTheDocument();
-      expect(screen.getByText("Another Product")).toBeInTheDocument();
-      expect(screen.getByText("Test description")).toBeInTheDocument();
-      expect(screen.getByText("Another test description")).toBeInTheDocument();
-      expect(screen.getAllByText(/Usage Based Tool • \$100/)).toHaveLength(1);
-      expect(screen.getAllByText(/Bundle • \$200/)).toHaveLength(1);
-    });
-
-    test("should render cart item quantities", () => {
-      renderCartWithRouter();
-
-      const quantities = screen.getAllByText(/Quantity:/);
-      expect(quantities).toHaveLength(2);
-      expect(screen.getByText("Quantity: 2")).toBeInTheDocument();
-      expect(screen.getByText("Quantity: 1")).toBeInTheDocument();
-    });
-
-    test("should render remove buttons for each item", () => {
-      renderCartWithRouter();
-
-      const removeButtons = screen.getAllByText("Remove");
-      expect(removeButtons).toHaveLength(2);
-      removeButtons.forEach((button) => {
-        expect(button.tagName).toBe("BUTTON");
-      });
-    });
-
-    test("should call removeFromCart when remove button is clicked", () => {
-      renderCartWithRouter();
-
-      const removeButtons = screen.getAllByText("Remove");
-      fireEvent.click(removeButtons[0]);
-
-      expect(mockRemoveFromCart).toHaveBeenCalledWith(1);
-    });
-
-    test("should render clear cart button", () => {
-      renderCartWithRouter();
-
-      const clearCartButton = screen.getByText("Clear Cart");
-      expect(clearCartButton).toBeInTheDocument();
-      expect(clearCartButton.tagName).toBe("BUTTON");
-    });
-
-    test("should call clearCart when clear cart button is clicked", () => {
-      renderCartWithRouter();
-
-      const clearCartButton = screen.getByText("Clear Cart");
-      fireEvent.click(clearCartButton);
-
-      expect(mockClearCart).toHaveBeenCalled();
+      const formSelectedApps = screen.getByTestId("form-selected-applications");
+      expect(formSelectedApps).toBeInTheDocument();
+      expect(screen.getByText("Selected Applications")).toBeInTheDocument();
+      expect(screen.getByText("Cart Items Content")).toBeInTheDocument();
     });
 
     test("should render FormPersonalInformation component", () => {
@@ -299,150 +194,16 @@ describe("Cart", () => {
       expect(contentRight).toBeInTheDocument();
     });
 
-    test("should render product icons", () => {
-      renderCartWithRouter();
-
-      const usageBasedIcon = screen.getByAltText("Usage Based Tool icon");
-      expect(usageBasedIcon).toBeInTheDocument();
-      expect(usageBasedIcon).toHaveAttribute(
-        "src",
-        "/assets/icons/icon_user-tool.png"
-      );
-
-      const bundleIcon = screen.getByAltText("Bundle icon");
-      expect(bundleIcon).toBeInTheDocument();
-      expect(bundleIcon).toHaveAttribute(
-        "src",
-        "/assets/icons/icon_bundle.png"
-      );
-    });
-
-    test("should format prices correctly", () => {
-      renderCartWithRouter();
-
-      expect(screen.getAllByText(/Usage Based Tool • \$100/)).toHaveLength(1);
-      expect(screen.getAllByText(/Bundle • \$200/)).toHaveLength(1);
-    });
-
     test("should handle singular product count", () => {
       mockUseCart.mockReturnValue({
-        cartItems: [{ product: mockProduct, quantity: 1 }],
         cartCount: 1,
-        removeFromCart: mockRemoveFromCart,
-        clearCart: mockClearCart,
       });
 
       renderCartWithRouter();
 
-      expect(screen.getByText("Cart Items (1 product)")).toBeInTheDocument();
-    });
-
-    test("should handle ROM pricing", () => {
-      mockUseCart.mockReturnValue({
-        cartItems: [{ product: mockProductWithROM, quantity: 1 }],
-        cartCount: 1,
-        removeFromCart: mockRemoveFromCart,
-        clearCart: mockClearCart,
-      });
-
-      renderCartWithRouter();
-
-      expect(screen.getByText("ROM Product")).toBeInTheDocument();
-      expect(
-        screen.getByText(/Seat Based Tool • \$5K - \$10K/)
-      ).toBeInTheDocument();
-    });
-
-    test("should handle free products", () => {
-      mockUseCart.mockReturnValue({
-        cartItems: [{ product: mockFreeProduct, quantity: 1 }],
-        cartCount: 1,
-        removeFromCart: mockRemoveFromCart,
-        clearCart: mockClearCart,
-      });
-
-      renderCartWithRouter();
-
-      expect(screen.getByText("Free Product")).toBeInTheDocument();
-      expect(screen.getByText(/Usage Based Tool • Free/)).toBeInTheDocument();
-    });
-
-    test("should render correct icon for different product types", () => {
-      mockUseCart.mockReturnValue({
-        cartItems: [
-          { product: mockProduct, quantity: 1 }, // Usage Based Tool
-          { product: mockProduct2, quantity: 1 }, // Bundle
-          { product: mockProductWithROM, quantity: 1 }, // Seat Based Tool
-        ],
-        cartCount: 3,
-        removeFromCart: mockRemoveFromCart,
-        clearCart: mockClearCart,
-      });
-
-      renderCartWithRouter();
-
-      // Usage Based Tool should use user-tool icon
-      const usageBasedIcon = screen.getByAltText("Usage Based Tool icon");
-      expect(usageBasedIcon).toHaveAttribute(
-        "src",
-        "/assets/icons/icon_user-tool.png"
-      );
-
-      // Bundle should use bundle icon
-      const bundleIcon = screen.getByAltText("Bundle icon");
-      expect(bundleIcon).toHaveAttribute(
-        "src",
-        "/assets/icons/icon_bundle.png"
-      );
-
-      // Seat Based Tool should use seat-based-tool icon
-      const seatBasedIcon = screen.getByAltText("Seat Based Tool icon");
-      expect(seatBasedIcon).toHaveAttribute(
-        "src",
-        "/assets/icons/icon_seat-based-tool.png"
-      );
-    });
-
-    test("should handle unknown product types with default icon", () => {
-      const mockUnknownProduct = {
-        ...mockProduct,
-        type: "Unknown Type",
-      };
-
-      mockUseCart.mockReturnValue({
-        cartItems: [{ product: mockUnknownProduct, quantity: 1 }],
-        cartCount: 1,
-        removeFromCart: mockRemoveFromCart,
-        clearCart: mockClearCart,
-      });
-
-      renderCartWithRouter();
-
-      const unknownIcon = screen.getByAltText("Unknown Type icon");
-      expect(unknownIcon).toHaveAttribute(
-        "src",
-        "/assets/icons/icon_user-tool.png"
-      );
-    });
-
-    test("should format prices with commas for large numbers", () => {
-      const mockExpensiveProduct = {
-        ...mockProduct,
-        price: 1000000,
-      };
-
-      mockUseCart.mockReturnValue({
-        cartItems: [{ product: mockExpensiveProduct, quantity: 1 }],
-        cartCount: 1,
-        removeFromCart: mockRemoveFromCart,
-        clearCart: mockClearCart,
-      });
-
-      renderCartWithRouter();
-
-      expect(
-        screen.getByText(/Usage Based Tool • \$1,000,000/)
-      ).toBeInTheDocument();
+      // FormSelectedApplications should handle the display of cart count
+      const formSelectedApps = screen.getByTestId("form-selected-applications");
+      expect(formSelectedApps).toBeInTheDocument();
     });
   });
 
