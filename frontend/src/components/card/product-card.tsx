@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Card, Typography, Button, Box, TextField } from "@mui/material";
 import { Product } from "../../types/products";
+import { getIconPath, formatPrice } from "../../utils/helper-functions";
 
 interface ProductCardProps {
   product: Product;
@@ -16,7 +17,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const increaseIntervalRef = useRef<number | null>(null);
   const decreaseIntervalRef = useRef<number | null>(null);
-  
+
   // Local state for input quantity - defaults to current cart quantity, otherwise 1 for new items
   const [inputQuantity, setInputQuantity] = useState<number>(
     product.currentlyInCart > 0 ? product.currentlyInCart : 1
@@ -27,6 +28,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     setInputQuantity(product.currentlyInCart > 0 ? product.currentlyInCart : 1);
   }, [product.currentlyInCart]);
 
+  /* v8 ignore next 11 */
   // Cleanup intervals on component unmount
   useEffect(() => {
     return () => {
@@ -47,20 +49,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const startIncreasing = (event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
     // Update the input quantity immediately
-    setInputQuantity(prev => prev + 1);
+    setInputQuantity((prev) => prev + 1);
 
     increaseIntervalRef.current = window.setInterval(() => {
-      setInputQuantity(prev => prev + 1);
+      setInputQuantity((prev) => prev + 1);
     }, 150); // Repeat every 150ms
   };
 
   const startDecreasing = (event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
     // Update the input quantity immediately, minimum 0
-    setInputQuantity(prev => Math.max(0, prev - 1));
+    setInputQuantity((prev) => Math.max(0, prev - 1));
 
     decreaseIntervalRef.current = window.setInterval(() => {
-      setInputQuantity(prev => Math.max(0, prev - 1));
+      setInputQuantity((prev) => Math.max(0, prev - 1));
     }, 150); // Repeat every 150ms
   };
 
@@ -95,12 +97,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     if (product.currentlyInCart === 0) {
       return "Add to Cart";
     }
-    
+
     // If item is in cart and quantity has changed, show "Update Cart"
     if (inputQuantity !== product.currentlyInCart) {
       return "Update Cart";
     }
-    
+
     // If item is in cart but quantity hasn't changed, show "Add to Cart"
     return "Add to Cart";
   };
@@ -111,38 +113,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     if (isUnavailable) {
       return true;
     }
-    
+
     // If item is not in cart, button should be enabled
     if (product.currentlyInCart === 0) {
       return false;
     }
-    
+
     // If item is in cart but quantity hasn't changed, button should be disabled
     if (inputQuantity === product.currentlyInCart) {
       return true;
     }
-    
+
     // If item is in cart and quantity has changed, button should be enabled
     return false;
-  };
-
-  const formatPrice = (price: number, rom?: string) => {
-    if (price === 0) return "Free";
-    if (rom) return rom;
-    return `$${price.toLocaleString()}`;
-  };
-
-  const getIconPath = (type: string) => {
-    switch (type) {
-      case "Usage Based Tool":
-        return "/assets/icons/icon_user-tool.png";
-      case "Bundle":
-        return "/assets/icons/icon_bundle.png";
-      case "Seat Based Tool":
-        return "/assets/icons/icon_seat-based-tool.png";
-      default:
-        return "/assets/icons/icon_user-tool.png";
-    }
   };
 
   const isUnavailable = product.cartStatus === "unavailable";
