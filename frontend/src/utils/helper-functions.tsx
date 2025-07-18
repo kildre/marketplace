@@ -1,6 +1,7 @@
-export const formatPrice = (price: number, rom?: string) => {
+export const formatPrice = (price: number | null, rom?: string) => {
   if (rom) return rom;
   if (price === 0) return "Free";
+  if (price === null) return "Custom ROM";
   return `$${price.toLocaleString()}`;
 };
 

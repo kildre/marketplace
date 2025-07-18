@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Product } from '../types/products';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { Product } from "../types/products";
 
 // Cart item interface - maintains 1:1 relationship
 interface CartItem {
@@ -10,6 +10,7 @@ interface CartItem {
 interface CartContextType {
   cartItems: CartItem[];
   cartCount: number; // Number of unique products in cart (1:1 relationship)
+  pendingPriceCount: number; // Number of cart items with null price
   addToCart: (product: Product, quantity: number) => void;
   updateCartQuantity: (product: Product, quantity: number) => void;
   removeFromCart: (productId: number) => void;
@@ -23,7 +24,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error("useCart must be used within a CartProvider");
   }
   return context;
 };
@@ -38,16 +39,23 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   // Cart count represents unique products (1:1 relationship)
   const cartCount = cartItems.length;
 
+  // Count of cart items with null price (pending price)
+  const pendingPriceCount = cartItems.filter(
+    (item) => item.product.price === null
+  ).length;
+
   const addToCart = (product: Product, quantity: number) => {
-    setCartItems(prevItems => {
-      const existingItemIndex = prevItems.findIndex(item => item.product.id === product.id);
-      
+    setCartItems((prevItems) => {
+      const existingItemIndex = prevItems.findIndex(
+        (item) => item.product.id === product.id
+      );
+
       if (existingItemIndex >= 0) {
         // Update existing item quantity
         const updatedItems = [...prevItems];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
-          quantity: quantity
+          quantity: quantity,
         };
         return updatedItems;
       } else {
@@ -62,16 +70,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       removeFromCart(product.id);
       return;
     }
-    
-    setCartItems(prevItems => {
-      const existingItemIndex = prevItems.findIndex(item => item.product.id === product.id);
-      
+
+    setCartItems((prevItems) => {
+      const existingItemIndex = prevItems.findIndex(
+        (item) => item.product.id === product.id
+      );
+
       if (existingItemIndex >= 0) {
         // Update existing item
         const updatedItems = [...prevItems];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
-          quantity: quantity
+          quantity: quantity,
         };
         return updatedItems;
       } else {
@@ -82,16 +92,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const removeFromCart = (productId: number) => {
-    setCartItems(prevItems => prevItems.filter(item => item.product.id !== productId));
+    setCartItems((prevItems) =>
+      prevItems.filter((item) => item.product.id !== productId)
+    );
   };
 
   const getProductCartQuantity = (productId: number): number => {
-    const cartItem = cartItems.find(item => item.product.id === productId);
+    const cartItem = cartItems.find((item) => item.product.id === productId);
     return cartItem ? cartItem.quantity : 0;
   };
 
   const isProductInCart = (productId: number): boolean => {
-    return cartItems.some(item => item.product.id === productId);
+    return cartItems.some((item) => item.product.id === productId);
   };
 
   const clearCart = () => {
@@ -101,17 +113,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const value: CartContextType = {
     cartItems,
     cartCount,
+    pendingPriceCount,
     addToCart,
     updateCartQuantity,
     removeFromCart,
     getProductCartQuantity,
     isProductInCart,
-    clearCart
+    clearCart,
   };
 
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

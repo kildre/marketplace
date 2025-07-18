@@ -2,9 +2,60 @@ import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 import { FormPersonalInformation } from "./form-personal-information";
 
+// Mock the CartContext to provide cart data for FormCostDetails
+const mockUseCart = vi.fn();
+vi.mock("../../contexts/CartContext", () => ({
+  useCart: () => mockUseCart(),
+}));
+
 describe("FormPersonalInformation", () => {
+  // Mock cart data for testing
+  const mockCartItems = [
+    {
+      product: {
+        id: 1,
+        name: "Test Product 1",
+        price: 100,
+      },
+      quantity: 2,
+    },
+    {
+      product: {
+        id: 2,
+        name: "Test Product 2",
+        price: 50,
+      },
+      quantity: 1,
+    },
+    {
+      product: {
+        id: 3,
+        name: "Test Product 3 (Pending Price)",
+        price: null, // Product with pending price
+      },
+      quantity: 1,
+    },
+    {
+      product: {
+        id: 4,
+        name: "Test Product 4 (Pending Price)",
+        price: null, // Another product with pending price
+      },
+      quantity: 2,
+    },
+  ];
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // Provide default mock values
+    mockUseCart.mockReturnValue({
+      cartItems: mockCartItems,
+      cartCount: 4,
+      pendingPriceCount: 2, // Two products with null prices
+      removeFromCart: vi.fn(),
+      clearCart: vi.fn(),
+      updateCartQuantity: vi.fn(),
+    });
   });
 
   afterEach(() => {
@@ -116,7 +167,7 @@ describe("FormPersonalInformation", () => {
       render(<FormPersonalInformation />);
 
       expect(screen.getByText("PRODUCTS REQUESTED")).toBeInTheDocument();
-      expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByText("4")).toBeInTheDocument();
     });
 
     test("should display applications pending price with warning", () => {
@@ -149,7 +200,7 @@ describe("FormPersonalInformation", () => {
       render(<FormPersonalInformation />);
 
       expect(screen.getByText("Estimated ROM")).toBeInTheDocument();
-      expect(screen.getByText("$13.00")).toBeInTheDocument();
+      expect(screen.getByText("$250")).toBeInTheDocument();
     });
 
     test("should have estimated ROM in correct format", () => {
@@ -158,15 +209,16 @@ describe("FormPersonalInformation", () => {
       const romHeading = screen.getByRole("heading", {
         name: /estimated rom/i,
       });
-      expect(romHeading).toHaveTextContent("Estimated ROM$13.00");
+      expect(romHeading).toHaveTextContent("Estimated ROM$250");
     });
 
     test("should display price in correct currency format", () => {
       render(<FormPersonalInformation />);
 
-      const priceElement = screen.getByText("$13.00");
+      // With our mock cart items: Product 1 ($100 * 2) + Product 2 ($50 * 1) = $250
+      const priceElement = screen.getByText("$250");
       expect(priceElement).toBeInTheDocument();
-      expect(priceElement.textContent).toMatch(/^\$\d+\.\d{2}$/);
+      expect(priceElement.textContent).toMatch(/^\$\d+$/);
     });
   });
 

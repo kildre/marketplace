@@ -251,7 +251,9 @@ export const FormSelectedApplications = (): React.ReactElement => {
                 <p>
                   Cost:{" "}
                   <span>
-                    {formatPrice(quantity * product.price, product.rom)}
+                    {product.price === null
+                      ? formatPrice(quantity * 0, product.rom)
+                      : formatPrice(quantity * product.price, product.rom)}
                   </span>
                 </p>
               </div>
