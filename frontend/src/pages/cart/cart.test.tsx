@@ -79,6 +79,12 @@ describe("Cart", () => {
     beforeEach(() => {
       mockUseCart.mockReturnValue({
         cartCount: 0,
+        cartItems: [],
+        pendingPriceCount: 0,
+        addToCart: vi.fn(),
+        removeFromCart: vi.fn(),
+        clearCart: vi.fn(),
+        updateCartQuantity: vi.fn(),
       });
     });
 
@@ -148,6 +154,22 @@ describe("Cart", () => {
     beforeEach(() => {
       mockUseCart.mockReturnValue({
         cartCount: 2,
+        cartItems: [
+          {
+            product: {
+              id: 1,
+              name: "Test Product 1",
+              price: 100,
+              type: "License Based",
+            },
+            quantity: 2,
+          },
+        ],
+        pendingPriceCount: 0,
+        addToCart: vi.fn(),
+        removeFromCart: vi.fn(),
+        clearCart: vi.fn(),
+        updateCartQuantity: vi.fn(),
       });
     });
 
@@ -197,6 +219,22 @@ describe("Cart", () => {
     test("should handle singular product count", () => {
       mockUseCart.mockReturnValue({
         cartCount: 1,
+        cartItems: [
+          {
+            product: {
+              id: 1,
+              name: "Test Product 1",
+              price: 100,
+              type: "License Based",
+            },
+            quantity: 1,
+          },
+        ],
+        pendingPriceCount: 0,
+        addToCart: vi.fn(),
+        removeFromCart: vi.fn(),
+        clearCart: vi.fn(),
+        updateCartQuantity: vi.fn(),
       });
 
       renderCartWithRouter();

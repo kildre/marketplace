@@ -79,6 +79,10 @@ describe("Helper Functions", () => {
         expect(formatPrice(100, null as any)).toBe("$100");
         expect(formatPrice(100, undefined)).toBe("$100");
       });
+
+      test("should handle null price", () => {
+        expect(formatPrice(null)).toBe("Custom ROM");
+      });
     });
 
     describe("Priority order", () => {

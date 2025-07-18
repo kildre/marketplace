@@ -85,9 +85,17 @@ describe("mock-productData", () => {
       expect(uniqueIds.length).toBe(ids.length);
     });
 
-    test("should have positive prices", () => {
+    test("should have valid prices", () => {
       mockProducts.items.forEach((product) => {
-        expect(product.price).toBeGreaterThan(0);
+        // Price can be null (for ROM products) or non-negative number
+        if (product.price !== null) {
+          expect(typeof product.price).toBe("number");
+          expect(product.price).toBeGreaterThanOrEqual(0);
+        } else {
+          expect(product.price).toBeNull();
+          // Products with null price should have ROM field
+          expect(product.rom).toBeDefined();
+        }
       });
     });
 
@@ -175,7 +183,10 @@ describe("mock-productData", () => {
         expect(typeof product.id).toBe("number");
         expect(typeof product.name).toBe("string");
         expect(typeof product.description).toBe("string");
-        expect(typeof product.price).toBe("number");
+        // Price can be number or null
+        expect(
+          product.price === null || typeof product.price === "number"
+        ).toBe(true);
         expect(typeof product.unit).toBe("number");
         expect(typeof product.inCart).toBe("boolean");
         expect(typeof product.currentlyInCart).toBe("number");

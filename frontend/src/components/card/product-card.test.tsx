@@ -57,7 +57,6 @@ describe("ProductCard", () => {
     currentlyInCart: 5,
   };
 
-  const mockOnAddToCart = vi.fn();
   const mockOnUpdateCartQuantity = vi.fn();
 
   beforeEach(() => {
@@ -84,7 +83,6 @@ describe("ProductCard", () => {
       <ThemeProvider theme={testTheme}>
         <ProductCard
           product={product}
-          onAddToCart={mockOnAddToCart}
           onUpdateCartQuantity={mockOnUpdateCartQuantity}
           {...props}
         />
@@ -351,7 +349,7 @@ describe("ProductCard", () => {
       renderProductCard();
 
       const quantityInput = screen.getByRole("spinbutton");
-      
+
       // First, set quantity to 0 manually
       act(() => {
         fireEvent.change(quantityInput, { target: { value: "0" } });
@@ -397,7 +395,6 @@ describe("ProductCard", () => {
         <ThemeProvider theme={testTheme}>
           <ProductCard
             product={updatedProduct}
-            onAddToCart={mockOnAddToCart}
             onUpdateCartQuantity={mockOnUpdateCartQuantity}
           />
         </ThemeProvider>
@@ -411,7 +408,11 @@ describe("ProductCard", () => {
 
   describe("Optional Props", () => {
     test("should work without onUpdateCartQuantity prop", () => {
-      renderProductCard();
+      render(
+        <ThemeProvider theme={testTheme}>
+          <ProductCard product={mockProduct} />
+        </ThemeProvider>
+      );
 
       const addButton = screen.getByRole("button", {
         name: "Add to Cart Test Product",
@@ -451,7 +452,9 @@ describe("ProductCard", () => {
         "product-title-1"
       );
 
-      const quantityHelp = screen.getByText("Enter quantity (minimum 0, use 0 to remove from cart)");
+      const quantityHelp = screen.getByText(
+        "Enter quantity (minimum 0, use 0 to remove from cart)"
+      );
       expect(quantityHelp).toHaveAttribute("id", "quantity-help-1");
       expect(quantityHelp).toHaveClass("sr-only");
     });
@@ -553,11 +556,12 @@ describe("ProductCard", () => {
         name: "Update Cart Product In Cart",
       });
       expect(updateButton).toHaveTextContent("Update Cart");
-    });    test("should revert to 'Add to Cart' when quantity is changed back to original", () => {
+    });
+    test("should revert to 'Add to Cart' when quantity is changed back to original", () => {
       renderProductCard(mockProductInCart);
 
       const quantityInput = screen.getByRole("spinbutton");
-      
+
       // Change quantity
       act(() => {
         fireEvent.change(quantityInput, { target: { value: "3" } });
@@ -651,7 +655,7 @@ describe("ProductCard", () => {
       renderProductCard(mockProductInCart);
 
       const quantityInput = screen.getByRole("spinbutton");
-      
+
       act(() => {
         fireEvent.change(quantityInput, { target: { value: "3" } });
       });
@@ -667,7 +671,7 @@ describe("ProductCard", () => {
       renderProductCard(mockProductInCart);
 
       const quantityInput = screen.getByRole("spinbutton");
-      
+
       // Change quantity
       act(() => {
         fireEvent.change(quantityInput, { target: { value: "3" } });
