@@ -25,7 +25,9 @@ export const Cart = (): React.ReactElement => {
             </p>
           </div>
           <div className="cart-page__content-right">
-            <FormPersonalInformation />
+            <div className="form-personal-information">
+              <FormPersonalInformation />
+            </div>
           </div>
         </div>
       </div>

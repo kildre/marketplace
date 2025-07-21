@@ -51,6 +51,16 @@ vi.mock(
   })
 );
 
+vi.mock("../../components/form-cost-details/form-cost-details", () => ({
+  FormCostDetails: () => (
+    <div data-testid="form-cost-details">
+      <h4>Pricing Summary</h4>
+      <p>Total: $200.00</p>
+      <p>Estimated ROM: $5K - $10K</p>
+    </div>
+  ),
+}));
+
 // Mock the useCart hook
 const mockUseCart = vi.fn();
 vi.mock("../../contexts/CartContext", () => ({
@@ -148,6 +158,13 @@ describe("Cart", () => {
       const cartForm = screen.queryByTestId("cart-form");
       expect(cartForm).not.toBeInTheDocument();
     });
+
+    test("should not render FormCostDetails when cart is empty", () => {
+      renderCartWithRouter();
+
+      const formCostDetails = screen.queryByTestId("form-cost-details");
+      expect(formCostDetails).not.toBeInTheDocument();
+    });
   });
 
   describe("Cart with Items", () => {
@@ -196,6 +213,16 @@ describe("Cart", () => {
       const formPersonalInfo = screen.getByTestId("form-personal-information");
       expect(formPersonalInfo).toBeInTheDocument();
       expect(screen.getByText("Personal Information")).toBeInTheDocument();
+    });
+
+    test("should render FormCostDetails component", () => {
+      renderCartWithRouter();
+
+      const formCostDetails = screen.getByTestId("form-cost-details");
+      expect(formCostDetails).toBeInTheDocument();
+      // Use more specific text that only appears in FormCostDetails
+      expect(screen.getByText("Total: $200.00")).toBeInTheDocument();
+      expect(screen.getByText("Estimated ROM: $5K - $10K")).toBeInTheDocument();
     });
 
     test("should have proper layout structure with items", () => {
