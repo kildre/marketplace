@@ -1,0 +1,27 @@
+@use "../globals/colors" as *;
+// Form Submit Request Styles
+.form-submit-request {
+  background: $product-card-background;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 1.5rem;
+  margin-top: 1rem;
+
+  &__checkbox {
+    align-items: center;
+    display: flex;
+    flex-wrap: nowrap;
+  }
+
+  .MuiCheckbox-root {
+    padding: 0;
+    height: 24px;
+    margin-right: 0.5rem;
+  }
+
+  p {
+    font-size: 0.8rem;
+    margin: 0;
+  }
+}

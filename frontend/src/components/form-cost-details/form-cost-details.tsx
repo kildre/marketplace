@@ -54,7 +54,7 @@ export const FormCostDetails = (): React.ReactElement => {
       </div>
       <h5>
         Estimated ROM
-        <span>{estimatedRom}</span>
+        <span id="estimatedRom">{estimatedRom}</span>
       </h5>
     </>
   );
