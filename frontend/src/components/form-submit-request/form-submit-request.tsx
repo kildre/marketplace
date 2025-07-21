@@ -35,28 +35,59 @@ export const FormSubmitRequest = (): React.ReactElement => {
 
   // Check if required fields are filled and checkbox is checked
   React.useEffect(() => {
-    if (!checked) {
-      setCanSubmit(false);
-      return;
-    } else if (getValue("organization") === "") {
-      setCanSubmit(false);
-      return;
-    } else if (
-      getValue("organization") === "Other" &&
-      getValue("organizationOther") === ""
-    ) {
-      setCanSubmit(false);
-      return;
-    }
-    setCanSubmit(true);
+    const checkCanSubmit = () => {
+      if (!checked) {
+        setCanSubmit(false);
+        return;
+      }
+
+      const organization = getValue("organization");
+      if (organization === "") {
+        setCanSubmit(false);
+        return;
+      }
+
+      if (organization === "Other" && getValue("organizationOther") === "") {
+        setCanSubmit(false);
+        return;
+      }
+
+      setCanSubmit(true);
+    };
+
+    checkCanSubmit();
+
+    // Add event listeners to form fields to update canSubmit when they change
+    const inputs = document.querySelectorAll(
+      '[name="organization"], [name="organizationOther"]'
+    );
+    inputs.forEach((input) => {
+      input.addEventListener("change", checkCanSubmit);
+      input.addEventListener("input", checkCanSubmit);
+    });
+
+    return () => {
+      inputs.forEach((input) => {
+        input.removeEventListener("change", checkCanSubmit);
+        input.removeEventListener("input", checkCanSubmit);
+      });
+    };
   }, [checked]);
 
-  const handleSubmit = (e: React.MouseEvent) => {
+  const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
 
     const formData = getFormData();
 
     const estimatedRom = document.getElementById("estimatedRom")?.innerHTML;
+
+    // Get Personal Data
+    const personalData = {
+      name: document.getElementById("username")?.textContent || "",
+      email: document.getElementById("email")?.textContent || "",
+      designation: document.getElementById("designation")?.textContent || "",
+      agency: document.getElementById("agency")?.textContent || "",
+    };
 
     // Prepare cart data for output
     const cartData = cartItems.map((item) => ({
@@ -80,6 +111,7 @@ export const FormSubmitRequest = (): React.ReactElement => {
     // Combine form data and cart data
     const submitData = {
       requestId: requestId,
+      personalData: personalData,
       requestDetails: formData,
       cartItems: cartData,
       summary: {
@@ -103,7 +135,7 @@ export const FormSubmitRequest = (): React.ReactElement => {
   };
 
   return (
-    <>
+    <form onSubmit={handleSubmit}>
       <div className="form-submit-request__checkbox">
         <Checkbox
           checked={checked}
@@ -116,7 +148,6 @@ export const FormSubmitRequest = (): React.ReactElement => {
       </div>
       <button
         id="submit-request-button"
-        onClick={handleSubmit}
         type="submit"
         disabled={!canSubmit}
         className={
@@ -127,6 +158,6 @@ export const FormSubmitRequest = (): React.ReactElement => {
       >
         Submit Request
       </button>
-    </>
+    </form>
   );
 };
