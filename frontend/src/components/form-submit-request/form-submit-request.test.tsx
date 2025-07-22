@@ -10,6 +10,10 @@ import "@testing-library/jest-dom";
 import { vi } from "vitest";
 import { FormSubmitRequest } from "./form-submit-request";
 import { CartProvider } from "../../contexts/CartContext";
+import {
+  OrganizationProvider,
+  useOrganization,
+} from "../../contexts/OrganizationContext";
 import { Product } from "../../types/products";
 
 // Mock console.log to test output
@@ -22,28 +26,42 @@ const FormSubmitRequestWithProvider: React.FC<{
   _cartItems?: Product[];
 }> = ({ _cartItems = [] }) => {
   return (
-    <CartProvider>
-      <div>
-        {/* Mock form fields that FormSubmitRequest will query */}
-        <select name="organization" defaultValue="">
-          <option value="">Select Organization</option>
-          <option value="Organization A">Organization A</option>
-          <option value="Organization B">Organization B</option>
-          <option value="Other">Other</option>
-        </select>
-        <input name="organizationOther" defaultValue="" />
-        <input name="pocName" defaultValue="" />
-        <input name="pocPhone" defaultValue="" />
-        <input name="pocEmail" defaultValue="" />
-        <textarea name="useCaseDescription" defaultValue="" />
-        <div id="estimatedRom">$15,000</div>
-        <FormSubmitRequest />
-      </div>
-    </CartProvider>
+    <OrganizationProvider>
+      <CartProvider>
+        <div>
+          {/* Mock form fields that FormSubmitRequest will query */}
+          <input name="pocName" defaultValue="" />
+          <input name="pocPhone" defaultValue="" />
+          <input name="pocEmail" defaultValue="" />
+          <textarea name="useCaseDescription" defaultValue="" />
+          <div id="estimatedRom">$15,000</div>
+          <FormSubmitRequest />
+        </div>
+      </CartProvider>
+    </OrganizationProvider>
   );
 };
 
 // Helper component with pre-filled form data and personal data elements
+const OrganizationTestWrapper: React.FC<{
+  organization?: string;
+  organizationOther?: string;
+  children: React.ReactNode;
+}> = ({
+  organization = "Organization A",
+  organizationOther = "",
+  children,
+}) => {
+  const { setOrganization, setOrganizationOther } = useOrganization();
+
+  React.useEffect(() => {
+    setOrganization(organization);
+    setOrganizationOther(organizationOther);
+  }, [organization, organizationOther, setOrganization, setOrganizationOther]);
+
+  return <>{children}</>;
+};
+
 const FormSubmitRequestWithData: React.FC<{
   _cartItems?: Product[];
   formData?: {
@@ -62,50 +80,42 @@ const FormSubmitRequestWithData: React.FC<{
   };
 }> = ({ _cartItems = [], formData = {}, personalData = {} }) => {
   return (
-    <CartProvider>
-      <div>
-        {/* Personal data elements */}
-        <div id="username">{personalData.username || ""}</div>
-        <div id="email">{personalData.email || ""}</div>
-        <div id="designation">{personalData.designation || ""}</div>
-        <div id="agency">{personalData.agency || ""}</div>
-
-        {/* Form elements */}
-        <select
-          name="organization"
-          defaultValue={
-            formData.organization !== undefined
-              ? formData.organization
-              : "Organization A"
-          }
+    <OrganizationProvider>
+      <CartProvider>
+        <OrganizationTestWrapper
+          organization={formData.organization}
+          organizationOther={formData.organizationOther}
         >
-          <option value="">Select Organization</option>
-          <option value="Organization A">Organization A</option>
-          <option value="Organization B">Organization B</option>
-          <option value="Other">Other</option>
-        </select>
-        <input
-          name="organizationOther"
-          defaultValue={
-            formData.organizationOther !== undefined
-              ? formData.organizationOther
-              : ""
-          }
-        />
-        <input name="pocName" defaultValue={formData.pocName || "John Doe"} />
-        <input name="pocPhone" defaultValue={formData.pocPhone || "555-1234"} />
-        <input
-          name="pocEmail"
-          defaultValue={formData.pocEmail || "john@example.com"}
-        />
-        <textarea
-          name="useCaseDescription"
-          defaultValue={formData.useCaseDescription || "Test use case"}
-        />
-        <div id="estimatedRom">$15,000</div>
-        <FormSubmitRequest />
-      </div>
-    </CartProvider>
+          <div>
+            {/* Personal data elements */}
+            <div id="username">{personalData.username || ""}</div>
+            <div id="email">{personalData.email || ""}</div>
+            <div id="designation">{personalData.designation || ""}</div>
+            <div id="agency">{personalData.agency || ""}</div>
+
+            {/* Form elements */}
+            <input
+              name="pocName"
+              defaultValue={formData.pocName || "John Doe"}
+            />
+            <input
+              name="pocPhone"
+              defaultValue={formData.pocPhone || "555-1234"}
+            />
+            <input
+              name="pocEmail"
+              defaultValue={formData.pocEmail || "john@example.com"}
+            />
+            <textarea
+              name="useCaseDescription"
+              defaultValue={formData.useCaseDescription || "Test use case"}
+            />
+            <div id="estimatedRom">$15,000</div>
+            <FormSubmitRequest />
+          </div>
+        </OrganizationTestWrapper>
+      </CartProvider>
+    </OrganizationProvider>
   );
 };
 
@@ -876,6 +886,107 @@ describe("FormSubmitRequest", () => {
       // Disable by clearing organizationOther
       fireEvent.change(organizationOtherInput, { target: { value: "" } });
       await waitFor(() => expect(submitButton).toBeDisabled());
+    });
+  });
+
+  describe("Order Independence Tests", () => {
+    it("enables button when checkbox is checked first, then form fields are filled", async () => {
+      render(<FormSubmitRequestWithData formData={{ organization: "" }} />);
+
+      const checkbox = screen.getByRole("checkbox");
+      const organizationSelect = screen.getByRole("combobox");
+      const submitButton = screen.getByRole("button", {
+        name: "Submit Request",
+      });
+
+      // Check checkbox first
+      fireEvent.click(checkbox);
+
+      // Should be disabled because organization is empty
+      await waitFor(() => expect(submitButton).toBeDisabled());
+
+      // Then fill organization field
+      fireEvent.change(organizationSelect, {
+        target: { value: "Organization A" },
+      });
+
+      // Should now be enabled
+      await waitFor(() => expect(submitButton).toBeEnabled());
+    });
+
+    it("enables button when form fields are filled first, then checkbox is checked", async () => {
+      render(<FormSubmitRequestWithData formData={{ organization: "" }} />);
+
+      const checkbox = screen.getByRole("checkbox");
+      const organizationSelect = screen.getByRole("combobox");
+      const submitButton = screen.getByRole("button", {
+        name: "Submit Request",
+      });
+
+      // Fill organization field first
+      fireEvent.change(organizationSelect, {
+        target: { value: "Organization A" },
+      });
+
+      // Should still be disabled because checkbox is unchecked
+      await waitFor(() => expect(submitButton).toBeDisabled());
+
+      // Then check checkbox
+      fireEvent.click(checkbox);
+
+      // Should now be enabled
+      await waitFor(() => expect(submitButton).toBeEnabled());
+    });
+
+    it("handles 'Other' organization correctly regardless of order", async () => {
+      render(
+        <FormSubmitRequestWithData
+          formData={{ organization: "", organizationOther: "" }}
+        />
+      );
+
+      const checkbox = screen.getByRole("checkbox");
+      const organizationSelect = screen.getByRole("combobox");
+      const organizationOtherInput = screen.getByDisplayValue("");
+      const submitButton = screen.getByRole("button", {
+        name: "Submit Request",
+      });
+
+      // Scenario 1: Checkbox first
+      fireEvent.click(checkbox);
+      await waitFor(() => expect(submitButton).toBeDisabled());
+
+      fireEvent.change(organizationSelect, {
+        target: { value: "Other" },
+      });
+      await waitFor(() => expect(submitButton).toBeDisabled());
+
+      fireEvent.change(organizationOtherInput, {
+        target: { value: "Custom Org" },
+      });
+      await waitFor(() => expect(submitButton).toBeEnabled());
+
+      // Reset
+      fireEvent.click(checkbox); // Uncheck
+      fireEvent.change(organizationSelect, {
+        target: { value: "" },
+      });
+      fireEvent.change(organizationOtherInput, {
+        target: { value: "" },
+      });
+      await waitFor(() => expect(submitButton).toBeDisabled());
+
+      // Scenario 2: Form fields first
+      fireEvent.change(organizationSelect, {
+        target: { value: "Other" },
+      });
+      fireEvent.change(organizationOtherInput, {
+        target: { value: "Custom Org" },
+      });
+      await waitFor(() => expect(submitButton).toBeDisabled()); // Still disabled because checkbox unchecked
+
+      fireEvent.click(checkbox); // Check
+      await waitFor(() => expect(submitButton).toBeEnabled());
     });
   });
 });

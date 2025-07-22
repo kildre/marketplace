@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { PageTitle } from "@/components/page-title/page-title";
 import { useCart } from "../../contexts/CartContext";
+import { OrganizationProvider } from "../../contexts/OrganizationContext";
 import { CartForm } from "@/components/cart-form/cart-form";
 import { FormPersonalInformation } from "@/components/form-personal-information/form-personal-information";
 import { FormSelectedApplications } from "@/components/form-selected-applications/form-selected-applications";
@@ -35,27 +36,29 @@ export const Cart = (): React.ReactElement => {
     );
   } else {
     return (
-      <div className="cart-page marketplace-content">
-        <Link to="/" className="cart-form__breadcrumb">
-          Return to Catalog
-        </Link>
-        <PageTitle title="Cart" />
-        <div className="cart-page__content-wrapper">
-          <div className="cart-page__content-left">
-            <CartForm />
-            <FormSelectedApplications />
-          </div>
-          <div className="cart-page__content-right">
-            <div className="form-personal-information">
-              <FormPersonalInformation />
-              <FormCostDetails />
+      <OrganizationProvider>
+        <div className="cart-page marketplace-content">
+          <Link to="/" className="cart-form__breadcrumb">
+            Return to Catalog
+          </Link>
+          <PageTitle title="Cart" />
+          <div className="cart-page__content-wrapper">
+            <div className="cart-page__content-left">
+              <CartForm />
+              <FormSelectedApplications />
             </div>
-            <div className="form-submit-request">
-              <FormSubmitRequest />
+            <div className="cart-page__content-right">
+              <div className="form-personal-information">
+                <FormPersonalInformation />
+                <FormCostDetails />
+              </div>
+              <div className="form-submit-request">
+                <FormSubmitRequest />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </OrganizationProvider>
     );
   }
 };

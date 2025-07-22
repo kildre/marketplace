@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { FormRequestDetails } from "./form-request-details";
+import { OrganizationProvider } from "../../contexts/OrganizationContext";
 
 // Create a test theme for Material-UI components
 const testTheme = createTheme({
@@ -16,8 +17,6 @@ const testTheme = createTheme({
 });
 
 interface FormValues {
-  organization: string;
-  organizationOther: string;
   pocName?: string;
   pocPhone?: string;
   pocEmail?: string;
@@ -29,8 +28,6 @@ describe("FormRequestDetails", () => {
   const mockHandleChange = vi.fn();
 
   const defaultFormValues: FormValues = {
-    organization: "",
-    organizationOther: "",
     pocName: "",
     pocPhone: "",
     pocEmail: "",
@@ -41,12 +38,14 @@ describe("FormRequestDetails", () => {
     formValues: FormValues = defaultFormValues
   ) => {
     return render(
-      <ThemeProvider theme={testTheme}>
-        <FormRequestDetails
-          formValues={formValues}
-          handleChange={mockHandleChange}
-        />
-      </ThemeProvider>
+      <OrganizationProvider>
+        <ThemeProvider theme={testTheme}>
+          <FormRequestDetails
+            formValues={formValues}
+            handleChange={mockHandleChange}
+          />
+        </ThemeProvider>
+      </OrganizationProvider>
     );
   };
 

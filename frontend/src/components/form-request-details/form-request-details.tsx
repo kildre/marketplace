@@ -7,12 +7,11 @@ import TextField from "@mui/material/TextField";
 import Alert from "@mui/material/Alert";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { organizationOptions } from "../../data/organizationOptionsData";
+import { useOrganization } from "../../contexts/OrganizationContext";
 
 interface FormValues {
-  organization: string;
-  organizationOther: string;
   pocName?: string;
   pocPhone?: string;
   pocEmail?: string;
@@ -32,21 +31,41 @@ export const FormRequestDetails = ({
   formValues,
   handleChange,
 }: FormRequestDetailsProps): React.ReactElement => {
+  const {
+    organization,
+    organizationOther,
+    setOrganization,
+    setOrganizationOther,
+  } = useOrganization();
+  const handleOrganizationChange = (event: SelectChangeEvent<string>) => {
+    const value = event.target.value as string;
+    setOrganization(value);
+    // Reset organizationOther when switching away from "Other"
+    if (value !== "Other") {
+      setOrganizationOther("");
+    }
+  };
+
+  const handleOrganizationOtherChange = (
+    e: React.ChangeEvent<{ value: string }>
+  ) => {
+    setOrganizationOther(e.target.value);
+  };
+
   return (
     <div className="form-request-details__container">
       {/* Display warning if organization is not selected */}
-      {formValues.organization === "" && (
+      {organization === "" && (
         <Alert severity="warning">
           Please select an organization that this request is on behalf of.
         </Alert>
       )}
       {/* Display warning if "Other" is selected but no organization input */}
-      {formValues.organization === "Other" &&
-        formValues.organizationOther === "" && (
-          <Alert severity="warning">
-            Please specify the organization you are requesting on behalf of.
-          </Alert>
-        )}
+      {organization === "Other" && organizationOther === "" && (
+        <Alert severity="warning">
+          Please specify the organization you are requesting on behalf of.
+        </Alert>
+      )}
       <Accordion defaultExpanded slotProps={{ heading: { component: "h2" } }}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -70,8 +89,8 @@ export const FormRequestDetails = ({
               id="organization-select"
               name="organization"
               size="small"
-              value={formValues.organization}
-              onChange={handleChange}
+              value={organization}
+              onChange={handleOrganizationChange}
               renderValue={(selected) => {
                 if (selected.length === 0) {
                   return <em>- Select -</em>;
@@ -86,7 +105,7 @@ export const FormRequestDetails = ({
               ))}
             </Select>
           </FormControl>
-          {formValues.organization === "Other" && (
+          {organization === "Other" && (
             <>
               <label htmlFor="organization-other">
                 Please specify the organization you are requesting on behalf of.
@@ -98,8 +117,8 @@ export const FormRequestDetails = ({
                 fullWidth
                 size="small"
                 className="form-request-details__organization-other"
-                value={formValues.organizationOther}
-                onChange={handleChange}
+                value={organizationOther}
+                onChange={handleOrganizationOtherChange}
               />
             </>
           )}

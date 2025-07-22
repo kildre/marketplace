@@ -2,8 +2,6 @@ import React from "react";
 import { FormRequestDetails } from "../form-request-details/form-request-details";
 
 interface FormValues {
-  organization: string;
-  organizationOther: string;
   pocName: string;
   pocPhone: string;
   pocEmail: string;
@@ -11,10 +9,8 @@ interface FormValues {
 }
 
 export const CartForm = (): React.ReactElement => {
-  // State to hold the form values
+  // State to hold the form values (excluding organization which is now in context)
   const [formValues, setFormValues] = React.useState<FormValues>({
-    organization: "",
-    organizationOther: "",
     pocName: "",
     pocPhone: "",
     pocEmail: "",
@@ -32,11 +28,6 @@ export const CartForm = (): React.ReactElement => {
 
     if (name) {
       setFormValues((prevData) => ({ ...prevData, [name]: value }));
-    }
-
-    if (name === "organization" && value !== "Other") {
-      // Reset organizationOther if a different organization is selected
-      setFormValues((prevData) => ({ ...prevData, organizationOther: "" }));
     }
   };
 

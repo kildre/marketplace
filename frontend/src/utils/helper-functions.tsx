@@ -17,3 +17,8 @@ export const getIconPath = (type: string) => {
       return "/assets/icons/icon_user-tool.png";
   }
 };
+
+export const getValue = (name: string): string => {
+  const element = document.querySelector(`[name="${name}"]`);
+  return (element as { value?: string })?.value || "";
+};

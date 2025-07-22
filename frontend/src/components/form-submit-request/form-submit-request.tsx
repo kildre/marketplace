@@ -1,6 +1,8 @@
 import React from "react";
 import Checkbox from "@mui/material/Checkbox";
 import { useCart } from "../../contexts/CartContext";
+import { useOrganization } from "../../contexts/OrganizationContext";
+import { getValue } from "../../utils/helper-functions";
 
 interface FormData {
   organization: string;
@@ -15,64 +17,18 @@ export const FormSubmitRequest = (): React.ReactElement => {
   const [checked, setChecked] = React.useState(false);
   const [canSubmit, setCanSubmit] = React.useState(false);
   const { cartItems } = useCart();
-
-  // Function to get form values directly from form elements
-  const getValue = (name: string): string => {
-    const element = document.querySelector(`[name="${name}"]`);
-    return (element as { value?: string })?.value || "";
-  };
+  const { organization, organizationOther } = useOrganization();
 
   const getFormData = (): FormData => {
     return {
-      organization: getValue("organization"),
-      organizationOther: getValue("organizationOther"),
+      organization,
+      organizationOther,
       pocName: getValue("pocName"),
       pocPhone: getValue("pocPhone"),
       pocEmail: getValue("pocEmail"),
       useCaseDescription: getValue("useCaseDescription"),
     };
   };
-
-  // Check if required fields are filled and checkbox is checked
-  React.useEffect(() => {
-    const checkCanSubmit = () => {
-      if (!checked) {
-        setCanSubmit(false);
-        return;
-      }
-
-      const organization = getValue("organization");
-      if (organization === "") {
-        setCanSubmit(false);
-        return;
-      }
-
-      if (organization === "Other" && getValue("organizationOther") === "") {
-        setCanSubmit(false);
-        return;
-      }
-
-      setCanSubmit(true);
-    };
-
-    checkCanSubmit();
-
-    // Add event listeners to form fields to update canSubmit when they change
-    const inputs = document.querySelectorAll(
-      '[name="organization"], [name="organizationOther"]'
-    );
-    inputs.forEach((input) => {
-      input.addEventListener("change", checkCanSubmit);
-      input.addEventListener("input", checkCanSubmit);
-    });
-
-    return () => {
-      inputs.forEach((input) => {
-        input.removeEventListener("change", checkCanSubmit);
-        input.removeEventListener("input", checkCanSubmit);
-      });
-    };
-  }, [checked]);
 
   const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
@@ -133,6 +89,32 @@ export const FormSubmitRequest = (): React.ReactElement => {
     // eslint-disable-next-line no-console
     console.log("=============================");
   };
+
+  React.useEffect(() => {
+    const checkCanSubmit = () => {
+      if (!checked) {
+        setCanSubmit(false);
+        return;
+      }
+
+      // Check if organization is selected
+      if (organization === "") {
+        setCanSubmit(false);
+        return;
+      }
+
+      // If "Other" is selected, check if organizationOther is filled
+      if (organization === "Other" && organizationOther === "") {
+        setCanSubmit(false);
+        return;
+      }
+
+      // If all checks pass, enable submit
+      setCanSubmit(true);
+    };
+
+    checkCanSubmit();
+  }, [checked, organization, organizationOther]);
 
   return (
     <form onSubmit={handleSubmit}>
