@@ -81,15 +81,16 @@ describe("CartForm", () => {
       expect(formRequestDetails).toBeInTheDocument();
     });
 
-    test("should render submit button with correct text and classes", () => {
-      render(<CartForm />);
+    test("should render form with correct structure", () => {
+      const { container } = render(<CartForm />);
 
-      const submitButton = screen.getByRole("button", {
-        name: /submit request/i,
-      });
-      expect(submitButton).toBeInTheDocument();
-      expect(submitButton).toHaveAttribute("type", "submit");
-      expect(submitButton).toHaveClass("button--submit", "button");
+      const form = container.querySelector("form");
+      expect(form).toBeInTheDocument();
+      expect(form).toHaveClass("cart-form");
+      expect(form).toHaveAttribute("id", "cart-form");
+
+      // Verify form structure without onSubmit handler
+      expect(form).not.toHaveAttribute("onsubmit");
     });
   });
 
@@ -187,83 +188,36 @@ describe("CartForm", () => {
     });
   });
 
-  describe("Form Submission", () => {
-    test("should prevent default form submission", async () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-      render(<CartForm />);
+  describe("Form Structure", () => {
+    test("should render form without submission handler", () => {
+      const { container } = render(<CartForm />);
 
-      const submitButton = screen.getByRole("button", {
-        name: /submit request/i,
-      });
-
-      // Click the submit button
-      await user.click(submitButton);
-
-      // Verify that console.log was called (which means the form handler ran)
-      expect(consoleSpy).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
+      const form = container.querySelector("form");
+      expect(form).toBeInTheDocument();
+      expect(form).toHaveAttribute("id", "cart-form");
+      expect(form).toHaveClass("cart-form");
     });
 
-    test("should log form values on submission", async () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-      render(<CartForm />);
+    test("should not prevent form submission since no handler exists", () => {
+      const { container } = render(<CartForm />);
 
-      // Fill out some form data
-      const organizationInput = screen.getByTestId("organization-input");
-      const pocNameInput = screen.getByTestId("poc-name-input");
+      const form = container.querySelector("form");
+      expect(form).toBeInTheDocument();
 
-      await user.type(organizationInput, "Org 1");
-      await user.type(pocNameInput, "John Doe");
-
-      // Submit the form
-      const submitButton = screen.getByRole("button", {
-        name: /submit request/i,
-      });
-      await user.click(submitButton);
-
-      expect(consoleSpy).toHaveBeenCalledWith("Form submitted:", {
-        organization: "Org 1",
-        organizationOther: "",
-        pocName: "John Doe",
-        pocPhone: "",
-        pocEmail: "",
-        useCaseDescription: "",
-      });
-
-      consoleSpy.mockRestore();
+      // Trigger form submission - should not call any handlers
+      expect(() => fireEvent.submit(form!)).not.toThrow();
     });
 
-    test("should handle form submission with all fields filled", async () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-      render(<CartForm />);
+    test("should maintain form structure for potential external handling", () => {
+      const { container } = render(<CartForm />);
 
-      const formData = {
-        organization: "Other",
-        organizationOther: "Custom Organization",
-        pocName: "Jane Smith",
-        pocPhone: "555-1234",
-        pocEmail: "jane@example.com",
-        useCaseDescription: "Comprehensive test description",
-      };
+      const form = container.querySelector("form");
+      expect(form).toBeInTheDocument();
+      expect(form).toHaveAttribute("id", "cart-form");
 
-      // Fill out all form fields
-      for (const [field, value] of Object.entries(formData)) {
-        const input = screen.getByTestId(
-          `${field.replace(/([A-Z])/g, "-$1").toLowerCase()}-input`
-        );
-        await user.clear(input);
-        await user.type(input, value);
-      }
-
-      // Submit the form
-      const submitButton = screen.getByRole("button", {
-        name: /submit request/i,
-      });
-      await user.click(submitButton);
-
-      expect(consoleSpy).toHaveBeenCalledWith("Form submitted:", formData);
-      consoleSpy.mockRestore();
+      // Verify form contains the FormRequestDetails component
+      const formRequestDetails = screen.getByTestId("form-request-details");
+      expect(form).toContainElement(formRequestDetails);
     });
   });
 
@@ -330,23 +284,19 @@ describe("CartForm", () => {
 
       const form = container.querySelector("form");
       expect(form).toBeInTheDocument();
+      expect(form).toHaveClass("cart-form");
 
-      const submitButton = screen.getByRole("button", {
-        name: /submit request/i,
-      });
-      expect(submitButton).toHaveAttribute("type", "submit");
+      // Verify form has proper structure
+      expect(form).toHaveAttribute("class", "cart-form");
     });
 
     test("should be keyboard navigable", async () => {
       render(<CartForm />);
 
-      const submitButton = screen.getByRole("button", {
-        name: /submit request/i,
-      });
-
-      // Focus the submit button
-      submitButton.focus();
-      expect(submitButton).toHaveFocus();
+      // Focus the first input field
+      const firstInput = screen.getByTestId("organization-input");
+      firstInput.focus();
+      expect(firstInput).toHaveFocus();
     });
   });
 

@@ -40,25 +40,13 @@ export const CartForm = (): React.ReactElement => {
     }
   };
 
-  // Handle form submission
-  // @TODO: change from console logging to actual form submission logic
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // eslint-disable-next-line no-console
-    console.log("Form submitted:", formValues);
-    // Add logic to send data to a backend or perform other actions
-  };
-
   return (
     <div className="cart-form__container">
-      <form onSubmit={handleSubmit} className="cart-form">
+      <form id="cart-form" className="cart-form">
         <FormRequestDetails
           formValues={formValues}
           handleChange={handleChange}
         />
-        <button className="button--submit button" type="submit">
-          Submit Request
-        </button>
       </form>
     </div>
   );

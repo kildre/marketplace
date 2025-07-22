@@ -14,7 +14,13 @@
   &--submit {
     background: $product-card-primary;
     border-radius: 8px;
-    margin: 2rem 0;
+    margin: 1rem 0 0;
+    width: 100%;
+  }
+
+  &--disabled {
+    background-color: $disabled-color;
+    cursor: not-allowed;
   }
 }
 

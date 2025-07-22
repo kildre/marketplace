@@ -5,6 +5,7 @@ import { CartForm } from "@/components/cart-form/cart-form";
 import { FormPersonalInformation } from "@/components/form-personal-information/form-personal-information";
 import { FormSelectedApplications } from "@/components/form-selected-applications/form-selected-applications";
 import { FormCostDetails } from "@/components/form-cost-details/form-cost-details";
+import { FormSubmitRequest } from "@/components/form-submit-request/form-submit-request";
 
 export const Cart = (): React.ReactElement => {
   const { cartCount } = useCart();
@@ -25,7 +26,9 @@ export const Cart = (): React.ReactElement => {
             </p>
           </div>
           <div className="cart-page__content-right">
-            <FormPersonalInformation />
+            <div className="form-personal-information">
+              <FormPersonalInformation />
+            </div>
           </div>
         </div>
       </div>
@@ -46,6 +49,9 @@ export const Cart = (): React.ReactElement => {
             <div className="form-personal-information">
               <FormPersonalInformation />
               <FormCostDetails />
+            </div>
+            <div className="form-submit-request">
+              <FormSubmitRequest />
             </div>
           </div>
         </div>
