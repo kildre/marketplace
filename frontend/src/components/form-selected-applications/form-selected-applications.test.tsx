@@ -697,14 +697,14 @@ describe("FormSelectedApplications", () => {
     test("should have proper heading hierarchy", () => {
       renderFormSelectedApplications();
 
-      const productHeadings = screen.getAllByRole("heading", { level: 3 });
+      const productHeadings = screen.getAllByRole("heading", { level: 4 });
       expect(productHeadings.length).toBeGreaterThanOrEqual(2);
 
       expect(
-        screen.getByRole("heading", { level: 3, name: "Test Product 1" })
+        screen.getByRole("heading", { level: 4, name: "Test Product 1" })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { level: 3, name: "Test Product 2" })
+        screen.getByRole("heading", { level: 4, name: "Test Product 2" })
       ).toBeInTheDocument();
     });
 

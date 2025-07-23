@@ -43,7 +43,7 @@ export const FormCostDetails = (): React.ReactElement => {
   return (
     <>
       <div className="form-personal-information__section">
-        <h4>Cost Details</h4>
+        <h5>Cost Details</h5>
         <p>
           PRODUCTS REQUESTED<span>{cartCount}</span>
         </p>
@@ -52,10 +52,10 @@ export const FormCostDetails = (): React.ReactElement => {
           <span className="cost-warning">{pendingPriceCount}</span>
         </p>
       </div>
-      <h5>
+      <h6>
         Estimated ROM
         <span id="estimatedRom">{estimatedRom}</span>
-      </h5>
+      </h6>
     </>
   );
 };

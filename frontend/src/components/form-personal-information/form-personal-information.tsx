@@ -1,7 +1,7 @@
 export const FormPersonalInformation = (): React.ReactElement => {
   return (
     <div className="form-personal-information__section">
-      <h4>Personal Information</h4>
+      <h5>Personal Information</h5>
       <p>
         NAME:<span id="username">Joe Snuffy</span>
       </p>

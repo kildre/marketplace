@@ -1,39 +1,55 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import Checkbox from "@mui/material/Checkbox";
 import { useCart } from "../../contexts/CartContext";
-import { useOrganization } from "../../contexts/OrganizationContext";
-import { getValue } from "../../utils/helper-functions";
-
-interface FormData {
-  organization: string;
-  organizationOther: string;
-  pocName: string;
-  pocPhone: string;
-  pocEmail: string;
-  useCaseDescription: string;
-}
+import {
+  useFormData,
+  useSubmitRequest,
+  SubmissionData,
+} from "../../hooks/useFormQueries";
 
 export const FormSubmitRequest = (): React.ReactElement => {
   const [checked, setChecked] = React.useState(false);
-  const [canSubmit, setCanSubmit] = React.useState(false);
-  const { cartItems } = useCart();
-  const { organization, organizationOther } = useOrganization();
+  const navigate = useNavigate();
+  const { cartItems, clearCart } = useCart();
+  const formData = useFormData();
+  const submitMutation = useSubmitRequest();
 
-  const getFormData = (): FormData => {
-    return {
-      organization,
-      organizationOther,
-      pocName: getValue("pocName"),
-      pocPhone: getValue("pocPhone"),
-      pocEmail: getValue("pocEmail"),
-      useCaseDescription: getValue("useCaseDescription"),
-    };
-  };
+  // Check if form is valid for submission
+  const isFormValid = React.useMemo(() => {
+    // If checkbox is not checked, form is invalid
+    if (!checked) {
+      return false;
+    }
+
+    // If organization is not selected, form is invalid
+    if (formData.organization === "") {
+      return false;
+    }
+
+    // If organization is "Other" but organizationOther is not filled, form is invalid
+    if (
+      formData.organization === "Other" &&
+      formData.organizationOther === ""
+    ) {
+      return false;
+    }
+
+    return true;
+  }, [checked, formData.organization, formData.organizationOther]);
+
+  // Navigate to requests page on successful submission
+  React.useEffect(() => {
+    if (submitMutation.isSuccess) {
+      clearCart(); // Clear the cart items
+      navigate("/requests"); // Then redirect to requests page
+    }
+  }, [submitMutation.isSuccess, navigate, clearCart]);
 
   const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
 
-    const formData = getFormData();
+    if (!isFormValid) return;
 
     const estimatedRom = document.getElementById("estimatedRom")?.innerHTML;
 
@@ -47,14 +63,16 @@ export const FormSubmitRequest = (): React.ReactElement => {
 
     // Prepare cart data for output
     const cartData = cartItems.map((item) => ({
-      productId: item.product.id,
-      productName: item.product.name,
-      productType: item.product.type,
+      product: {
+        id: item.product.id,
+        name: item.product.name,
+        type: item.product.type,
+        price: item.product.price,
+        description: item.product.description,
+        unit: item.product.unit.toString(),
+        rom: item.product.rom || "",
+      },
       quantity: item.quantity,
-      price: item.product.price,
-      description: item.product.description,
-      unit: item.product.unit,
-      rom: item.product.rom,
     }));
 
     // Function to generate a unique request ID
@@ -65,7 +83,7 @@ export const FormSubmitRequest = (): React.ReactElement => {
     const requestId = generateRequestId();
 
     // Combine form data and cart data
-    const submitData = {
+    const submitData: SubmissionData = {
       requestId: requestId,
       personalData: personalData,
       requestDetails: formData,
@@ -81,40 +99,8 @@ export const FormSubmitRequest = (): React.ReactElement => {
       submittedAt: new Date().toISOString(),
     };
 
-    // Output the combined JSON to console
-    // eslint-disable-next-line no-console
-    console.log("=== FORM SUBMISSION DATA ===");
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(submitData, null, 2));
-    // eslint-disable-next-line no-console
-    console.log("=============================");
+    submitMutation.mutate(submitData);
   };
-
-  React.useEffect(() => {
-    const checkCanSubmit = () => {
-      if (!checked) {
-        setCanSubmit(false);
-        return;
-      }
-
-      // Check if organization is selected
-      if (organization === "") {
-        setCanSubmit(false);
-        return;
-      }
-
-      // If "Other" is selected, check if organizationOther is filled
-      if (organization === "Other" && organizationOther === "") {
-        setCanSubmit(false);
-        return;
-      }
-
-      // If all checks pass, enable submit
-      setCanSubmit(true);
-    };
-
-    checkCanSubmit();
-  }, [checked, organization, organizationOther]);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -131,15 +117,20 @@ export const FormSubmitRequest = (): React.ReactElement => {
       <button
         id="submit-request-button"
         type="submit"
-        disabled={!canSubmit}
+        disabled={!isFormValid || submitMutation.isPending}
         className={
-          canSubmit
+          isFormValid && !submitMutation.isPending
             ? "button--submit button"
             : "button--submit button button--disabled"
         }
       >
-        Submit Request
+        {submitMutation.isPending ? "Submitting..." : "Submit Request"}
       </button>
+      {submitMutation.isError && (
+        <div className="error-message">
+          <p>Error submitting request. Please try again.</p>
+        </div>
+      )}
     </form>
   );
 };

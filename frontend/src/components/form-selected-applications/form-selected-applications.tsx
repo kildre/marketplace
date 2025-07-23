@@ -155,7 +155,7 @@ export const FormSelectedApplications = (): React.ReactElement => {
                 alt={`${product.type} icon`}
               />
               <div className="cart-item-card__details">
-                <h3>{product.name}</h3>
+                <h4>{product.name}</h4>
                 <p>
                   Description: <span>{product.description}</span>
                 </p>

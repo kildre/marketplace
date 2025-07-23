@@ -9,48 +9,52 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { organizationOptions } from "../../data/organizationOptionsData";
-import { useOrganization } from "../../contexts/OrganizationContext";
+import {
+  useOrganizationForm,
+  useRequestDetailsForm,
+} from "../../hooks/useFormQueries";
 
-interface FormValues {
-  pocName?: string;
-  pocPhone?: string;
-  pocEmail?: string;
-  useCaseDescription?: string;
-}
+export const FormRequestDetails = (): React.ReactElement => {
+  const { organization, organizationOther, updateOrganization } =
+    useOrganizationForm();
 
-interface FormRequestDetailsProps {
-  formValues: FormValues;
-  handleChange: (
-    e:
-      | React.ChangeEvent<{ name?: string; value: unknown }>
-      | { target: { name?: string; value: unknown } }
-  ) => void;
-}
-
-export const FormRequestDetails = ({
-  formValues,
-  handleChange,
-}: FormRequestDetailsProps): React.ReactElement => {
   const {
-    organization,
-    organizationOther,
-    setOrganization,
-    setOrganizationOther,
-  } = useOrganization();
+    pocName,
+    pocPhone,
+    pocEmail,
+    useCaseDescription,
+    updateRequestDetails,
+  } = useRequestDetailsForm();
+
   const handleOrganizationChange = (event: SelectChangeEvent<string>) => {
     const value = event.target.value as string;
-    setOrganization(value);
-    // Reset organizationOther when switching away from "Other"
+
+    // Update organization and reset organizationOther if needed in a single call
+    const updateData: Partial<{
+      organization: string;
+      organizationOther: string;
+    }> = {
+      organization: value,
+    };
+
     if (value !== "Other") {
-      setOrganizationOther("");
+      updateData.organizationOther = "";
     }
+
+    updateOrganization(updateData);
   };
 
   const handleOrganizationOtherChange = (
     e: React.ChangeEvent<{ value: string }>
   ) => {
-    setOrganizationOther(e.target.value);
+    updateOrganization({ organizationOther: e.target.value });
   };
+
+  const handleFieldChange =
+    (fieldName: string) => (e: React.ChangeEvent<{ value: string }>) => {
+      const update: Record<string, string> = { [fieldName]: e.target.value };
+      updateRequestDetails(update);
+    };
 
   return (
     <div className="form-request-details__container">
@@ -75,22 +79,21 @@ export const FormRequestDetails = ({
           <span>Request Details</span>
         </AccordionSummary>
         <AccordionDetails className="form-request-details__accordion-details">
-          <FormControl
-            required
-            fullWidth
-            className="form-request-details__organization"
-          >
+          <FormControl fullWidth className="form-request-details__organization">
             <label id="organization-label">
               Organization<span>*</span>
             </label>
             <p>Select the organization that this request is on behalf of.</p>
             <Select
               displayEmpty
+              required
               id="organization-select"
               name="organization"
               size="small"
               value={organization}
               onChange={handleOrganizationChange}
+              labelId="organization-label"
+              inputProps={{ "aria-label": "Organization" }}
               renderValue={(selected) => {
                 if (selected.length === 0) {
                   return <em>- Select -</em>;
@@ -111,6 +114,7 @@ export const FormRequestDetails = ({
                 Please specify the organization you are requesting on behalf of.
               </label>
               <TextField
+                required
                 id="organization-other"
                 name="organizationOther"
                 variant="outlined"
@@ -130,8 +134,8 @@ export const FormRequestDetails = ({
                 name="pocName"
                 variant="outlined"
                 size="small"
-                value={formValues.pocName}
-                onChange={handleChange}
+                value={pocName}
+                onChange={handleFieldChange("pocName")}
               />
             </div>
             <div className="form-request-details__poc-detail-item">
@@ -142,8 +146,8 @@ export const FormRequestDetails = ({
                 variant="outlined"
                 type="tel"
                 size="small"
-                value={formValues.pocPhone}
-                onChange={handleChange}
+                value={pocPhone}
+                onChange={handleFieldChange("pocPhone")}
               />
             </div>
             <div className="form-request-details__poc-detail-item">
@@ -154,8 +158,8 @@ export const FormRequestDetails = ({
                 variant="outlined"
                 type="email"
                 size="small"
-                value={formValues.pocEmail}
-                onChange={handleChange}
+                value={pocEmail}
+                onChange={handleFieldChange("pocEmail")}
               />
             </div>
           </div>
@@ -167,8 +171,8 @@ export const FormRequestDetails = ({
             variant="outlined"
             fullWidth
             size="small"
-            value={formValues.useCaseDescription}
-            onChange={handleChange}
+            value={useCaseDescription}
+            onChange={handleFieldChange("useCaseDescription")}
             minRows={6}
           />
         </AccordionDetails>

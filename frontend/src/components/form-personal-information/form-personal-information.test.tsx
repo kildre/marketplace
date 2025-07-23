@@ -23,7 +23,7 @@ describe("FormPersonalInformation", () => {
     test("should render main heading", () => {
       renderFormPersonalInformation();
 
-      const heading = screen.getByRole("heading", { level: 4 });
+      const heading = screen.getByRole("heading", { level: 5 });
       expect(heading).toBeInTheDocument();
       expect(heading).toHaveTextContent("Personal Information");
     });
@@ -87,7 +87,7 @@ describe("FormPersonalInformation", () => {
       const section = container.querySelector(
         ".form-personal-information__section"
       );
-      const heading = section?.querySelector("h4");
+      const heading = section?.querySelector("h5");
       const paragraphs = section?.querySelectorAll("p");
 
       expect(section).toBeInTheDocument();
@@ -185,7 +185,7 @@ describe("FormPersonalInformation", () => {
       const { container } = renderFormPersonalInformation();
 
       // Check for semantic heading
-      const heading = container.querySelector("h4");
+      const heading = container.querySelector("h5");
       expect(heading).toBeInTheDocument();
       expect(heading).toHaveTextContent("Personal Information");
 
@@ -197,7 +197,7 @@ describe("FormPersonalInformation", () => {
     test("should have proper heading hierarchy", () => {
       renderFormPersonalInformation();
 
-      const heading = screen.getByRole("heading", { level: 4 });
+      const heading = screen.getByRole("heading", { level: 5 });
       expect(heading).toHaveTextContent("Personal Information");
     });
   });
@@ -213,8 +213,8 @@ describe("FormPersonalInformation", () => {
       const { container } = renderFormPersonalInformation();
 
       // Test heading structure
-      const h4 = container.querySelector("h4");
-      expect(h4).toBeInTheDocument();
+      const h5 = container.querySelector("h5");
+      expect(h5).toBeInTheDocument();
 
       // Test semantic structure
       const section = container.querySelector("div");
@@ -234,7 +234,7 @@ describe("FormPersonalInformation", () => {
       renderFormPersonalInformation();
 
       // All text content should be accessible to screen readers
-      const heading = screen.getByRole("heading", { level: 4 });
+      const heading = screen.getByRole("heading", { level: 5 });
       expect(heading).toBeInTheDocument();
 
       // Check that important information is in semantic elements
@@ -271,7 +271,7 @@ describe("FormPersonalInformation", () => {
       expect(container.innerHTML).toContain(
         'class="form-personal-information__section"'
       );
-      expect(container.innerHTML).toContain("<h4>");
+      expect(container.innerHTML).toContain("<h5>");
       expect(container.innerHTML).toContain("Personal Information");
       expect(container.innerHTML).toContain("NAME:");
       expect(container.innerHTML).toContain("Joe Snuffy");
@@ -290,7 +290,7 @@ describe("FormPersonalInformation", () => {
       const outerDiv = container.firstChild;
       expect(outerDiv).toHaveClass("form-personal-information__section");
 
-      const heading = container.querySelector("h4");
+      const heading = container.querySelector("h5");
       expect(heading?.parentElement).toBe(outerDiv);
 
       const paragraphs = container.querySelectorAll("p");
