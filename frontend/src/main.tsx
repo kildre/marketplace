@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { ReactKeycloakProvider } from '@react-keycloak/web';
 import App from './App';
 import { CartProvider } from './contexts/CartContext';
-import keycloak from './keycloak';
 import './styles/main.scss';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
@@ -59,20 +58,44 @@ if (bypassAuth) {
     </React.StrictMode>
   );
 } else {
-  // Production mode with Keycloak
-  root.render(
-    <React.StrictMode>
-      <ReactKeycloakProvider
-        authClient={keycloak}
-        initOptions={keycloakInitOptions}
-        LoadingComponent={LoadingComponent}
-      >
+  // Production mode with Keycloak - import only when needed
+  import('./keycloak').then(({ default: keycloak }) => {
+    root.render(
+      <React.StrictMode>
+        <ReactKeycloakProvider
+          authClient={keycloak}
+          initOptions={keycloakInitOptions}
+          LoadingComponent={LoadingComponent}
+        >
+          <BrowserRouter>
+            <CartProvider>
+              <App />
+            </CartProvider>
+          </BrowserRouter>
+        </ReactKeycloakProvider>
+      </React.StrictMode>
+    );
+  }).catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error('Failed to load Keycloak configuration:', error);
+    // Fallback to bypass mode if Keycloak fails to load
+    root.render(
+      <React.StrictMode>
+        <div style={{
+          backgroundColor: '#f44336',
+          color: 'white',
+          padding: '16px',
+          textAlign: 'center',
+          fontWeight: 'bold'
+        }}>
+          ⚠️ Authentication Error: {error.message}
+        </div>
         <BrowserRouter>
           <CartProvider>
             <App />
           </CartProvider>
         </BrowserRouter>
-      </ReactKeycloakProvider>
-    </React.StrictMode>
-  );
+      </React.StrictMode>
+    );
+  });
 }
