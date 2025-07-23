@@ -20,7 +20,7 @@ workflow:
           --set image.tag=${CI_COMMIT_SHA}
     - if: $HELM_ONLY == "true"
       variables:
-        HELM_UPGRADE_EXTRA_ARGS: >-
+        HELM_UPGRADE_EXTRA_ARGS: >
           --set image.tag=${IMAGE_TAG_FOR_HELM_ONLY}
 
 variables:
@@ -32,7 +32,7 @@ variables:
       - "false"
   IMAGE_TAG_FOR_HELM_ONLY:
     description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-    value: "5e307754a69057cfb134a797ada9bd2bf87b05d0" # ${CI_COMMIT_SHA}
+    value: "5df08b59709c1cb80d0901be3dbc5bd5ab8824c6" # ${CI_COMMIT_SHA}
   CONTAINER_ONLY:
     description: "only build container"
     value: "false"

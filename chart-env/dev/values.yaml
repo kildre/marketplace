@@ -58,6 +58,12 @@ secret:
           REACT_APP_CLASSIFICATION_BANNER: "DEV"
           REACT_APP_CLASSIFICATION_BANNER_COLOR: "GREEN"
           REACT_APP_CLASSIFICATION_BANNER_TEXT_COLOR: "WHITE"
+          # Keycloak Configuration for Kubernetes deployment
+          VITE_KEYCLOAK_URL: "https://keycloak.cdao.us/auth"
+          VITE_KEYCLOAK_REALM: "baby-yoda"
+          VITE_KEYCLOAK_CLIENT_ID: "marketplace"
+          VITE_KEYCLOAK_CHECK_LOGIN_IFRAME: "false"
+          VITE_BYPASS_AUTH: "false"
   volume:
     secret:
       "secret-volume-ca-bundle-crt":
