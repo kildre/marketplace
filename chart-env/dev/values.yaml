@@ -1,6 +1,8 @@
 ###############################################################################
 ## Global Values                                                             ##
 ###############################################################################
+keycloakId: marketplace
+keycloakIssuer: https://keycloak.cdao.us/auth/realms/baby-yoda
 
 global:
   awsRegion: us-gov-west-1
