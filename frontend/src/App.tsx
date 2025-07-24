@@ -7,9 +7,25 @@ import { ProductCatalog } from "./pages/product-catalog/product-catalog";
 import { Cart } from "./pages/cart/cart";
 import { Requests } from "./pages/requests/requests";
 import { RequestDetail } from "./pages/request-detail/request-detail";
+import { useAuth } from "./hooks/useAuth";
+import { AppRoles } from "./types/auth";
 import "./styles/main.scss";
 
 function App(): React.ReactElement {
+  const { hasRole } = useAuth();
+
+  // Role-based home component selection
+  const getHomeComponent = () => {
+    if (hasRole(AppRoles.APPROVER)) {
+      return <Requests />;
+    } else if (hasRole(AppRoles.REQUESTOR)) {
+      return <ProductCatalog />;
+    } else {
+      // Default fallback if no specific role
+      return <ProductCatalog />;
+    }
+  };
+
   return (
     <div className="app-wrapper">
       <GovernmentBanner />
@@ -17,7 +33,7 @@ function App(): React.ReactElement {
       <main className="main-content">
         <Sidebar />
         <Routes>
-          <Route path="/" element={<ProductCatalog />} />
+          <Route path="/" element={getHomeComponent()} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/requests" element={<Requests />} />
           <Route path="/request-detail" element={<RequestDetail />} />

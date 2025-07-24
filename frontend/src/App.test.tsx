@@ -3,6 +3,13 @@ import { BrowserRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { vi } from "vitest";
 import App from "./App";
+import { AppRoles } from "./types/auth";
+
+// Mock the useAuth hook
+const mockUseAuth = vi.fn();
+vi.mock("./hooks/useAuth", () => ({
+  useAuth: () => mockUseAuth(),
+}));
 
 // Mock the child components to focus on App structure
 vi.mock("./components/government-banner/government-banner", () => ({
@@ -45,7 +52,31 @@ vi.mock("./pages/request-detail/request-detail", () => ({
 expect.extend(toHaveNoViolations);
 
 describe("App", () => {
-  const renderAppWithRouter = (initialRoute = "/") => {
+  const renderAppWithRouter = (
+    initialRoute = "/",
+    userRole = AppRoles.REQUESTOR
+  ) => {
+    // Mock the useAuth hook with the specified role
+    mockUseAuth.mockReturnValue({
+      userInfo: {
+        id: "test-user-123",
+        username: "testuser",
+        email: "test@advana.mil",
+        firstName: "Test",
+        lastName: "User",
+        roles: [userRole],
+        permissions: ["READ", "WRITE"],
+      },
+      keycloak: {},
+      isAuthenticated: true,
+      isRequestor: () => userRole === AppRoles.REQUESTOR,
+      isApprover: () => userRole === AppRoles.APPROVER,
+      hasRole: (role: AppRoles) => userRole === role,
+      hasPermission: () => true,
+      logout: vi.fn(),
+      login: vi.fn(),
+    });
+
     window.history.pushState({}, "Test page", initialRoute);
     return render(
       <BrowserRouter>
@@ -55,14 +86,14 @@ describe("App", () => {
   };
 
   test("should render successfully", () => {
-    const { container } = renderAppWithRouter();
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     expect(container.querySelector(".app-wrapper")).toBeInTheDocument();
     expect(container.querySelector("main.main-content")).toBeInTheDocument();
   });
 
   test("should render all main layout components", () => {
-    renderAppWithRouter();
+    renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     expect(screen.getByTestId("government-banner")).toBeInTheDocument();
     expect(screen.getByTestId("header")).toBeInTheDocument();
@@ -71,7 +102,7 @@ describe("App", () => {
   });
 
   test("should have correct DOM structure", () => {
-    const { container } = renderAppWithRouter();
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     const appWrapper = container.querySelector(".app-wrapper");
     const mainContent = container.querySelector("main.main-content");
@@ -81,8 +112,8 @@ describe("App", () => {
     expect(mainContent?.parentElement).toBe(appWrapper);
   });
 
-  test("should render ProductCatalog component on root route", () => {
-    renderAppWithRouter("/");
+  test("should render ProductCatalog component on root route for REQUESTOR role", () => {
+    renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     expect(screen.getByTestId("product-catalog")).toBeInTheDocument();
     expect(screen.queryByTestId("cart")).not.toBeInTheDocument();
@@ -90,8 +121,17 @@ describe("App", () => {
     expect(screen.queryByTestId("request-detail")).not.toBeInTheDocument();
   });
 
+  test("should render Requests component on root route for APPROVER role", () => {
+    renderAppWithRouter("/", AppRoles.APPROVER);
+
+    expect(screen.getByTestId("requests")).toBeInTheDocument();
+    expect(screen.queryByTestId("product-catalog")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cart")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("request-detail")).not.toBeInTheDocument();
+  });
+
   test("should render Cart component on /cart route", () => {
-    renderAppWithRouter("/cart");
+    renderAppWithRouter("/cart", AppRoles.REQUESTOR);
 
     expect(screen.getByTestId("cart")).toBeInTheDocument();
     expect(screen.queryByTestId("product-catalog")).not.toBeInTheDocument();
@@ -100,15 +140,25 @@ describe("App", () => {
   });
 
   test("should render Requests component on /requests route", () => {
-    renderAppWithRouter("/requests");
+    renderAppWithRouter("/requests", AppRoles.REQUESTOR);
 
     expect(screen.getByTestId("requests")).toBeInTheDocument();
     expect(screen.queryByTestId("product-catalog")).not.toBeInTheDocument();
     expect(screen.queryByTestId("cart")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("request-detail")).not.toBeInTheDocument();
+  });
+
+  test("should render RequestDetail component on /request-detail route", () => {
+    renderAppWithRouter("/request-detail", AppRoles.REQUESTOR);
+
+    expect(screen.getByTestId("request-detail")).toBeInTheDocument();
+    expect(screen.queryByTestId("product-catalog")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cart")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("requests")).not.toBeInTheDocument();
   });
 
   test("should have proper semantic HTML structure", () => {
-    const { container } = renderAppWithRouter();
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     const main = container.querySelector("main");
     expect(main).toHaveClass("main-content");
@@ -119,7 +169,7 @@ describe("App", () => {
     const routes = ["/", "/cart", "/requests", "/request-detail"];
 
     routes.forEach((route) => {
-      const { container } = renderAppWithRouter(route);
+      const { container } = renderAppWithRouter(route, AppRoles.REQUESTOR);
 
       expect(
         container.querySelector('[data-testid="government-banner"]')
@@ -137,7 +187,7 @@ describe("App", () => {
   });
 
   test("should render component snapshot consistently", () => {
-    const { container } = renderAppWithRouter();
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     expect(container.innerHTML).toContain('class="app-wrapper"');
     expect(container.innerHTML).toContain('class="main-content"');
@@ -145,7 +195,7 @@ describe("App", () => {
   });
 
   test("should have correct CSS classes", () => {
-    const { container } = renderAppWithRouter();
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     const appWrapper = container.querySelector(".app-wrapper");
     const mainContent = container.querySelector(".main-content");
@@ -155,13 +205,13 @@ describe("App", () => {
   });
 
   test("should have no accessibility violations", async () => {
-    const { container } = renderAppWithRouter();
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
   test("should meet WCAG accessibility standards", async () => {
-    const { container } = renderAppWithRouter();
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     // Test semantic structure
     const main = container.querySelector("main");
@@ -177,16 +227,65 @@ describe("App", () => {
     expect(results).toHaveNoViolations();
   });
 
-  test("should render routes correctly with different URL paths", () => {
-    const testCases = [
-      { path: "/", expectedTestId: "product-catalog" },
-      { path: "/cart", expectedTestId: "cart" },
-      { path: "/requests", expectedTestId: "requests" },
-    ];
+  test("should render routes correctly with different URL paths for REQUESTOR role", () => {
+    // Test home route
+    const { unmount: unmount1 } = renderAppWithRouter("/", AppRoles.REQUESTOR);
+    expect(screen.getByTestId("product-catalog")).toBeInTheDocument();
+    unmount1();
 
-    testCases.forEach(({ path, expectedTestId }) => {
-      renderAppWithRouter(path);
-      expect(screen.getByTestId(expectedTestId)).toBeInTheDocument();
-    });
+    // Test cart route
+    const { unmount: unmount2 } = renderAppWithRouter(
+      "/cart",
+      AppRoles.REQUESTOR
+    );
+    expect(screen.getByTestId("cart")).toBeInTheDocument();
+    unmount2();
+
+    // Test requests route
+    const { unmount: unmount3 } = renderAppWithRouter(
+      "/requests",
+      AppRoles.REQUESTOR
+    );
+    expect(screen.getByTestId("requests")).toBeInTheDocument();
+    unmount3();
+
+    // Test request-detail route
+    const { unmount: unmount4 } = renderAppWithRouter(
+      "/request-detail",
+      AppRoles.REQUESTOR
+    );
+    expect(screen.getByTestId("request-detail")).toBeInTheDocument();
+    unmount4();
+  });
+
+  test("should render routes correctly with different URL paths for APPROVER role", () => {
+    // Test home route (should show requests for APPROVER)
+    const { unmount: unmount1 } = renderAppWithRouter("/", AppRoles.APPROVER);
+    expect(screen.getByTestId("requests")).toBeInTheDocument();
+    unmount1();
+
+    // Test cart route
+    const { unmount: unmount2 } = renderAppWithRouter(
+      "/cart",
+      AppRoles.APPROVER
+    );
+    expect(screen.getByTestId("cart")).toBeInTheDocument();
+    unmount2();
+
+    // Test requests route
+    const { unmount: unmount3 } = renderAppWithRouter(
+      "/requests",
+      AppRoles.APPROVER
+    );
+    expect(screen.getByTestId("requests")).toBeInTheDocument();
+    unmount3();
+
+    // Test request-detail route
+    const { unmount: unmount4 } = renderAppWithRouter(
+      "/request-detail",
+      AppRoles.APPROVER
+    );
+    expect(screen.getByTestId("request-detail")).toBeInTheDocument();
+    unmount4();
   });
 });
