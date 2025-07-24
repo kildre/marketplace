@@ -1,6 +1,6 @@
 export const mockRequestData = [
   {
-    requestId: 290122,
+    requestId: "GnTqm8c-1983cdc2be0",
     personalData: {
       name: "Joe Snuffy",
       email: "Joe.Snuffy.mil@army.mil",
@@ -99,6 +99,8 @@ export const mockRequestData = [
         unit: 500,
       },
     ],
+    status: "Approved",
+    statusReason: "Approved by John Smith",
     summary: {
       totalItems: 8,
       totalQuantity: 127,
@@ -108,7 +110,7 @@ export const mockRequestData = [
     submittedAt: "2025-07-22T14:36:05.624Z",
   },
   {
-    requestId: 270482,
+    requestId: "JQkIwF3-1983cde1845",
     personalData: {
       name: "John Snuffy",
       email: "John.Snuffy.mil@army.mil",
@@ -186,6 +188,8 @@ export const mockRequestData = [
         unit: 500,
       },
     ],
+    status: "Pending",
+    statusReason: "Awaiting funds. Will update once funds are available.",
     summary: {
       totalItems: 6,
       totalQuantity: 22,
@@ -195,7 +199,7 @@ export const mockRequestData = [
     submittedAt: "2025-07-22T14:40:51.358Z",
   },
   {
-    requestId: 125312,
+    requestId: "8OdN4Sp-1983cde76dd",
     personalData: {
       name: "Jane Snuffy",
       email: "Jane.Snuffy.mil@army.mil",
@@ -263,6 +267,8 @@ export const mockRequestData = [
         unit: 500,
       },
     ],
+    status: "Denied",
+    statusReason: "Insufficient authorization",
     summary: {
       totalItems: 5,
       totalQuantity: 18,
@@ -272,7 +278,7 @@ export const mockRequestData = [
     submittedAt: "2025-07-22T14:42:10.543Z",
   },
   {
-    requestId: 46308,
+    requestId: "FD4kFZp-1983cdecda4",
     personalData: {
       name: "Joe Snuffy",
       email: "Joe.Snuffy.mil@army.mil",
@@ -330,6 +336,8 @@ export const mockRequestData = [
         unit: 500,
       },
     ],
+    status: "Pending",
+    statusReason: "",
     summary: {
       totalItems: 4,
       totalQuantity: 7,

@@ -105,16 +105,6 @@ describe("App", () => {
     expect(screen.getByTestId("requests")).toBeInTheDocument();
     expect(screen.queryByTestId("product-catalog")).not.toBeInTheDocument();
     expect(screen.queryByTestId("cart")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("request-detail")).not.toBeInTheDocument();
-  });
-
-  test("should render RequestDetail component on /request-detail route", () => {
-    renderAppWithRouter("/request-detail");
-
-    expect(screen.getByTestId("request-detail")).toBeInTheDocument();
-    expect(screen.queryByTestId("product-catalog")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("cart")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("requests")).not.toBeInTheDocument();
   });
 
   test("should have proper semantic HTML structure", () => {
@@ -192,7 +182,6 @@ describe("App", () => {
       { path: "/", expectedTestId: "product-catalog" },
       { path: "/cart", expectedTestId: "cart" },
       { path: "/requests", expectedTestId: "requests" },
-      { path: "/request-detail", expectedTestId: "request-detail" },
     ];
 
     testCases.forEach(({ path, expectedTestId }) => {

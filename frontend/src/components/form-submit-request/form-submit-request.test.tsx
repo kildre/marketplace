@@ -330,7 +330,7 @@ describe("FormSubmitRequest", () => {
       await user.click(submitButton);
 
       expect(mockSubmitMutation.mutate).toHaveBeenCalledWith({
-        requestId: expect.any(Number),
+        requestId: expect.any(String),
         personalData: {
           name: "John Doe",
           email: "john.doe@example.com",
@@ -396,7 +396,7 @@ describe("FormSubmitRequest", () => {
       await user.click(submitButton);
 
       expect(mockSubmitMutation.mutate).toHaveBeenCalledWith({
-        requestId: expect.any(Number),
+        requestId: expect.any(String),
         personalData: {
           name: "",
           email: "",
@@ -433,8 +433,10 @@ describe("FormSubmitRequest", () => {
       const secondCall = mockSubmitMutation.mutate.mock.calls[1][0];
 
       expect(firstCall.requestId).not.toEqual(secondCall.requestId);
-      expect(firstCall.requestId).toBeGreaterThan(0);
-      expect(secondCall.requestId).toBeGreaterThan(0);
+      expect(typeof firstCall.requestId).toBe("string");
+      expect(typeof secondCall.requestId).toBe("string");
+      expect(firstCall.requestId).toMatch(/^[A-Za-z0-9]+-[0-9a-f]+$/);
+      expect(secondCall.requestId).toMatch(/^[A-Za-z0-9]+-[0-9a-f]+$/);
     });
   });
 

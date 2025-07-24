@@ -1,0 +1,64 @@
+@use "../globals/colors" as *;
+// Request Detail Page Styles
+.request-detail-page {
+  #cart-form {
+    .Mui-disabled {
+      background: $disabled-background-color;
+      color: black;
+      cursor: not-allowed;
+      -webkit-text-fill-color: black;
+    }
+  }
+
+  .approval-section {
+    margin-top: 1rem;
+  }
+
+  .button--status {
+    width: 100%;
+    margin-top: 0.5rem;
+
+    &.button--approved {
+      background-color: $button-success-color;
+    }
+
+    &.button--denied {
+      background-color: $button-denied-color;
+    }
+
+    &.button--pending {
+      background-color: $button-pending-color;
+    }
+
+    &.button--submit {
+      border-radius: 4px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  .approval-section {
+    .approval-status__title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+      color: black;
+      display: inline-block;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .Mui-disabled {
+      background: $disabled-background-color;
+      color: black;
+      cursor: not-allowed;
+      -webkit-text-fill-color: black;
+    }
+  }
+}

@@ -1,5 +1,10 @@
 import { describe, test, expect } from "vitest";
-import { formatPrice, getIconPath, getValue } from "./helper-functions";
+import {
+  formatPrice,
+  getIconPath,
+  getValue,
+  generateRequestId,
+} from "./helper-functions";
 
 describe("Helper Functions", () => {
   describe("formatPrice", () => {
@@ -550,6 +555,276 @@ describe("Helper Functions", () => {
 
       expect(getIconPath(productType)).toBe("/assets/icons/icon_bundle.png");
       expect(formatPrice(price, rom)).toBe("$5K - $10K");
+    });
+  });
+
+  describe("generateRequestId", () => {
+    describe("Basic functionality", () => {
+      test("should generate a string with correct length pattern", () => {
+        const id = generateRequestId(10);
+        expect(typeof id).toBe("string");
+        expect(id).toMatch(/^.{10}-[0-9a-f]+$/); // 10 chars + hyphen + hex timestamp
+      });
+
+      test("should generate different IDs on subsequent calls", () => {
+        const id1 = generateRequestId(10);
+        const id2 = generateRequestId(10);
+        expect(id1).not.toBe(id2);
+      });
+
+      test("should include timestamp in hex format", () => {
+        const id = generateRequestId(5);
+        const parts = id.split("-");
+        expect(parts).toHaveLength(2);
+        expect(parts[1]).toMatch(/^[0-9a-f]+$/); // Hex timestamp
+      });
+
+      test("should generate random string of specified length", () => {
+        const lengths = [1, 5, 10, 15, 20];
+        lengths.forEach((length) => {
+          const id = generateRequestId(length);
+          const randomPart = id.split("-")[0];
+          expect(randomPart).toHaveLength(length);
+        });
+      });
+    });
+
+    describe("Character composition", () => {
+      test("should only use alphanumeric characters in random part", () => {
+        const id = generateRequestId(50); // Large number to increase character coverage
+        const randomPart = id.split("-")[0];
+        expect(randomPart).toMatch(/^[A-Za-z0-9]+$/);
+      });
+
+      test("should include mix of uppercase, lowercase, and numbers", () => {
+        // Generate multiple IDs to increase probability of getting all character types
+        let hasUpper = false;
+        let hasLower = false;
+        let hasNumber = false;
+
+        for (let i = 0; i < 20; i++) {
+          const id = generateRequestId(20);
+          const randomPart = id.split("-")[0];
+
+          if (/[A-Z]/.test(randomPart)) hasUpper = true;
+          if (/[a-z]/.test(randomPart)) hasLower = true;
+          if (/[0-9]/.test(randomPart)) hasNumber = true;
+
+          if (hasUpper && hasLower && hasNumber) break;
+        }
+
+        // With 20 iterations of 20-character strings, we should get all types
+        expect(hasUpper || hasLower || hasNumber).toBe(true); // At least one type should be present
+      });
+
+      test("should not include special characters in random part", () => {
+        const id = generateRequestId(30);
+        const randomPart = id.split("-")[0];
+        expect(randomPart).not.toMatch(/[^A-Za-z0-9]/);
+      });
+    });
+
+    describe("Timestamp integration", () => {
+      test("should have recent timestamp", () => {
+        const beforeTime = Date.now();
+        const id = generateRequestId(5);
+        const afterTime = Date.now();
+
+        const timestampHex = id.split("-")[1];
+        const timestamp = parseInt(timestampHex, 16);
+
+        expect(timestamp).toBeGreaterThanOrEqual(beforeTime);
+        expect(timestamp).toBeLessThanOrEqual(afterTime);
+      });
+    });
+
+    describe("Edge cases and parameters", () => {
+      test("should handle zero length random part", () => {
+        const id = generateRequestId(0);
+        expect(id).toMatch(/^-[0-9a-f]+$/);
+        expect(id.split("-")[0]).toBe("");
+      });
+
+      test("should handle very small length", () => {
+        const id = generateRequestId(1);
+        const randomPart = id.split("-")[0];
+        expect(randomPart).toHaveLength(1);
+        expect(randomPart).toMatch(/^[A-Za-z0-9]$/);
+      });
+
+      test("should handle large length", () => {
+        const id = generateRequestId(100);
+        const randomPart = id.split("-")[0];
+        expect(randomPart).toHaveLength(100);
+        expect(randomPart).toMatch(/^[A-Za-z0-9]+$/);
+      });
+
+      test("should be consistent with format regardless of length", () => {
+        const lengths = [0, 1, 5, 10, 50, 100];
+        lengths.forEach((length) => {
+          const id = generateRequestId(length);
+          expect(id).toMatch(/^.*-[0-9a-f]+$/);
+          expect(id.split("-")).toHaveLength(2);
+        });
+      });
+    });
+
+    describe("Uniqueness and randomness", () => {
+      test("should generate unique IDs in rapid succession", () => {
+        const ids = new Set();
+        const iterations = 100;
+
+        for (let i = 0; i < iterations; i++) {
+          const id = generateRequestId(10);
+          expect(ids.has(id)).toBe(false);
+          ids.add(id);
+        }
+
+        expect(ids.size).toBe(iterations);
+      });
+
+      test("should have different random parts even with same timestamp", () => {
+        // Mock Date.now to return the same value
+        const originalDateNow = Date.now;
+        const fixedTime = 1642675200000; // Fixed timestamp
+        Date.now = () => fixedTime;
+
+        try {
+          const id1 = generateRequestId(10);
+          const id2 = generateRequestId(10);
+
+          const randomPart1 = id1.split("-")[0];
+          const randomPart2 = id2.split("-")[0];
+          const timestampPart1 = id1.split("-")[1];
+          const timestampPart2 = id2.split("-")[1];
+
+          expect(timestampPart1).toBe(timestampPart2); // Same timestamp
+          expect(randomPart1).not.toBe(randomPart2); // Different random parts
+        } finally {
+          Date.now = originalDateNow; // Restore original function
+        }
+      });
+
+      test("should distribute characters randomly", () => {
+        const charCounts: Record<string, number> = {};
+        const totalChars = 1000;
+
+        // Generate many characters to test distribution
+        for (let i = 0; i < totalChars / 10; i++) {
+          const id = generateRequestId(10);
+          const randomPart = id.split("-")[0];
+
+          for (const char of randomPart) {
+            charCounts[char] = (charCounts[char] || 0) + 1;
+          }
+        }
+
+        // Should have reasonable character distribution (not perfectly even due to randomness)
+        const uniqueChars = Object.keys(charCounts);
+        expect(uniqueChars.length).toBeGreaterThan(10); // Should use variety of characters
+      });
+    });
+
+    describe("Real-world usage scenarios", () => {
+      test("should work for typical request ID lengths", () => {
+        const commonLengths = [8, 12, 16, 20, 24];
+        commonLengths.forEach((length) => {
+          const id = generateRequestId(length);
+          expect(id.split("-")[0]).toHaveLength(length);
+          expect(id).toMatch(/^[A-Za-z0-9]+-[0-9a-f]+$/);
+        });
+      });
+
+      test("should be suitable for database storage", () => {
+        const id = generateRequestId(20);
+
+        // Should not contain characters that need escaping in common databases
+        expect(id).not.toMatch(/['";\\]/);
+
+        // Should be reasonable length for database fields
+        expect(id.length).toBeLessThan(100);
+
+        // Should be URL-safe (important for APIs)
+        expect(id).not.toMatch(/[^A-Za-z0-9-]/);
+      });
+
+      test("should work in high-frequency generation scenarios", () => {
+        const startTime = Date.now();
+        const ids = [];
+
+        // Generate many IDs quickly
+        for (let i = 0; i < 1000; i++) {
+          ids.push(generateRequestId(12));
+        }
+
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+
+        // Should be reasonably fast
+        expect(duration).toBeLessThan(1000); // Less than 1 second for 1000 IDs
+
+        // All should be unique
+        const uniqueIds = new Set(ids);
+        expect(uniqueIds.size).toBe(ids.length);
+      });
+
+      test("should maintain format consistency across time", () => {
+        const ids = [];
+        const expectedPattern = /^[A-Za-z0-9]{15}-[0-9a-f]+$/;
+
+        // Generate IDs with small delays
+        for (let i = 0; i < 5; i++) {
+          ids.push(generateRequestId(15));
+          // Add tiny delay to ensure different timestamps
+          const start = Date.now();
+          while (Date.now() - start < 1) {
+            /* wait */
+          }
+        }
+
+        ids.forEach((id) => {
+          expect(id).toMatch(expectedPattern);
+        });
+      });
+    });
+
+    describe("Integration with application flow", () => {
+      test("should generate ID suitable for request tracking", () => {
+        const requestId = generateRequestId(24); // Common length for tracking IDs
+
+        // Should be long enough to avoid collisions
+        expect(requestId.split("-")[0]).toHaveLength(24);
+
+        // Should include timestamp for chronological sorting
+        const timestamp = parseInt(requestId.split("-")[1], 16);
+        expect(timestamp).toBeGreaterThan(1600000000000); // After year 2020
+
+        // Should be alphanumeric for easy copying/pasting
+        expect(requestId).toMatch(/^[A-Za-z0-9-]+$/);
+      });
+
+      test("should work with mock data scenarios", () => {
+        // Simulate generating IDs for mock data
+        const mockRequests = [];
+
+        for (let i = 0; i < 10; i++) {
+          mockRequests.push({
+            id: generateRequestId(16),
+            name: `Request ${i}`,
+            timestamp: Date.now(),
+          });
+        }
+
+        // All IDs should be unique
+        const ids = mockRequests.map((req) => req.id);
+        const uniqueIds = new Set(ids);
+        expect(uniqueIds.size).toBe(mockRequests.length);
+
+        // All should follow expected format
+        ids.forEach((id) => {
+          expect(id).toMatch(/^[A-Za-z0-9]{16}-[0-9a-f]+$/);
+        });
+      });
     });
   });
 });

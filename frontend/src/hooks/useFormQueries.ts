@@ -28,7 +28,7 @@ export interface RequestDetailsFormData {
 }
 
 export interface SubmissionData {
-  requestId: number;
+  requestId: string;
   personalData: {
     name: string;
     email: string;

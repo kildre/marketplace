@@ -7,6 +7,7 @@ import {
   useSubmitRequest,
   SubmissionData,
 } from "../../hooks/useFormQueries";
+import { generateRequestId } from "../../utils/helper-functions";
 
 export const FormSubmitRequest = (): React.ReactElement => {
   const [checked, setChecked] = React.useState(false);
@@ -75,12 +76,8 @@ export const FormSubmitRequest = (): React.ReactElement => {
       quantity: item.quantity,
     }));
 
-    // Function to generate a unique request ID
-    const generateRequestId = (): number => {
-      return Math.floor(Math.random() * 1000000); // Simple random ID for demo purposes
-    };
-
-    const requestId = generateRequestId();
+    // Generate a unique request ID
+    const requestId = generateRequestId(7);
 
     // Combine form data and cart data
     const submitData: SubmissionData = {
