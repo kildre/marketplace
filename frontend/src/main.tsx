@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ReactKeycloakProvider } from '@react-keycloak/web';
 import App from './App';
 import { CartProvider } from './contexts/CartContext';
+import MockKeycloakProvider from './contexts/MockKeycloakProvider';
 import './styles/main.scss';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
@@ -46,15 +47,17 @@ const DevBanner = () => (
 
 // Choose rendering approach based on environment
 if (bypassAuth) {
-  // Development mode without Keycloak
+  // Development mode with mock authentication
   root.render(
     <React.StrictMode>
       <DevBanner />
-      <BrowserRouter>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </BrowserRouter>
+      <MockKeycloakProvider>
+        <BrowserRouter>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </BrowserRouter>
+      </MockKeycloakProvider>
     </React.StrictMode>
   );
 } else {
