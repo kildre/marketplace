@@ -1,11 +1,13 @@
 import { useSearchParams } from "react-router-dom";
 import { PageTitle } from "../../components/page-title/page-title";
 import { mockRequestData } from "@/data/mock-requestData";
+import { organizationOptions } from "../../data/organizationOptionsData";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { getIconPath } from "../../utils/helper-functions";
@@ -77,7 +79,13 @@ export const RequestDetail = (): React.ReactElement => {
                           renderValue={(selected) => {
                             return selected;
                           }}
-                        ></Select>
+                        >
+                          {organizationOptions.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
                       </FormControl>
                       {request.requestDetails.organization === "Other" && (
                         <>

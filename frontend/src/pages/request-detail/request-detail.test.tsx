@@ -1,23 +1,62 @@
-import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { screen } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
+import { renderWithProviders } from "../../test-utils";
 import { RequestDetail } from "./request-detail";
+import { vi } from "vitest";
+import * as ReactRouterDom from "react-router-dom";
+
+// Mock react-router-dom
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useSearchParams: vi.fn(),
+  };
+});
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 
 describe("RequestDetail", () => {
-  const renderRequestDetailWithRoute = (initialEntries: string[] = ["/"]) => {
-    return render(
-      <MemoryRouter initialEntries={initialEntries}>
-        <RequestDetail />
-      </MemoryRouter>
-    );
+  const mockUseSearchParams = vi.mocked(ReactRouterDom.useSearchParams);
+
+  beforeEach(() => {
+    // Reset to default (no search params) before each test
+    mockUseSearchParams.mockReturnValue([
+      new window.URLSearchParams(),
+      vi.fn(),
+    ]);
+
+    // Suppress MUI Select warning for tests since the component doesn't have MenuItem options
+    vi.spyOn(console, "error").mockImplementation((message, ..._args) => {
+      if (
+        typeof message === "string" &&
+        message.includes("You have provided an out-of-range value")
+      ) {
+        return;
+      }
+      // Allow other console errors to pass through silently in tests
+    });
+  });
+
+  afterEach(() => {
+    // Restore all mocks
+    vi.restoreAllMocks();
+  });
+
+  const renderRequestDetail = (searchParams: string = "") => {
+    if (searchParams) {
+      mockUseSearchParams.mockReturnValue([
+        new window.URLSearchParams(searchParams),
+        vi.fn(),
+      ]);
+    }
+    return renderWithProviders(<RequestDetail />);
   };
 
   describe("when no request ID is provided", () => {
     test("should render 'Request Not Found' message", () => {
-      const { container } = renderRequestDetailWithRoute();
+      const { container } = renderRequestDetail();
 
       expect(screen.getByText("Request Not Found")).toBeInTheDocument();
       expect(
@@ -32,7 +71,7 @@ describe("RequestDetail", () => {
     });
 
     test("should have proper semantic structure for error state", () => {
-      const { container } = renderRequestDetailWithRoute();
+      const { container } = renderRequestDetail();
 
       const section = container.querySelector("section");
       expect(section).toHaveAttribute(
@@ -46,7 +85,7 @@ describe("RequestDetail", () => {
     });
 
     test("should be accessible when no ID provided", async () => {
-      const { container } = renderRequestDetailWithRoute();
+      const { container } = renderRequestDetail();
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
@@ -54,7 +93,7 @@ describe("RequestDetail", () => {
 
   describe("when invalid request ID is provided", () => {
     test("should render 'Request Not Found' for invalid ID", () => {
-      const { container } = renderRequestDetailWithRoute(["/?id=invalid-id"]);
+      const { container } = renderRequestDetail("?id=invalid-id");
 
       expect(screen.getByText("Request Not Found")).toBeInTheDocument();
       expect(
@@ -70,9 +109,7 @@ describe("RequestDetail", () => {
     const validRequestId = "GnTqm8c-1983cdc2be0"; // Using the first request from mock data
 
     test("should render request detail page successfully", () => {
-      const { container } = renderRequestDetailWithRoute([
-        `/?id=${validRequestId}`,
-      ]);
+      const { container } = renderRequestDetail(`?id=${validRequestId}`);
 
       const requestDetailContainer = container.querySelector(
         ".request-detail-page"
@@ -89,16 +126,18 @@ describe("RequestDetail", () => {
     });
 
     test("should render request details accordion", () => {
-      renderRequestDetailWithRoute([`/?id=${validRequestId}`]);
+      renderRequestDetail(`?id=${validRequestId}`);
 
       expect(screen.getByText("Request Details")).toBeInTheDocument();
       expect(screen.getByLabelText("Organization")).toBeInTheDocument();
-      expect(screen.getByDisplayValue("Other")).toBeInTheDocument();
+
+      // Check for the "Other Organization" field which contains "CDAO"
+      expect(screen.getByText("Other Organization")).toBeInTheDocument();
       expect(screen.getByDisplayValue("CDAO")).toBeInTheDocument();
     });
 
     test("should render personal information correctly", () => {
-      renderRequestDetailWithRoute([`/?id=${validRequestId}`]);
+      renderRequestDetail(`?id=${validRequestId}`);
 
       expect(screen.getByText("Personal Information")).toBeInTheDocument();
       expect(screen.getByText("Joe Snuffy")).toBeInTheDocument();
@@ -108,7 +147,7 @@ describe("RequestDetail", () => {
     });
 
     test("should render selected applications", () => {
-      renderRequestDetailWithRoute([`/?id=${validRequestId}`]);
+      renderRequestDetail(`?id=${validRequestId}`);
 
       expect(
         screen.getByText(/Selected Applications \(8 products\)/)
@@ -119,7 +158,7 @@ describe("RequestDetail", () => {
     });
 
     test("should render cost details", () => {
-      renderRequestDetailWithRoute([`/?id=${validRequestId}`]);
+      renderRequestDetail(`?id=${validRequestId}`);
 
       expect(screen.getByText("Cost Details")).toBeInTheDocument();
       expect(screen.getByText("PRODUCTS REQUESTED")).toBeInTheDocument();
@@ -130,7 +169,7 @@ describe("RequestDetail", () => {
     });
 
     test("should render approval status section", () => {
-      renderRequestDetailWithRoute([`/?id=${validRequestId}`]);
+      renderRequestDetail(`?id=${validRequestId}`);
 
       expect(screen.getByText("Approval Status")).toBeInTheDocument();
       expect(screen.getByLabelText("Reasoning")).toBeInTheDocument();
@@ -143,9 +182,7 @@ describe("RequestDetail", () => {
     });
 
     test("should have correct status button styling", () => {
-      const { container } = renderRequestDetailWithRoute([
-        `/?id=${validRequestId}`,
-      ]);
+      const { container } = renderRequestDetail(`?id=${validRequestId}`);
 
       // The status button should have the appropriate class based on status
       const statusButton = container.querySelector(
@@ -155,7 +192,7 @@ describe("RequestDetail", () => {
     });
 
     test("should render point of contact details", () => {
-      renderRequestDetailWithRoute([`/?id=${validRequestId}`]);
+      renderRequestDetail(`?id=${validRequestId}`);
 
       expect(screen.getByDisplayValue("Jane Doe")).toBeInTheDocument();
       expect(screen.getByDisplayValue("2192192199")).toBeInTheDocument();
@@ -165,7 +202,7 @@ describe("RequestDetail", () => {
     });
 
     test("should render use case description", () => {
-      renderRequestDetailWithRoute([`/?id=${validRequestId}`]);
+      renderRequestDetail(`?id=${validRequestId}`);
 
       const useCaseField = screen.getByLabelText("Use Case Description");
       expect(useCaseField).toBeInTheDocument();
@@ -173,9 +210,7 @@ describe("RequestDetail", () => {
     });
 
     test("should have proper DOM structure for valid request", () => {
-      const { container } = renderRequestDetailWithRoute([
-        `/?id=${validRequestId}`,
-      ]);
+      const { container } = renderRequestDetail(`?id=${validRequestId}`);
 
       const outerDiv = container.firstChild;
       expect(outerDiv).toHaveClass("request-detail-page");
@@ -192,9 +227,7 @@ describe("RequestDetail", () => {
     });
 
     test("should be accessible with valid request", async () => {
-      const { container } = renderRequestDetailWithRoute([
-        `/?id=${validRequestId}`,
-      ]);
+      const { container } = renderRequestDetail(`?id=${validRequestId}`);
       const results = await axe(container, {
         rules: {
           "heading-order": { enabled: false }, // Disable heading order check since h4 is used in card layout
@@ -204,7 +237,7 @@ describe("RequestDetail", () => {
     });
 
     test("should have proper heading hierarchy", () => {
-      renderRequestDetailWithRoute([`/?id=${validRequestId}`]);
+      renderRequestDetail(`?id=${validRequestId}`);
 
       const h1 = screen.getByRole("heading", { level: 1 });
       expect(h1).toHaveTextContent(`Request Detail - ${validRequestId}`);
@@ -215,9 +248,7 @@ describe("RequestDetail", () => {
     });
 
     test("should meet WCAG accessibility standards", async () => {
-      const { container } = renderRequestDetailWithRoute([
-        `/?id=${validRequestId}`,
-      ]);
+      const { container } = renderRequestDetail(`?id=${validRequestId}`);
 
       // Test heading hierarchy
       const h1 = container.querySelector("h1");

@@ -101,6 +101,7 @@ export const mockRequestData = [
     ],
     status: "Approved",
     statusReason: "Approved by John Smith",
+    decisionNumber: "JRkIwF3-1983cde1845",
     summary: {
       totalItems: 8,
       totalQuantity: 127,
@@ -189,7 +190,8 @@ export const mockRequestData = [
       },
     ],
     status: "Pending",
-    statusReason: "Awaiting funds. Will update once funds are available.",
+    statusReason: "",
+    decisionNumber: "",
     summary: {
       totalItems: 6,
       totalQuantity: 22,
@@ -269,6 +271,7 @@ export const mockRequestData = [
     ],
     status: "Denied",
     statusReason: "Insufficient authorization",
+    decisionNumber: "DRkIwF3-1983fde1845",
     summary: {
       totalItems: 5,
       totalQuantity: 18,
@@ -338,6 +341,7 @@ export const mockRequestData = [
     ],
     status: "Pending",
     statusReason: "",
+    decisionNumber: "",
     summary: {
       totalItems: 4,
       totalQuantity: 7,
