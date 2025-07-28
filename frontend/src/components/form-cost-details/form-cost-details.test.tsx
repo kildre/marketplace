@@ -121,7 +121,7 @@ describe("FormCostDetails", () => {
     test("should render main heading", () => {
       renderFormCostDetails();
 
-      const heading = screen.getByRole("heading", { level: 4 });
+      const heading = screen.getByRole("heading", { level: 5 });
       expect(heading).toBeInTheDocument();
       expect(heading).toHaveTextContent("Cost Details");
     });
@@ -129,7 +129,7 @@ describe("FormCostDetails", () => {
     test("should render estimated ROM heading", () => {
       renderFormCostDetails();
 
-      const romHeading = screen.getByRole("heading", { level: 5 });
+      const romHeading = screen.getByRole("heading", { level: 6 });
       expect(romHeading).toBeInTheDocument();
       expect(romHeading).toHaveTextContent("Estimated ROM");
     });
@@ -375,9 +375,9 @@ describe("FormCostDetails", () => {
       const section = container.querySelector(
         ".form-personal-information__section"
       );
-      const heading = section?.querySelector("h4");
+      const heading = section?.querySelector("h5");
       const paragraphs = section?.querySelectorAll("p");
-      const romHeading = container.querySelector("h5");
+      const romHeading = container.querySelector("h6");
 
       expect(section).toBeInTheDocument();
       expect(heading).toBeInTheDocument();
@@ -412,7 +412,7 @@ describe("FormCostDetails", () => {
       });
 
       // Check ROM heading structure
-      const romHeading = container.querySelector("h5");
+      const romHeading = container.querySelector("h6");
       expect(romHeading?.querySelector("span")).toBeInTheDocument();
     });
   });
@@ -468,10 +468,10 @@ describe("FormCostDetails", () => {
       const { container } = renderFormCostDetails();
 
       // Check for semantic headings
-      const h4 = container.querySelector("h4");
       const h5 = container.querySelector("h5");
-      expect(h4).toBeInTheDocument();
+      const h6 = container.querySelector("h6");
       expect(h5).toBeInTheDocument();
+      expect(h6).toBeInTheDocument();
 
       // Check for semantic paragraph elements
       const paragraphs = container.querySelectorAll("p");
@@ -481,11 +481,11 @@ describe("FormCostDetails", () => {
     test("should have proper heading hierarchy", () => {
       renderFormCostDetails();
 
-      const h4 = screen.getByRole("heading", { level: 4 });
       const h5 = screen.getByRole("heading", { level: 5 });
+      const h6 = screen.getByRole("heading", { level: 6 });
 
-      expect(h4).toHaveTextContent("Cost Details");
-      expect(h5).toHaveTextContent("Estimated ROM");
+      expect(h5).toHaveTextContent("Cost Details");
+      expect(h6).toHaveTextContent("Estimated ROM");
     });
   });
 
@@ -508,10 +508,10 @@ describe("FormCostDetails", () => {
       const { container } = renderFormCostDetails();
 
       // Test heading structure
-      const h4 = container.querySelector("h4");
       const h5 = container.querySelector("h5");
-      expect(h4).toBeInTheDocument();
+      const h6 = container.querySelector("h6");
       expect(h5).toBeInTheDocument();
+      expect(h6).toBeInTheDocument();
 
       // Run comprehensive accessibility tests
       const results = await axe(container, {
@@ -527,11 +527,11 @@ describe("FormCostDetails", () => {
       renderFormCostDetails();
 
       // All text content should be accessible to screen readers
-      const h4 = screen.getByRole("heading", { level: 4 });
       const h5 = screen.getByRole("heading", { level: 5 });
+      const h6 = screen.getByRole("heading", { level: 6 });
 
-      expect(h4).toBeInTheDocument();
       expect(h5).toBeInTheDocument();
+      expect(h6).toBeInTheDocument();
 
       // Check that important information is in semantic elements
       expect(screen.getByText("Cost Details")).toBeInTheDocument();
@@ -721,12 +721,12 @@ describe("FormCostDetails", () => {
       expect(container.innerHTML).toContain(
         'class="form-personal-information__section"'
       );
-      expect(container.innerHTML).toContain("<h4>");
+      expect(container.innerHTML).toContain("<h5>");
       expect(container.innerHTML).toContain("Cost Details");
       expect(container.innerHTML).toContain("PRODUCTS REQUESTED");
       expect(container.innerHTML).toContain("APPLICATIONS PENDING PRICE");
       expect(container.innerHTML).toContain("cost-warning");
-      expect(container.innerHTML).toContain("<h5>");
+      expect(container.innerHTML).toContain("<h6>");
       expect(container.innerHTML).toContain("Estimated ROM");
     });
 
@@ -737,10 +737,10 @@ describe("FormCostDetails", () => {
       const section = container.querySelector(
         ".form-personal-information__section"
       );
-      const h5 = container.querySelector("h5");
+      const h6 = container.querySelector("h6");
 
       expect(section).toBeInTheDocument();
-      expect(h5).toBeInTheDocument();
+      expect(h6).toBeInTheDocument();
 
       const paragraphs = container.querySelectorAll("p");
       paragraphs.forEach((p) => {
