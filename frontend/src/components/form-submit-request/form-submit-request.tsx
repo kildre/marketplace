@@ -2,11 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Checkbox from "@mui/material/Checkbox";
 import { useCart } from "../../contexts/CartContext";
-import {
-  useFormData,
-  useSubmitRequest,
-  SubmissionData,
-} from "../../hooks/useFormQueries";
+import { useFormData, useSubmitRequest } from "../../hooks/useFormQueries";
+import { SubmissionData } from "../../interfaces";
 import { generateRequestId } from "../../utils/helper-functions";
 
 export const FormSubmitRequest = (): React.ReactElement => {
@@ -52,7 +49,8 @@ export const FormSubmitRequest = (): React.ReactElement => {
 
     if (!isFormValid) return;
 
-    const estimatedRom = document.getElementById("estimatedRom")?.innerHTML;
+    const estimatedRom =
+      document.getElementById("estimatedRom")?.innerHTML || "$0";
 
     // Get Personal Data
     const personalData = {

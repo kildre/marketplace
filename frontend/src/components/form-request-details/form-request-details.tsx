@@ -13,8 +13,12 @@ import {
   useOrganizationForm,
   useRequestDetailsForm,
 } from "../../hooks/useFormQueries";
+import { FormRequestDetailsProps } from "../../interfaces";
 
-export const FormRequestDetails = (): React.ReactElement => {
+export const FormRequestDetails = ({
+  mode = "edit",
+  viewData,
+}: FormRequestDetailsProps = {}): React.ReactElement => {
   const { organization, organizationOther, updateOrganization } =
     useOrganizationForm();
 
@@ -25,6 +29,21 @@ export const FormRequestDetails = (): React.ReactElement => {
     useCaseDescription,
     updateRequestDetails,
   } = useRequestDetailsForm();
+
+  // Use viewData for view mode, form data for edit mode
+  const data =
+    mode === "view" && viewData
+      ? viewData
+      : {
+          organization,
+          organizationOther,
+          pocName,
+          pocPhone,
+          pocEmail,
+          useCaseDescription,
+        };
+
+  const isViewMode = mode === "view";
 
   const handleOrganizationChange = (event: SelectChangeEvent<string>) => {
     const value = event.target.value as string;
@@ -58,18 +77,20 @@ export const FormRequestDetails = (): React.ReactElement => {
 
   return (
     <div className="form-request-details__container">
-      {/* Display warning if organization is not selected */}
-      {organization === "" && (
+      {/* Display warning if organization is not selected - only in edit mode */}
+      {!isViewMode && data.organization === "" && (
         <Alert severity="warning">
           Please select an organization that this request is on behalf of.
         </Alert>
       )}
-      {/* Display warning if "Other" is selected but no organization input */}
-      {organization === "Other" && organizationOther === "" && (
-        <Alert severity="warning">
-          Please specify the organization you are requesting on behalf of.
-        </Alert>
-      )}
+      {/* Display warning if "Other" is selected but no organization input - only in edit mode */}
+      {!isViewMode &&
+        data.organization === "Other" &&
+        data.organizationOther === "" && (
+          <Alert severity="warning">
+            Please specify the organization you are requesting on behalf of.
+          </Alert>
+        )}
       <Accordion defaultExpanded slotProps={{ heading: { component: "h2" } }}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -81,17 +102,20 @@ export const FormRequestDetails = (): React.ReactElement => {
         <AccordionDetails className="form-request-details__accordion-details">
           <FormControl fullWidth className="form-request-details__organization">
             <label id="organization-label">
-              Organization<span>*</span>
+              Organization{!isViewMode && <span>*</span>}
             </label>
-            <p>Select the organization that this request is on behalf of.</p>
+            {!isViewMode && (
+              <p>Select the organization that this request is on behalf of.</p>
+            )}
             <Select
               displayEmpty
-              required
+              required={!isViewMode}
+              disabled={isViewMode}
               id="organization-select"
               name="organization"
               size="small"
-              value={organization}
-              onChange={handleOrganizationChange}
+              value={data.organization}
+              onChange={isViewMode ? undefined : handleOrganizationChange}
               labelId="organization-label"
               inputProps={{ "aria-label": "Organization" }}
               renderValue={(selected) => {
@@ -108,21 +132,26 @@ export const FormRequestDetails = (): React.ReactElement => {
               ))}
             </Select>
           </FormControl>
-          {organization === "Other" && (
+          {data.organization === "Other" && (
             <>
               <label htmlFor="organization-other">
-                Please specify the organization you are requesting on behalf of.
+                {isViewMode
+                  ? "Other Organization"
+                  : "Please specify the organization you are requesting on behalf of."}
               </label>
               <TextField
-                required
+                required={!isViewMode}
+                disabled={isViewMode}
                 id="organization-other"
                 name="organizationOther"
                 variant="outlined"
                 fullWidth
                 size="small"
                 className="form-request-details__organization-other"
-                value={organizationOther}
-                onChange={handleOrganizationOtherChange}
+                value={data.organizationOther}
+                onChange={
+                  isViewMode ? undefined : handleOrganizationOtherChange
+                }
               />
             </>
           )}
@@ -130,49 +159,59 @@ export const FormRequestDetails = (): React.ReactElement => {
             <div className="form-request-details__poc-detail-item">
               <label htmlFor="poc-name">Point of Contact Name</label>
               <TextField
+                disabled={isViewMode}
                 id="poc-name"
                 name="pocName"
                 variant="outlined"
                 size="small"
-                value={pocName}
-                onChange={handleFieldChange("pocName")}
+                value={data.pocName}
+                onChange={isViewMode ? undefined : handleFieldChange("pocName")}
               />
             </div>
             <div className="form-request-details__poc-detail-item">
               <label htmlFor="poc-phone">Phone Number</label>
               <TextField
+                disabled={isViewMode}
                 id="poc-phone"
                 name="pocPhone"
                 variant="outlined"
                 type="tel"
                 size="small"
-                value={pocPhone}
-                onChange={handleFieldChange("pocPhone")}
+                value={data.pocPhone}
+                onChange={
+                  isViewMode ? undefined : handleFieldChange("pocPhone")
+                }
               />
             </div>
             <div className="form-request-details__poc-detail-item">
               <label htmlFor="poc-email">Email Address</label>
               <TextField
+                disabled={isViewMode}
                 id="poc-email"
                 name="pocEmail"
                 variant="outlined"
                 type="email"
                 size="small"
-                value={pocEmail}
-                onChange={handleFieldChange("pocEmail")}
+                value={data.pocEmail}
+                onChange={
+                  isViewMode ? undefined : handleFieldChange("pocEmail")
+                }
               />
             </div>
           </div>
           <label htmlFor="use-case-description">Use Case Description</label>
           <TextField
+            disabled={isViewMode}
             multiline
             id="use-case-description"
             name="useCaseDescription"
             variant="outlined"
             fullWidth
             size="small"
-            value={useCaseDescription}
-            onChange={handleFieldChange("useCaseDescription")}
+            value={data.useCaseDescription}
+            onChange={
+              isViewMode ? undefined : handleFieldChange("useCaseDescription")
+            }
             minRows={6}
           />
         </AccordionDetails>

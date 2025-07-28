@@ -1,50 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-// Import the Product type
-interface CartItem {
-  product: {
-    id: number;
-    name: string;
-    type: string;
-    price: number | null;
-    description: string;
-    unit: string;
-    rom: string;
-  };
-  quantity: number;
-}
-
-// Types for form data
-export interface OrganizationFormData {
-  organization: string;
-  organizationOther: string;
-}
-
-export interface RequestDetailsFormData {
-  pocName: string;
-  pocPhone: string;
-  pocEmail: string;
-  useCaseDescription: string;
-}
-
-export interface SubmissionData {
-  requestId: string;
-  personalData: {
-    name: string;
-    email: string;
-    designation: string;
-    agency: string;
-  };
-  requestDetails: OrganizationFormData & RequestDetailsFormData;
-  cartItems: CartItem[];
-  summary: {
-    totalItems: number;
-    totalQuantity: number;
-    pendingPriceItems: number;
-    estimatedROM: string | undefined;
-  };
-  submittedAt: string;
-}
+import {
+  OrganizationFormData,
+  RequestDetailsFormData,
+  SubmissionData,
+} from "../interfaces";
 
 // Query keys
 export const formKeys = {

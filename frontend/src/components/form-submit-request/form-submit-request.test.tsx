@@ -409,7 +409,7 @@ describe("FormSubmitRequest", () => {
           totalItems: 2,
           totalQuantity: 3,
           pendingPriceItems: 1,
-          estimatedROM: undefined,
+          estimatedROM: "$0",
         },
         submittedAt: expect.any(String),
       });

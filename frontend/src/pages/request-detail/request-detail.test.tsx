@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { renderWithProviders } from "../../test-utils";
 import { RequestDetail } from "./request-detail";
@@ -417,6 +418,173 @@ describe("RequestDetail", () => {
           /Your user role does not match any of the expected roles/
         )
       ).toBeInTheDocument();
+    });
+
+    // Test event handler functionality
+    test("should handle reasoning field changes for APPROVER", async () => {
+      const user = userEvent.setup();
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      const reasoningField = screen.getByLabelText("Reasoning");
+
+      // Clear the field and type new text
+      await user.clear(reasoningField);
+      await user.type(reasoningField, "New reasoning text");
+
+      expect(reasoningField).toHaveValue("New reasoning text");
+    });
+
+    test("should handle accept button click for APPROVER", async () => {
+      const user = userEvent.setup();
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      const acceptButton = screen.getByRole("button", { name: "Accept" });
+      await user.click(acceptButton);
+
+      // Should call updateRequest function which logs to console
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Updated request: ",
+        expect.objectContaining({
+          requestId: validRequestId,
+          status: "Approved",
+        })
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    test("should handle reject button click for APPROVER", async () => {
+      const user = userEvent.setup();
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      const rejectButton = screen.getByRole("button", { name: "Reject" });
+      await user.click(rejectButton);
+
+      // Should call updateRequest function which logs to console
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Updated request: ",
+        expect.objectContaining({
+          requestId: validRequestId,
+          status: "Denied",
+        })
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    test("should use custom reasoning when accepting request", async () => {
+      const user = userEvent.setup();
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      // Change the reasoning text
+      const reasoningField = screen.getByLabelText("Reasoning");
+      await user.clear(reasoningField);
+      await user.type(reasoningField, "Custom approval reason");
+
+      const acceptButton = screen.getByRole("button", { name: "Accept" });
+      await user.click(acceptButton);
+
+      // Should use the custom reasoning
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Updated request: ",
+        expect.objectContaining({
+          statusReason: "Custom approval reason",
+        })
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    test("should use custom reasoning when rejecting request", async () => {
+      const user = userEvent.setup();
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      // Change the reasoning text
+      const reasoningField = screen.getByLabelText("Reasoning");
+      await user.clear(reasoningField);
+      await user.type(reasoningField, "Custom rejection reason");
+
+      const rejectButton = screen.getByRole("button", { name: "Reject" });
+      await user.click(rejectButton);
+
+      // Should use the custom reasoning
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Updated request: ",
+        expect.objectContaining({
+          statusReason: "Custom rejection reason",
+        })
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    test("should use default reasoning when accepting with empty field", async () => {
+      const user = userEvent.setup();
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      // Clear the reasoning field
+      const reasoningField = screen.getByLabelText("Reasoning");
+      await user.clear(reasoningField);
+
+      const acceptButton = screen.getByRole("button", { name: "Accept" });
+      await user.click(acceptButton);
+
+      // Should use default reasoning
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Updated request: ",
+        expect.objectContaining({
+          statusReason: "Request accepted.",
+        })
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    test("should use default reasoning when rejecting with empty field", async () => {
+      const user = userEvent.setup();
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      // Clear the reasoning field
+      const reasoningField = screen.getByLabelText("Reasoning");
+      await user.clear(reasoningField);
+
+      const rejectButton = screen.getByRole("button", { name: "Reject" });
+      await user.click(rejectButton);
+
+      // Should use default reasoning
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Updated request: ",
+        expect.objectContaining({
+          statusReason: "Request denied.",
+        })
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    // Test button class rendering based on status
+    test("should apply correct button class for pending status", () => {
+      // Use a request with pending status
+      const pendingRequestId = "JQkIwF3-1983cde1845"; // Second request in test data has pending status
+      const { container } = renderRequestDetail(
+        `?id=${pendingRequestId}`,
+        AppRoles.APPROVER
+      );
+
+      const statusButton = container.querySelector(".button--pending");
+      expect(statusButton).toBeInTheDocument();
     });
   });
 });
