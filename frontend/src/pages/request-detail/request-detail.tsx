@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PageTitle } from "../../components/page-title/page-title";
 import { mockRequestData } from "@/data/mock-requestData";
@@ -34,6 +35,11 @@ export const RequestDetail = (): React.ReactElement => {
       );
     }
 
+    // State for managing the reasoning field value
+    const [statusReason, setStatusReason] = useState(
+      request.statusReason || ""
+    );
+
     let buttonClass = "button button--status";
     if (request.status === "Approved") {
       buttonClass += " button--approved";
@@ -45,18 +51,31 @@ export const RequestDetail = (): React.ReactElement => {
       buttonClass = "button"; // Default case
     }
 
-    console.log("Request Detail Rendered", request);
+    const updateRequest = () => {
+      // Logic to update the request status
+      // @TODO: Replace with actual API call
+      /* eslint-disable-next-line */
+      console.log("Updated request: ", request);
+    };
+
+    const handleReasoningChange = (
+      event: React.ChangeEvent<{ value: string }>
+    ) => {
+      setStatusReason(event.target.value);
+    };
 
     const handleAccept = () => {
       // Logic to handle accept action
       request.status = "Approved";
-      request.statusReason = request.statusReason || "Request accepted.";
+      request.statusReason = statusReason || "Request accepted.";
+      updateRequest();
     };
 
     const handleReject = () => {
       // Logic to handle reject action
       request.status = "Denied";
-      request.statusReason = request.statusReason || "Request denied.";
+      request.statusReason = statusReason || "Request denied.";
+      updateRequest();
     };
 
     if (hasRole(AppRoles.APPROVER)) {
@@ -271,6 +290,8 @@ export const RequestDetail = (): React.ReactElement => {
                   fullWidth
                   size="small"
                   minRows={6}
+                  value={statusReason}
+                  onChange={handleReasoningChange}
                 />
                 <button disabled className={buttonClass}>
                   {request.status}

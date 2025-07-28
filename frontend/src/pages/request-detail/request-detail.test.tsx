@@ -4,6 +4,8 @@ import { renderWithProviders } from "../../test-utils";
 import { RequestDetail } from "./request-detail";
 import { vi } from "vitest";
 import * as ReactRouterDom from "react-router-dom";
+import { AppRoles } from "../../types/auth";
+import * as UseAuthHook from "../../hooks/useAuth";
 
 // Mock react-router-dom
 vi.mock("react-router-dom", async () => {
@@ -14,11 +16,17 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+// Mock useAuth hook
+vi.mock("../../hooks/useAuth", () => ({
+  useAuth: vi.fn(),
+}));
+
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 
 describe("RequestDetail", () => {
   const mockUseSearchParams = vi.mocked(ReactRouterDom.useSearchParams);
+  const mockUseAuth = vi.mocked(UseAuthHook.useAuth);
 
   beforeEach(() => {
     // Reset to default (no search params) before each test
@@ -26,6 +34,29 @@ describe("RequestDetail", () => {
       new window.URLSearchParams(),
       vi.fn(),
     ]);
+
+    // Default to APPROVER role unless specified otherwise
+    mockUseAuth.mockReturnValue({
+      hasRole: vi.fn((role: AppRoles) => role === AppRoles.APPROVER),
+      isAuthenticated: true,
+      getUserInfo: vi.fn(() => ({
+        id: "test-user",
+        username: "test",
+        email: "test@test.com",
+        firstName: "Test",
+        lastName: "User",
+        roles: [AppRoles.APPROVER],
+      })),
+      getUserRoles: vi.fn(() => [AppRoles.APPROVER]),
+      hasAnyRole: vi.fn(() => true),
+      hasAllRoles: vi.fn(() => true),
+      isRequestor: vi.fn(() => false),
+      isApprover: vi.fn(() => true),
+      hasPermission: vi.fn(() => true),
+      canApproveRequests: vi.fn(() => true),
+      canCreateRequests: vi.fn(() => true),
+      keycloak: {} as any,
+    });
 
     // Suppress MUI Select warning for tests since the component doesn't have MenuItem options
     vi.spyOn(console, "error").mockImplementation((message, ..._args) => {
@@ -44,13 +75,40 @@ describe("RequestDetail", () => {
     vi.restoreAllMocks();
   });
 
-  const renderRequestDetail = (searchParams: string = "") => {
+  const renderRequestDetail = (
+    searchParams: string = "",
+    role: AppRoles = AppRoles.APPROVER
+  ) => {
     if (searchParams) {
       mockUseSearchParams.mockReturnValue([
         new window.URLSearchParams(searchParams),
         vi.fn(),
       ]);
     }
+
+    // Set up role-specific mock
+    mockUseAuth.mockReturnValue({
+      hasRole: vi.fn((checkRole: AppRoles) => checkRole === role),
+      isAuthenticated: true,
+      getUserInfo: vi.fn(() => ({
+        id: "test-user",
+        username: "test",
+        email: "test@test.com",
+        firstName: "Test",
+        lastName: "User",
+        roles: [role],
+      })),
+      getUserRoles: vi.fn(() => [role]),
+      hasAnyRole: vi.fn(() => true),
+      hasAllRoles: vi.fn(() => true),
+      isRequestor: vi.fn(() => role === AppRoles.REQUESTOR),
+      isApprover: vi.fn(() => role === AppRoles.APPROVER),
+      hasPermission: vi.fn(() => true),
+      canApproveRequests: vi.fn(() => role === AppRoles.APPROVER),
+      canCreateRequests: vi.fn(() => true),
+      keycloak: {} as any,
+    });
+
     return renderWithProviders(<RequestDetail />);
   };
 
@@ -268,6 +326,97 @@ describe("RequestDetail", () => {
         },
       });
       expect(results).toHaveNoViolations();
+    });
+
+    // Role-based rendering tests
+    test("should render APPROVER view with editable reasoning field and action buttons", () => {
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      // Check for APPROVER-specific elements
+      expect(
+        screen.getByRole("button", { name: "Accept" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Reject" })
+      ).toBeInTheDocument();
+
+      // Check that reasoning field is editable (not disabled)
+      const reasoningField = screen.getByLabelText("Reasoning");
+      expect(reasoningField).toBeInTheDocument();
+      expect(reasoningField).not.toHaveAttribute("disabled");
+    });
+
+    test("should render REQUESTOR view with read-only reasoning field and no action buttons", () => {
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.REQUESTOR);
+
+      // Check that action buttons are NOT present for REQUESTOR
+      expect(
+        screen.queryByRole("button", { name: "Accept" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Reject" })
+      ).not.toBeInTheDocument();
+
+      // Check that reasoning field is read-only (disabled)
+      const reasoningField = screen.getByLabelText("Reasoning");
+      expect(reasoningField).toBeInTheDocument();
+      expect(reasoningField).toHaveAttribute("disabled");
+    });
+
+    test("should initialize reasoning field with existing statusReason for APPROVER", () => {
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      const reasoningField = screen.getByLabelText("Reasoning");
+      // The mock data has a statusReason of "Approved by John Smith"
+      expect(reasoningField).toHaveValue("Approved by John Smith");
+    });
+
+    test("should show existing statusReason in read-only field for REQUESTOR", () => {
+      renderRequestDetail(`?id=${validRequestId}`, AppRoles.REQUESTOR);
+
+      const reasoningField = screen.getByLabelText("Reasoning");
+      // For REQUESTOR, it should show the request.statusReason value
+      expect(reasoningField).toBeInTheDocument();
+      expect(reasoningField).toHaveAttribute("disabled");
+    });
+
+    test("should render error view when user has no valid role", () => {
+      // Mock a user with no valid roles
+      mockUseAuth.mockReturnValue({
+        hasRole: vi.fn(() => false),
+        isAuthenticated: true,
+        getUserInfo: vi.fn(() => ({
+          id: "test-user",
+          username: "test",
+          email: "test@test.com",
+          firstName: "Test",
+          lastName: "User",
+          roles: [],
+        })),
+        getUserRoles: vi.fn(() => []),
+        hasAnyRole: vi.fn(() => false),
+        hasAllRoles: vi.fn(() => false),
+        isRequestor: vi.fn(() => false),
+        isApprover: vi.fn(() => false),
+        hasPermission: vi.fn(() => false),
+        canApproveRequests: vi.fn(() => false),
+        canCreateRequests: vi.fn(() => false),
+        keycloak: {} as any,
+      });
+
+      mockUseSearchParams.mockReturnValue([
+        new window.URLSearchParams(`?id=${validRequestId}`),
+        vi.fn(),
+      ]);
+
+      renderWithProviders(<RequestDetail />);
+
+      expect(screen.getByText("No User Role Found")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Your user role does not match any of the expected roles/
+        )
+      ).toBeInTheDocument();
     });
   });
 });
