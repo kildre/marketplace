@@ -2,6 +2,7 @@
 ## Global Values                                                             ##
 ###############################################################################
 
+namespace: advana-marketplace
 global:
   awsRegion: us-gov-west-1
   appName: advana-marketplace
@@ -15,7 +16,7 @@ global:
 
 image:
   repository: tenant/images/advana-marketplace
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 serviceAccount:
   name: "{{ $.Release.Name }}"

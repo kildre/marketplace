@@ -1,1 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-advana-marketplace-web
+  namespace: advana-marketplace
+spec:
+  replicas: {{ .Values.deployment.web.replicaCount }}
+  selector:
+    matchLabels:
+      app: advana-marketplace-web
+  template:
+    metadata:
+      labels:
+        app: advana-marketplace-web
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: advana-marketplace-web
+          image: {{ .Values.image.repository }}@{{ .Values.image.digest }}
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "250m" # 0.25 CPU cores
+              memory: "256Mi" # 256 MiB of memory
+            limits:
+              cpu: "1000m" # 1 CPU core
+              memory: "1Gi" # 1 GiB of memory
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              runAsNonRoot: true
+              runAsUser: {{ .Values.securityContext.runAsUser | default 10001 }}
+              runAsGroup: {{ .Values.securityContext.runAsGroup | default 10001 }}
+            seccompProfile:
+              type: RuntimeDefault
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: secret-volume
+              mountPath: "/etc/secrets"
+              readOnly: true
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: your-secret
 {{ include "common.deployment" $ }}
