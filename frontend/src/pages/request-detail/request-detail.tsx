@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { PageTitle } from "../../components/page-title/page-title";
 import { mockRequestData } from "@/data/mock-requestData";
 import { organizationOptions } from "../../data/organizationOptionsData";
@@ -14,11 +14,17 @@ import Select from "@mui/material/Select";
 import { getIconPath } from "../../utils/helper-functions";
 import { useAuth } from "@/hooks/useAuth";
 import { AppRoles } from "@/types/auth";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Button } from "@mui/material";
 
 export const RequestDetail = (): React.ReactElement => {
   const [searchParams] = useSearchParams();
   const requestId = searchParams.get("id");
+  const userId = searchParams.get("userId"); // Get userId from URL
   const { hasRole } = useAuth();
+  
+  // Create the back link URL - preserve userId if it exists
+  const backToRequestsUrl = userId ? `/requests?userId=${userId}` : '/requests';
 
   // If an ID is provided, show the specific request detail
   if (requestId) {
@@ -29,6 +35,19 @@ export const RequestDetail = (): React.ReactElement => {
     if (!request) {
       return (
         <div className="requests-page marketplace-content">
+          {/* Back to Requests Button */}
+          <div style={{ marginBottom: '1rem' }}>
+            <Button
+              component={Link}
+              to={backToRequestsUrl}
+              startIcon={<ArrowBackIcon />}
+              variant="text"
+              color="primary"
+              sx={{ textTransform: 'none' }}
+            >
+              Back to Requests
+            </Button>
+          </div>
           <PageTitle title="Request Not Found" />
           <p>Request with ID {requestId} was not found.</p>
         </div>
@@ -81,6 +100,19 @@ export const RequestDetail = (): React.ReactElement => {
     if (hasRole(AppRoles.APPROVER)) {
       return (
         <div className="request-detail-page cart-page marketplace-content">
+          {/* Back to Requests Button */}
+          <div style={{ marginBottom: '1rem' }}>
+            <Button
+              component={Link}
+              to={backToRequestsUrl}
+              startIcon={<ArrowBackIcon />}
+              variant="text"
+              color="primary"
+              sx={{ textTransform: 'none' }}
+            >
+              Back to Requests
+            </Button>
+          </div>
           <PageTitle title={`Request Detail - ${request.requestId}`} />
           <div className="cart-page__content-wrapper">
             <div className="cart-page__content-left">
@@ -316,6 +348,19 @@ export const RequestDetail = (): React.ReactElement => {
     } else if (hasRole(AppRoles.REQUESTOR)) {
       return (
         <div className="request-detail-page cart-page marketplace-content">
+          {/* Back to Requests Button */}
+          <div style={{ marginBottom: '1rem' }}>
+            <Button
+              component={Link}
+              to={backToRequestsUrl}
+              startIcon={<ArrowBackIcon />}
+              variant="text"
+              color="primary"
+              sx={{ textTransform: 'none' }}
+            >
+              Back to Requests
+            </Button>
+          </div>
           <PageTitle title={`Request Detail - ${request.requestId}`} />
           <div className="cart-page__content-wrapper">
             <div className="cart-page__content-left">
@@ -540,6 +585,19 @@ export const RequestDetail = (): React.ReactElement => {
       // If the user does not have the expected roles, show an error message
       return (
         <div className="requests-page marketplace-content">
+          {/* Back to Requests Button */}
+          <div style={{ marginBottom: '1rem' }}>
+            <Button
+              component={Link}
+              to={backToRequestsUrl}
+              startIcon={<ArrowBackIcon />}
+              variant="text"
+              color="primary"
+              sx={{ textTransform: 'none' }}
+            >
+              Back to Requests
+            </Button>
+          </div>
           <PageTitle title="No User Role Found" />
           <p>
             Your user role does not match any of the expected roles for this
@@ -553,6 +611,19 @@ export const RequestDetail = (): React.ReactElement => {
   // If no ID is provided, show an error message
   return (
     <div className="requests-page marketplace-content">
+      {/* Back to Requests Button */}
+      <div style={{ marginBottom: '1rem' }}>
+        <Button
+          component={Link}
+          to={backToRequestsUrl}
+          startIcon={<ArrowBackIcon />}
+          variant="text"
+          color="primary"
+          sx={{ textTransform: 'none' }}
+        >
+          Back to Requests
+        </Button>
+      </div>
       <PageTitle title="Request Not Found" />
       <p>
         No Request ID was given as a parameter. Please return to the previous
