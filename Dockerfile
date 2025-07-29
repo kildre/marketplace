@@ -1,4 +1,4 @@
-ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
+ARG BASE_IMAGE="231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:24"
 FROM "${BASE_IMAGE}-dev" AS builder
 USER root
 ENV APP_UID=65532
