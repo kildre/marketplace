@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
+import { useAuth } from "@/hooks/useAuth";
+import { AppRoles } from "@/types/auth";
 
 export const Header = (): React.ReactElement => {
   const { cartCount } = useCart();
+  const { hasRole } = useAuth();
 
   return (
     <header className="header">
@@ -13,18 +16,20 @@ export const Header = (): React.ReactElement => {
           className="header__logo"
         />
       </Link>
-      <Link
-        className="header__cart-wrapper"
-        to="/cart"
-        aria-label="Go to cart page"
-      >
-        <img
-          src="/assets/icons/cart-icon.png"
-          alt="Cart Icon"
-          className="header__cart-icon"
-        />
-        <span className="header__cart-count">({cartCount})</span>
-      </Link>
+      {hasRole(AppRoles.REQUESTOR) && (
+        <Link
+          className="header__cart-wrapper"
+          to="/cart"
+          aria-label="Go to cart page"
+        >
+          <img
+            src="/assets/icons/cart-icon.png"
+            alt="Cart Icon"
+            className="header__cart-icon"
+          />
+          <span className="header__cart-count">({cartCount})</span>
+        </Link>
+      )}
     </header>
   );
 };
