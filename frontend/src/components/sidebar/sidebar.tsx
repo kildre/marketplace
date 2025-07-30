@@ -1,14 +1,26 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 import { useAuth } from "../../hooks/useAuth";
 import { AppRoles } from "../../types/auth";
+import { useRequests } from "../../hooks/useRequests";
 
 export const Sidebar = (): React.ReactElement => {
   const location = useLocation();
   const { cartCount } = useCart();
   const { hasRole } = useAuth();
+  const { userId: urlUserId } = useParams<{ userId: string }>();
+  const [searchParams] = useSearchParams();
+  const queryUserId = searchParams.get('userId');
+  
+  // Use the same logic as the requests page for consistency
+  const currentUserId = urlUserId || queryUserId || undefined;
+  const { requestsCount } = useRequests(currentUserId);
 
   const isActive = (path: string): boolean => {
+    // Handle requests page with or without user parameters
+    if (path === "/requests") {
+      return location.pathname === "/requests" || location.pathname.startsWith("/requests/");
+    }
     return location.pathname === path;
   };
 
@@ -27,7 +39,7 @@ export const Sidebar = (): React.ReactElement => {
                 aria-label="Go to home page"
                 aria-current={isActive("/") ? "page" : undefined}
               >
-                Requests <span className="sidebar__requests-count">(0)</span>
+                Requests <span className="sidebar__requests-count">({requestsCount})</span>
               </Link>
             </li>
           </ul>
@@ -79,12 +91,12 @@ export const Sidebar = (): React.ReactElement => {
                 aria-label="Go to requests page"
                 aria-current={isActive("/requests") ? "page" : undefined}
               >
-                Requests <span className="sidebar__requests-count">(0)</span>
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </div>
+              Requests <span className="sidebar__requests-count">({requestsCount})</span>
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    </div>
     );
   }
 };

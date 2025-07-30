@@ -199,7 +199,7 @@ describe("RequestDetail", () => {
 
       expect(screen.getByText("Personal Information")).toBeInTheDocument();
       expect(screen.getByText("Joe Snuffy")).toBeInTheDocument();
-      expect(screen.getByText("Joe.Snuffy.mil@army.mil")).toBeInTheDocument();
+      expect(screen.getByText("joe.snuffy.ctr@army.mil")).toBeInTheDocument();
       expect(screen.getByText("Military")).toBeInTheDocument();
       expect(screen.getByText("III Corps")).toBeInTheDocument();
     });

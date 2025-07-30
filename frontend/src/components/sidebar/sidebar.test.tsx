@@ -31,6 +31,14 @@ describe("Sidebar", () => {
         roles: [userRole],
         permissions: ["READ", "WRITE"],
       },
+      getUserInfo: () => ({
+        id: "test-user-123",
+        username: "testuser",
+        email: "test@advana.mil",
+        firstName: "Test",
+        lastName: "User",
+        roles: [userRole],
+      }),
       keycloak: {},
       isAuthenticated: true,
       isRequestor: () => userRole === AppRoles.REQUESTOR,
@@ -62,6 +70,14 @@ describe("Sidebar", () => {
         roles: [userRole],
         permissions: ["READ", "WRITE"],
       },
+      getUserInfo: () => ({
+        id: "test-user-123",
+        username: "testuser",
+        email: "test@advana.mil",
+        firstName: "Test",
+        lastName: "User",
+        roles: [userRole],
+      }),
       keycloak: {},
       isAuthenticated: true,
       isRequestor: () => userRole === AppRoles.REQUESTOR,
@@ -198,7 +214,7 @@ describe("Sidebar", () => {
   test("should display only requests counter for APPROVER role", () => {
     renderSidebarWithBrowserRouter(AppRoles.APPROVER);
 
-    const requestsCounter = screen.getByText("(0)", {
+    const requestsCounter = screen.getByText("(31)", {
       selector: ".sidebar__requests-count",
     });
 
