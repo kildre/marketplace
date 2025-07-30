@@ -7,6 +7,7 @@ import { ProductCatalog } from "./pages/product-catalog/product-catalog";
 import { Cart } from "./pages/cart/cart";
 import { Requests } from "./pages/requests/requests";
 import { RequestDetail } from "./pages/request-detail/request-detail";
+import { ApproverRedirectGuard } from "./components/auth/ApproverRedirectGuard";
 import { useAuth } from "./hooks/useAuth";
 import { AppRoles } from "./types/auth";
 import "./styles/main.scss";
@@ -34,8 +35,16 @@ function App(): React.ReactElement {
         <Sidebar />
         <Routes>
           <Route path="/" element={getHomeComponent()} />
-          <Route path="/cart" element={<Cart />} />
+          <Route 
+            path="/cart" 
+            element={
+              <ApproverRedirectGuard>
+                <Cart />
+              </ApproverRedirectGuard>
+            } 
+          />
           <Route path="/requests" element={<Requests />} />
+          <Route path="/requests/:userId" element={<Requests />} />
           <Route path="/request-detail" element={<RequestDetail />} />
         </Routes>
       </main>

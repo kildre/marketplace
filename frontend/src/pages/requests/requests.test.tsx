@@ -1,19 +1,90 @@
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
+import { vi } from "vitest";
 import { Requests } from "./requests";
+import { AppRoles } from "../../types/auth";
+
+// Mock the useAuth hook
+const mockUseAuth = vi.fn();
+
+vi.mock("../../hooks/useAuth", () => ({
+  useAuth: () => mockUseAuth(),
+}));
+
+// Mock the RequestsTable component since we're testing the Requests page logic
+vi.mock("../../components/requests-table/requests-table", () => ({
+  RequestsTable: ({ userId, showUserColumn }: { userId?: string; showUserColumn?: boolean }) => (
+    <div 
+      data-testid="requests-table" 
+      {...(userId !== undefined ? { 'data-user-id': userId } : {})}
+      data-show-user-column={showUserColumn}
+    >
+      Mock RequestsTable
+    </div>
+  ),
+}));
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 
 describe("Requests", () => {
-  const renderRequestsWithRouter = () => {
+  const renderRequestsWithRouter = (userRole = AppRoles.REQUESTOR) => {
+    // Mock the useAuth hook with the specified role
+    mockUseAuth.mockReturnValue({
+      isRequestor: () => userRole === AppRoles.REQUESTOR,
+      isApprover: () => userRole === AppRoles.APPROVER,
+      getUserInfo: () => ({
+        id: "test-user-123",
+        username: userRole === AppRoles.REQUESTOR ? "developer" : "approver",
+        email: "test@advana.mil",
+        firstName: "Test",
+        lastName: "User",
+        roles: [userRole],
+      }),
+    });
+
     return render(
       <BrowserRouter>
         <Requests />
       </BrowserRouter>
     );
   };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test("should render successfully", () => {
+    const { container } = renderRequestsWithRouter();
+    const requestsContainer = container.querySelector(".requests-page");
+
+    expect(requestsContainer).toBeInTheDocument();
+  });
+
+  test("should render main heading", () => {
+    renderRequestsWithRouter();
+
+    const mainHeading = screen.getByText("Requests");
+    expect(mainHeading).toBeInTheDocument();
+    expect(mainHeading.tagName).toBe("H1");
+  });
+
+  test("should pass correct props to RequestsTable for REQUESTOR role", () => {
+    renderRequestsWithRouter(AppRoles.REQUESTOR);
+
+    const requestsTable = screen.getByTestId("requests-table");
+    expect(requestsTable).toHaveAttribute("data-user-id", "developer");
+    expect(requestsTable).toHaveAttribute("data-show-user-column", "false");
+  });
+
+  test("should pass correct props to RequestsTable for APPROVER role", () => {
+    renderRequestsWithRouter(AppRoles.APPROVER);
+
+    const requestsTable = screen.getByTestId("requests-table");
+    expect(requestsTable).not.toHaveAttribute("data-user-id");
+    expect(requestsTable).toHaveAttribute("data-show-user-column", "true");
+  });
 
   test("should render successfully", () => {
     const { container } = renderRequestsWithRouter();
@@ -47,10 +118,13 @@ describe("Requests", () => {
     expect(containerDiv).toHaveClass("requests-page");
   });
 
-  test("should render without router (standalone)", () => {
-    render(<Requests />);
+  test("should render successfully", () => {
+    const { container } = renderRequestsWithRouter();
+    const requestsContainer = container.querySelector(".requests-page");
+    const section = container.querySelector("section");
 
-    expect(screen.getByText("Requests")).toBeInTheDocument();
+    expect(requestsContainer).toBeInTheDocument();
+    expect(section).toBeInTheDocument();
   });
 
   test("should have proper heading hierarchy", () => {

@@ -264,12 +264,12 @@ describe("App", () => {
     expect(screen.getByTestId("requests")).toBeInTheDocument();
     unmount1();
 
-    // Test cart route
+    // Test cart route (should redirect to requests for APPROVER)
     const { unmount: unmount2 } = renderAppWithRouter(
       "/cart",
       AppRoles.APPROVER
     );
-    expect(screen.getByTestId("cart")).toBeInTheDocument();
+    expect(screen.getByTestId("requests")).toBeInTheDocument();
     unmount2();
 
     // Test requests route
