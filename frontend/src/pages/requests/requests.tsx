@@ -18,7 +18,7 @@ export const Requests = (): React.ReactElement => {
     userId = userInfo.username;
   }
   
-  // Determine if user column should be shown
+  // Determine if user column should be shown or not
   // Hide user column when filtering by specific user OR when user is a requestor (they only see their own)
   const showUserColumn = isApprover() && !userId;
 
