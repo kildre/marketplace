@@ -16,7 +16,29 @@ This application uses:
 - npm >= 8.0.0
 - Docker (for containerized deployment)
 
+
 ### Local Development
+
+#### ECR Login
+Pulling containers from ECR is necessary so that the exact containers used in Advana Kubernetes is what is being troubleshot and validated locally
+1. Get AWS credentials. There are several ways to do this, but once you log into AWS, click on the link for **access keys** as shown here
+
+<img src="imgs/accesskeys.jpg" alt="Access Keys" width="300" height="200">   
+
+
+2. Next, you can choose any way to get your credentials, in this example, I added the credentials shown to my ~/.aws/config file 
+
+<img src="imgs/ssooptions.jpg" alt="Access Keys" width="300" height="200">   
+
+
+3. Now login to ECR
+```bash
+aws ecr get-login-password --region us-gov-west-1 --profile SandboxDevAccess-092548256278 | docker login --username AWS --password-stdin 231388672283.dkr.ecr.us-gov-west-1.amazonaws.com
+```
+4. Try to pull the node image
+```bash
+docker pull 231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22
+```
 
 1. **Install dependencies and start development server:**
    ```bash
