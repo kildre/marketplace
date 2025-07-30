@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { PageTitle } from "../../components/page-title/page-title";
 import { ProductCard } from "../../components/card/product-card";
 import { mockProducts } from "../../data/mock-productData";
-import { Product } from "../../types/products";
+import { Product } from "../../interfaces";
 import { useCart } from "../../contexts/CartContext";
 
 export const ProductCatalog = (): React.ReactElement => {
