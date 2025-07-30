@@ -133,7 +133,7 @@ describe("Cart", () => {
 
     it("should render breadcrumb link", () => {
       renderCart();
-      expect(screen.getByText("Return to Catalog")).toBeInTheDocument();
+      expect(screen.getByText("Back to Catalog")).toBeInTheDocument();
     });
 
     it("should render PageTitle component", () => {
@@ -293,7 +293,7 @@ describe("Cart", () => {
     it("should be accessible", () => {
       renderCart();
       const breadcrumbLink = screen.getByRole("link", {
-        name: "Return to Catalog",
+        name: "Back to Catalog",
       });
       expect(breadcrumbLink).toBeInTheDocument();
     });
@@ -301,7 +301,7 @@ describe("Cart", () => {
     it("should render all text content correctly", () => {
       renderCart();
       expect(screen.getByText("Your cart is empty")).toBeInTheDocument();
-      expect(screen.getByText("Return to Catalog")).toBeInTheDocument();
+      expect(screen.getByText("Back to Catalog")).toBeInTheDocument();
     });
 
     it("should have no accessibility violations", async () => {

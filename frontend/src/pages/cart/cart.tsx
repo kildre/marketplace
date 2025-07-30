@@ -6,6 +6,8 @@ import { FormPersonalInformation } from "@/components/form-personal-information/
 import { FormSelectedApplications } from "@/components/form-selected-applications/form-selected-applications";
 import { FormCostDetails } from "@/components/form-cost-details/form-cost-details";
 import { FormSubmitRequest } from "@/components/form-submit-request/form-submit-request";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Button } from "@mui/material";
 
 export const Cart = (): React.ReactElement => {
   const { cartCount } = useCart();
@@ -13,9 +15,18 @@ export const Cart = (): React.ReactElement => {
   if (cartCount === 0) {
     return (
       <div className="cart-page marketplace-content">
-        <Link to="/" className="cart-form__breadcrumb">
-          Return to Catalog
-        </Link>
+        <div className="back-button-wrapper">
+          <Button
+            component={Link}
+            to="/"
+            startIcon={<ArrowBackIcon />}
+            variant="text"
+            color="primary"
+            sx={{ textTransform: "none" }}
+          >
+            Back to Catalog
+          </Button>
+        </div>
         <PageTitle title="Cart" />
         <div className="cart-page__content-wrapper">
           <div className="cart-page__content-left">
@@ -36,9 +47,18 @@ export const Cart = (): React.ReactElement => {
   } else {
     return (
       <div className="cart-page marketplace-content">
-        <Link to="/" className="cart-form__breadcrumb">
-          Return to Catalog
-        </Link>
+        <div className="back-button-wrapper">
+          <Button
+            component={Link}
+            to="/"
+            startIcon={<ArrowBackIcon />}
+            variant="text"
+            color="primary"
+            sx={{ textTransform: "none" }}
+          >
+            Back to Catalog
+          </Button>
+        </div>
         <PageTitle title="Cart" />
         <div className="cart-page__content-wrapper">
           <div className="cart-page__content-left">

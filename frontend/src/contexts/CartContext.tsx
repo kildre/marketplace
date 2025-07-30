@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { Product } from "../types/products";
+import { Product } from "../interfaces";
 
 // Cart item interface - maintains 1:1 relationship
 interface CartItem {

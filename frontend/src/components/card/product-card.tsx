@@ -1,14 +1,8 @@
 /// <reference lib="dom" />
 import React, { useRef, useEffect, useState } from "react";
 import { Card, Typography, Button, Box, TextField } from "@mui/material";
-import { Product } from "../../types/products";
 import { getIconPath, formatPrice } from "../../utils/helper-functions";
-
-interface ProductCardProps {
-  product: Product;
-  onAddToCart?: (product: Product) => void;
-  onUpdateCartQuantity?: (product: Product, newQuantity: number) => void;
-}
+import { ProductCardProps } from "../../interfaces";
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,

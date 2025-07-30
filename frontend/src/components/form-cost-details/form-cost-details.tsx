@@ -1,8 +1,35 @@
+import React from "react";
 import { useCart } from "../../contexts/CartContext";
 import { formatPrice } from "../../utils/helper-functions";
+import { FormCostDetailsProps } from "../../interfaces";
 
-export const FormCostDetails = (): React.ReactElement => {
+export const FormCostDetails = ({
+  source = "cart",
+  summary,
+}: FormCostDetailsProps): React.ReactElement => {
   const { cartItems, cartCount, pendingPriceCount } = useCart();
+
+  // Use props data for 'request' source, cart data for 'cart' source
+  if (source === "request" && summary) {
+    return (
+      <>
+        <div className="form-personal-information__section">
+          <h5>Cost Details</h5>
+          <p>
+            PRODUCTS REQUESTED<span>{summary.totalItems}</span>
+          </p>
+          <p>
+            APPLICATIONS PENDING PRICE
+            <span className="cost-warning">{summary.pendingPriceItems}</span>
+          </p>
+        </div>
+        <h6>
+          Estimated ROM
+          <span id="estimatedRom">{summary.estimatedROM}</span>
+        </h6>
+      </>
+    );
+  }
 
   // Calculate total price from all cart items that have a price
   const calculateTotalPrice = () => {
