@@ -27,7 +27,7 @@ export const RequestDetail = (): React.ReactElement => {
       return (
         <div className="requests-page marketplace-content">
           {/* Back to Requests Button */}
-          <div style={{ marginBottom: "1rem" }}>
+          <div className="back-button-wrapper">
             <Button
               component={Link}
               to={backToRequestsUrl}
@@ -97,7 +97,7 @@ export const RequestDetail = (): React.ReactElement => {
       return (
         <div className="request-detail-page cart-page marketplace-content">
           {/* Back to Requests Button */}
-          <div style={{ marginBottom: "1rem" }}>
+          <div className="back-button-wrapper">
             <Button
               component={Link}
               to={backToRequestsUrl}
@@ -126,7 +126,7 @@ export const RequestDetail = (): React.ReactElement => {
       return (
         <div className="requests-page marketplace-content">
           {/* Back to Requests Button */}
-          <div style={{ marginBottom: "1rem" }}>
+          <div className="back-button-wrapper">
             <Button
               component={Link}
               to={backToRequestsUrl}
@@ -152,7 +152,7 @@ export const RequestDetail = (): React.ReactElement => {
   return (
     <div className="requests-page marketplace-content">
       {/* Back to Requests Button */}
-      <div style={{ marginBottom: "1rem" }}>
+      <div className="back-button-wrapper">
         <Button
           component={Link}
           to={backToRequestsUrl}
