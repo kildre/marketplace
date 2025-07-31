@@ -1,1 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-advana-marketplace-ingress
+  namespace: advana-marketplace
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+spec:
+  rules:
+    - host: {{ .Values.ingress.host | default "advana-marketplace.local" }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-advana-marketplace-web-clusterip
+                port:
+                  number: 8080
+  # Uncomment below to enable TLS
+  # tls:
+  #   - hosts:
+  #       - {{ .Values.ingress.host | default "advana-marketplace.local" }}
+  #     secretName: advana-marketplace-tls
 {{ include "common.ingress" $ }}
