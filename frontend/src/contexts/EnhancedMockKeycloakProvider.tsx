@@ -226,7 +226,7 @@ export const MockUserSwitcher: React.FC = () => {
     <div style={{
       position: 'fixed',
       top: '50px',
-      right: '10px',
+      right: '230px',
       zIndex: 1000,
       backgroundColor: '#f0f0f0',
       border: '1px solid #ccc',
