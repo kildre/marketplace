@@ -44,25 +44,26 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       return undefined; // Show all requests
     }
 
-    // If user is an approver, they can see all requests or filter by specific user
+    // Special handling for kberres user - always show their requests
+    const username = userInfo?.username?.toLowerCase();
+    const email = userInfo?.email?.toLowerCase();
+    if (username?.includes('kberres') || email?.includes('kberres')) {
+      // eslint-disable-next-line no-console
+      console.log('🔍 Kberres detected - forcing to show kberres requests');
+      return 'kberres'; // Force to kberres to match mock data
+    }
+
+    // If user is a requestor (and not an approver viewing all), show their own requests
+    if (isRequestor() && !isApprover()) {
+      return userInfo?.username; // Use their actual username
+    }
+
+    // If user is an approver, they can see all requests by default
     if (isApprover()) {
       return undefined; // undefined = all requests
     }
 
-    // If user is a requestor, they can only see their own requests
-    if (isRequestor()) {
-      // Special handling for kberres - ensure they can see their requests
-      const username = userInfo?.username?.toLowerCase();
-      const email = userInfo?.email?.toLowerCase();
-      
-      if (username?.includes('kberres') || email?.includes('kberres')) {
-        return 'kberres'; // Force to kberres to match mock data
-      }
-      
-      return userInfo?.username; // Use their actual username
-    }
-
-    // Default fallback - show all requests
+    // Default fallback - show all requests (for debugging)
     return undefined;
   }, [userId, isApprover, isRequestor, userInfo]);
 
@@ -71,13 +72,14 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   
   // Debug logging for production
   // eslint-disable-next-line no-console
-  console.log('🔍 RequestsTable Debug:', {
-    effectiveUserId,
+    console.log('🔍 RequestsTable Debug:', {
     userInfo,
-    totalRequests: allRequests.length,
-    isApprover: isApprover(),
-    isRequestor: isRequestor(),
-    providedUserId: userId,
+    userId,
+    effectiveUserId,
+    isRequestorResult: isRequestor(),
+    isApproverResult: isApprover(),
+    mockRequestDataLength: mockRequestData.length,
+    currentUrl: window.location.href
   });
   
   const requests = effectiveUserId

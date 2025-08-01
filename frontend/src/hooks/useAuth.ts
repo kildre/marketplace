@@ -12,11 +12,20 @@ export const useAuth = () => {
    * Check if user has a specific role (supports both app roles and Keycloak roles)
    */
   const hasRole = (role: AppRoles): boolean => {
-    if (!keycloak.authenticated) return false;
+    if (!keycloak.authenticated) {
+      // eslint-disable-next-line no-console
+      console.log('🔍 hasRole: Not authenticated');
+      return false;
+    }
     
     // Check against app roles first
     const userInfo = AuthService.getStoredUserInfo();
+    // eslint-disable-next-line no-console
+    console.log('🔍 hasRole: Stored user info:', userInfo);
+    
     if (userInfo?.roles.includes(role)) {
+      // eslint-disable-next-line no-console
+      console.log('🔍 hasRole: Found role in stored user info:', role);
       return true;
     }
 
@@ -27,9 +36,20 @@ export const useAuth = () => {
     };
 
     const rolesToCheck = keycloakRoleMap[role] || [role];
-    return rolesToCheck.some(r => 
-      keycloak.hasRealmRole(r) || keycloak.hasResourceRole(r)
-    );
+    // eslint-disable-next-line no-console
+    console.log('🔍 hasRole: Checking roles:', rolesToCheck);
+    
+    const hasKeycloakRole = rolesToCheck.some(r => {
+      const hasRealm = keycloak.hasRealmRole(r);
+      const hasResource = keycloak.hasResourceRole(r);
+      // eslint-disable-next-line no-console
+      console.log(`🔍 hasRole: ${r} - realm: ${hasRealm}, resource: ${hasResource}`);
+      return hasRealm || hasResource;
+    });
+    
+    // eslint-disable-next-line no-console
+    console.log('🔍 hasRole: Final result for', role, ':', hasKeycloakRole);
+    return hasKeycloakRole;
   };
 
   /**
