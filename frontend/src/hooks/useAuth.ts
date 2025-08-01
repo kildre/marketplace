@@ -1,18 +1,52 @@
 import { useKeycloak } from "../hooks/useKeycloak";
 import { AppRoles, ROLE_PERMISSIONS, Resources, Actions } from "../types/auth";
+import { AuthService } from "../services/authService";
 
 /**
- * Hook for role-based access control
+ * Hook for role-based access control with enhanced authentication
  */
 export const useAuth = () => {
   const { keycloak } = useKeycloak();
 
   /**
-   * Check if user has a specific role
+   * Check if user has a specific role (supports both app roles and Keycloak roles)
    */
   const hasRole = (role: AppRoles): boolean => {
     if (!keycloak.authenticated) return false;
-    return keycloak.hasRealmRole(role) || keycloak.hasResourceRole(role);
+    
+    // Check against app roles first
+    const userInfo = AuthService.getStoredUserInfo();
+    if (userInfo?.roles.includes(role)) {
+      return true;
+    }
+
+    // Fallback to Keycloak role checking
+    const keycloakRoleMap = {
+      [AppRoles.APPROVER]: ["marketplace-approver", "APPROVER"],
+      [AppRoles.REQUESTOR]: ["marketplace-requestor", "REQUESTOR"],
+    };
+
+    const rolesToCheck = keycloakRoleMap[role] || [role];
+    return rolesToCheck.some(r => 
+      keycloak.hasRealmRole(r) || keycloak.hasResourceRole(r)
+    );
+  };
+
+  /**
+   * Get all mapped Keycloak roles as app roles
+   */
+  const getKeycloakRoles = (): string[] => {
+    if (!keycloak.authenticated || !keycloak.tokenParsed) return [];
+    
+    return AuthService.extractRolesFromToken(keycloak.tokenParsed);
+  };
+
+  /**
+   * Get app roles from Keycloak roles
+   */
+  const getAppRoles = (): AppRoles[] => {
+    const keycloakRoles = getKeycloakRoles();
+    return AuthService.mapKeycloakRolesToAppRoles(keycloakRoles);
   };
 
   /**
@@ -50,10 +84,18 @@ export const useAuth = () => {
   };
 
   /**
-   * Get all user roles
+   * Get all user roles (prioritizes stored user info, falls back to Keycloak)
    */
   const getUserRoles = (): AppRoles[] => {
     if (!keycloak.authenticated) return [];
+    
+    // Get from stored user info first
+    const userInfo = AuthService.getStoredUserInfo();
+    if (userInfo?.roles) {
+      return userInfo.roles;
+    }
+
+    // Fallback to extracting from current token
     return Object.values(AppRoles).filter((role) => hasRole(role));
   };
 
@@ -106,6 +148,8 @@ export const useAuth = () => {
     // User info
     getUserInfo,
     getUserRoles,
+    getKeycloakRoles,
+    getAppRoles,
 
     // Role checks
     hasRole,

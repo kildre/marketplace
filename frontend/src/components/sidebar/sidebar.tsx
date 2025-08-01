@@ -42,6 +42,24 @@ export const Sidebar = (): React.ReactElement => {
                 Requests <span className="sidebar__requests-count">({requestsCount})</span>
               </Link>
             </li>
+            {/* Development-only auth status link */}
+            {import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === 'true' && !import.meta.env.VITEST && (
+              <li
+                className={
+                  isActive("/auth-status") ? "sidebar-nav__item active" : "sidebar-nav__item"
+                }
+                style={{ borderTop: '1px solid #ddd', marginTop: '10px', paddingTop: '10px' }}
+              >
+                <Link
+                  to="/auth-status"
+                  aria-label="Go to auth status page"
+                  aria-current={isActive("/auth-status") ? "page" : undefined}
+                  style={{ fontSize: '12px', color: '#666' }}
+                >
+                  🔐 Auth Status (Dev)
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
       </div>
@@ -94,6 +112,24 @@ export const Sidebar = (): React.ReactElement => {
               Requests <span className="sidebar__requests-count">({requestsCount})</span>
             </Link>
           </li>
+          {/* Development-only auth status link */}
+          {import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === 'true' && !import.meta.env.VITEST && (
+            <li
+              className={
+                isActive("/auth-status") ? "sidebar-nav__item active" : "sidebar-nav__item"
+              }
+              style={{ borderTop: '1px solid #ddd', marginTop: '10px', paddingTop: '10px' }}
+            >
+              <Link
+                to="/auth-status"
+                aria-label="Go to auth status page"
+                aria-current={isActive("/auth-status") ? "page" : undefined}
+                style={{ fontSize: '12px', color: '#666' }}
+              >
+                🔐 Auth Status (Dev)
+              </Link>
+            </li>
+          )}
         </ul>
       </nav>
     </div>

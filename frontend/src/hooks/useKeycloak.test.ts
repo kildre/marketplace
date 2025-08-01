@@ -7,13 +7,13 @@ vi.mock('@react-keycloak/web', () => ({
   useKeycloak: vi.fn()
 }));
 
-vi.mock('../contexts/MockKeycloakProvider', () => ({
-  useMockKeycloak: vi.fn()
+vi.mock('../contexts/EnhancedMockKeycloakProvider', () => ({
+  useEnhancedMockKeycloak: vi.fn()
 }));
 
 // Import the mocked functions to set up their behavior
 import { useKeycloak as useRealKeycloak } from '@react-keycloak/web';
-import { useMockKeycloak } from '../contexts/MockKeycloakProvider';
+import { useEnhancedMockKeycloak } from '../contexts/EnhancedMockKeycloakProvider';
 
 describe('useKeycloak hook', () => {
   // Mock return values
@@ -61,7 +61,7 @@ describe('useKeycloak hook', () => {
     
     // Set up default mock implementations
     (useRealKeycloak as any).mockReturnValue(mockRealKeycloakReturn);
-    (useMockKeycloak as any).mockReturnValue(mockMockKeycloakReturn);
+    (useEnhancedMockKeycloak as any).mockReturnValue(mockMockKeycloakReturn);
   });
 
   afterEach(() => {
@@ -79,7 +79,7 @@ describe('useKeycloak hook', () => {
       const { result } = renderHook(() => useKeycloak());
 
       expect(result.current).toEqual(mockMockKeycloakReturn);
-      expect(useMockKeycloak).toHaveBeenCalledTimes(1);
+      expect(useEnhancedMockKeycloak).toHaveBeenCalledTimes(1);
       expect(useRealKeycloak).not.toHaveBeenCalled();
     });
 
@@ -104,7 +104,7 @@ describe('useKeycloak hook', () => {
 
       expect(result.current).toEqual(mockRealKeycloakReturn);
       expect(useRealKeycloak).toHaveBeenCalledTimes(1);
-      expect(useMockKeycloak).not.toHaveBeenCalled();
+      expect(useEnhancedMockKeycloak).not.toHaveBeenCalled();
     });
 
     it('should return real user data', () => {
@@ -128,7 +128,7 @@ describe('useKeycloak hook', () => {
 
       expect(result.current).toEqual(mockRealKeycloakReturn);
       expect(useRealKeycloak).toHaveBeenCalledTimes(1);
-      expect(useMockKeycloak).not.toHaveBeenCalled();
+      expect(useEnhancedMockKeycloak).not.toHaveBeenCalled();
     });
   });
 
@@ -146,7 +146,7 @@ describe('useKeycloak hook', () => {
 
       expect(result.current).toEqual(mockRealKeycloakReturn);
       expect(useRealKeycloak).toHaveBeenCalledTimes(1);
-      expect(useMockKeycloak).not.toHaveBeenCalled();
+      expect(useEnhancedMockKeycloak).not.toHaveBeenCalled();
     });
   });
 
@@ -192,7 +192,7 @@ describe('useKeycloak hook', () => {
 
       expect(result.current).toEqual(mockRealKeycloakReturn);
       expect(useRealKeycloak).toHaveBeenCalledTimes(1);
-      expect(useMockKeycloak).not.toHaveBeenCalled();
+      expect(useEnhancedMockKeycloak).not.toHaveBeenCalled();
     });
 
     it('should handle whitespace as false', () => {
@@ -202,7 +202,7 @@ describe('useKeycloak hook', () => {
 
       expect(result.current).toEqual(mockRealKeycloakReturn);
       expect(useRealKeycloak).toHaveBeenCalledTimes(1);
-      expect(useMockKeycloak).not.toHaveBeenCalled();
+      expect(useEnhancedMockKeycloak).not.toHaveBeenCalled();
     });
   });
 });

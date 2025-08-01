@@ -5,7 +5,7 @@ import { ReactKeycloakProvider } from "@react-keycloak/web";
 import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import { CartProvider } from "./contexts/CartContext";
-import MockKeycloakProvider from "./contexts/MockKeycloakProvider";
+import { EnhancedMockKeycloakProvider, MockUserSwitcher } from "./contexts/EnhancedMockKeycloakProvider";
 import { queryClient } from "./lib/queryClient";
 import "./styles/main.scss";
 
@@ -53,18 +53,19 @@ const DevBanner = () => (
 
 // Choose rendering approach based on environment
 if (bypassAuth) {
-  // Development mode with mock authentication
+  // Development mode with enhanced mock authentication
   root.render(
     <React.StrictMode>
       <DevBanner />
       <QueryClientProvider client={queryClient}>
-        <MockKeycloakProvider>
+        <EnhancedMockKeycloakProvider>
           <BrowserRouter>
             <CartProvider>
               <App />
+              <MockUserSwitcher />
             </CartProvider>
           </BrowserRouter>
-        </MockKeycloakProvider>
+        </EnhancedMockKeycloakProvider>
       </QueryClientProvider>
     </React.StrictMode>
   );

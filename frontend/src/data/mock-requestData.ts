@@ -1,4 +1,160 @@
 export const mockRequestData = [
+  // Requests for kberres user
+  {
+    requestId: "KBER-REQ-001",
+    ticketNumber: "9001",
+    personalData: {
+      name: "K Berres",
+      email: "kberres@advana.mil",
+      designation: "Contractor",
+      agency: "CDAO",
+    },
+    requestDetails: {
+      organization: "CDAO",
+      organizationOther: "",
+      pocName: "K Berres",
+      pocPhone: "5555551234",
+      pocEmail: "kberres@advana.mil",
+      useCaseDescription:
+        "Data analytics platform for machine learning model training and deployment. Need access to advanced ML tools for predictive analytics on DoD datasets.",
+    },
+    cartItems: [
+      {
+        productId: 3,
+        productName: "Databricks",
+        productType: "Consumption Based Tool",
+        quantity: 1,
+        price: null,
+        description:
+          "Unified platform for data engineering, analytics, and AI.",
+        unit: 100,
+        rom: "Custom ROM",
+      },
+      {
+        productId: 4,
+        productName: "DataRobot",
+        productType: "Consumption Based Tool",
+        quantity: 1,
+        price: 600,
+        description:
+          "AI lifecycle platform for building and deploying machine learning models.",
+        unit: 500,
+      },
+    ],
+    status: "Pending",
+    statusReason: "Under review by approval board",
+    decisionNumber: "",
+    summary: {
+      totalItems: 2,
+      totalQuantity: 2,
+      pendingPriceItems: 1,
+      estimatedROM: "$1,100",
+    },
+    submittedAt: "2025-07-31T09:15:30.000Z",
+  },
+  {
+    requestId: "KBER-REQ-002",
+    ticketNumber: "9002",
+    personalData: {
+      name: "K Berres",
+      email: "kberres@advana.mil",
+      designation: "Contractor",
+      agency: "CDAO",
+    },
+    requestDetails: {
+      organization: "CDAO",
+      organizationOther: "",
+      pocName: "K Berres",
+      pocPhone: "5555551234",
+      pocEmail: "kberres@advana.mil",
+      useCaseDescription:
+        "Cloud infrastructure for development and testing environments. Required for secure application deployment and CI/CD pipeline implementation.",
+    },
+    cartItems: [
+      {
+        productId: 1,
+        productName: "AWS",
+        productType: "License Based",
+        quantity: 10,
+        price: 500,
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
+        unit: 100,
+      },
+      {
+        productId: 5,
+        productName: "Gitlab",
+        productType: "License Based",
+        quantity: 5,
+        price: 0,
+        description:
+          "DevOps platform enabling source code management and CI/CD pipelines.",
+        unit: 100,
+      },
+    ],
+    status: "Approved",
+    statusReason: "Approved by Sarah Johnson - meets security requirements",
+    decisionNumber: "KBER-APP-002",
+    summary: {
+      totalItems: 2,
+      totalQuantity: 15,
+      pendingPriceItems: 0,
+      estimatedROM: "$5,000",
+    },
+    submittedAt: "2025-07-25T14:22:15.000Z",
+  },
+  {
+    requestId: "KBER-REQ-003",
+    ticketNumber: "9003",
+    personalData: {
+      name: "K Berres",
+      email: "kberres@advana.mil",
+      designation: "Contractor",
+      agency: "CDAO",
+    },
+    requestDetails: {
+      organization: "CDAO",
+      organizationOther: "",
+      pocName: "K Berres",
+      pocPhone: "5555551234",
+      pocEmail: "kberres@advana.mil",
+      useCaseDescription:
+        "Business intelligence and data visualization tools for executive dashboards and reporting. Requirement for sensitive data handling capabilities.",
+    },
+    cartItems: [
+      {
+        productId: 6,
+        productName: "Palantir",
+        productType: "License Based",
+        quantity: 2,
+        price: 299,
+        description:
+          "Data integration and analytics platform for large-scale decision-making.",
+        unit: 100,
+      },
+      {
+        productId: 7,
+        productName: "Tableau",
+        productType: "License Based",
+        quantity: 5,
+        price: 200,
+        description:
+          "Interactive data visualization software for business intelligence.",
+        unit: 100,
+      },
+    ],
+    status: "Denied",
+    statusReason: "Security clearance requirements not met for requested data classification level",
+    decisionNumber: "KBER-DEN-003",
+    summary: {
+      totalItems: 2,
+      totalQuantity: 7,
+      pendingPriceItems: 0,
+      estimatedROM: "$1,598",
+    },
+    submittedAt: "2025-07-20T11:45:00.000Z",
+  },
+  // Existing requests below
   {
     requestId: "GnTqm8c-1983cdc2be0",
     ticketNumber: "0001",

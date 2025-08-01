@@ -22,6 +22,18 @@ export interface UsersResponse {
 // Mock users data simulating API response
 const mockUsersData: UserData[] = [
   {
+    id: 'kberres',
+    firstName: 'K',
+    lastName: 'Berres',
+    email: 'kberres@metrostar.com',
+    role: 'Contractor',
+    organization: 'CDAO',
+    clearanceLevel: 'Secret',
+    isActive: true,
+    lastLogin: '01-Aug-25',
+    requestCount: 3,
+  },
+  {
     id: 'joe.snuffy.ctr',
     firstName: 'Joe',
     lastName: 'Snuffy',
