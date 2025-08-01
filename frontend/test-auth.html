@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Authentication Flow</title>
+</head>
+<body>
+    <h1>Authentication Test</h1>
+    <div id="status">Loading...</div>
+    <div id="details"></div>
+
+    <script>
+        // Test script to check localStorage for authentication data
+        function checkAuth() {
+            const status = document.getElementById('status');
+            const details = document.getElementById('details');
+            
+            // Check for stored authentication data
+            const token = localStorage.getItem('marketplace_auth_token');
+            const refreshToken = localStorage.getItem('marketplace_refresh_token');
+            const userInfo = localStorage.getItem('marketplace_user_info');
+            
+            if (token) {
+                status.innerHTML = '✅ Authentication data found!';
+                details.innerHTML = `
+                    <h3>Stored Data:</h3>
+                    <p><strong>Token:</strong> ${token ? 'Present (length: ' + token.length + ')' : 'Missing'}</p>
+                    <p><strong>Refresh Token:</strong> ${refreshToken ? 'Present' : 'Missing'}</p>
+                    <p><strong>User Info:</strong> ${userInfo ? 'Present' : 'Missing'}</p>
+                    ${userInfo ? '<h4>User Info:</h4><pre>' + JSON.stringify(JSON.parse(userInfo), null, 2) + '</pre>' : ''}
+                `;
+            } else {
+                status.innerHTML = '❌ No authentication data found';
+                details.innerHTML = '<p>Please authenticate through the main application first.</p>';
+            }
+        }
+        
+        // Run check on page load
+        checkAuth();
+        
+        // Add refresh button
+        document.body.innerHTML += '<button onclick="checkAuth()">Refresh Check</button>';
+    </script>
+</body>
+</html>
