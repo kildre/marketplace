@@ -123,6 +123,20 @@ export const useAuth = () => {
    * Get user information from token
    */
   const getUserInfo = () => {
+    // First try to get from stored user info (for production)
+    const storedUserInfo = AuthService.getStoredUserInfo();
+    if (storedUserInfo) {
+      return {
+        id: storedUserInfo.id,
+        username: storedUserInfo.username,
+        email: storedUserInfo.email,
+        firstName: storedUserInfo.firstName,
+        lastName: storedUserInfo.lastName,
+        roles: storedUserInfo.roles,
+      };
+    }
+
+    // Fallback to direct token parsing (for development)
     if (!keycloak.authenticated || !keycloak.tokenParsed) {
       return null;
     }
