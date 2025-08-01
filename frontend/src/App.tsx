@@ -8,6 +8,7 @@ import { Cart } from "./pages/cart/cart";
 import { Requests } from "./pages/requests/requests";
 import { RequestDetail } from "./pages/request-detail/request-detail";
 import { ApproverRedirectGuard } from "./components/auth/ApproverRedirectGuard";
+import { AuthStatusPage } from "./pages/auth-status/auth-status";
 import { useAuth } from "./hooks/useAuth";
 import { AppRoles } from "./types/auth";
 import "./styles/main.scss";
@@ -46,6 +47,10 @@ function App(): React.ReactElement {
           <Route path="/requests" element={<Requests />} />
           <Route path="/requests/:userId" element={<Requests />} />
           <Route path="/request-detail" element={<RequestDetail />} />
+          {/* Development-only auth status page */}
+          {import.meta.env.DEV && (
+            <Route path="/auth-status" element={<AuthStatusPage />} />
+          )}
         </Routes>
       </main>
       <Footer />

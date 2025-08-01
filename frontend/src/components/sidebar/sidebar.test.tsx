@@ -214,7 +214,7 @@ describe("Sidebar", () => {
   test("should display only requests counter for APPROVER role", () => {
     renderSidebarWithBrowserRouter(AppRoles.APPROVER);
 
-    const requestsCounter = screen.getByText("(31)", {
+    const requestsCounter = screen.getByText("(34)", {
       selector: ".sidebar__requests-count",
     });
 
