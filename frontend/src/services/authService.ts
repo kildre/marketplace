@@ -87,6 +87,13 @@ export class AuthService {
       });
     }
 
+    // Debug log for marketplace roles specifically
+    const marketplaceRoles = tokenParsed.resource_access?.marketplace?.roles || [];
+    if (marketplaceRoles.length > 0) {
+      // eslint-disable-next-line no-console
+      console.log('🎯 Marketplace roles found:', marketplaceRoles);
+    }
+
     return roles;
   }
 
@@ -243,7 +250,7 @@ export class AuthService {
     const keycloakRoles = this.extractRolesFromToken(tokenParsed);
     const appRoles = this.mapKeycloakRolesToAppRoles(keycloakRoles);
 
-    return {
+    const userInfo: UserInfo = {
       id: tokenParsed.sub || "unknown",
       username: tokenParsed.preferred_username || tokenParsed.name || "unknown",
       email: tokenParsed.email || "",
@@ -253,5 +260,17 @@ export class AuthService {
       keycloakRoles,
       tokenExpiry: tokenParsed.exp,
     };
+
+    // Debug log for user authentication
+    // eslint-disable-next-line no-console
+    console.log('👤 User authenticated:', {
+      username: userInfo.username,
+      email: userInfo.email,
+      keycloakRoles: userInfo.keycloakRoles,
+      mappedAppRoles: userInfo.roles,
+      marketplaceRoles: tokenParsed.resource_access?.marketplace?.roles || []
+    });
+
+    return userInfo;
   }
 }

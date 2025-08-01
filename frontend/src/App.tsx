@@ -9,6 +9,7 @@ import { Requests } from "./pages/requests/requests";
 import { RequestDetail } from "./pages/request-detail/request-detail";
 import { ApproverRedirectGuard } from "./components/auth/ApproverRedirectGuard";
 import { AuthStatusPage } from "./pages/auth-status/auth-status";
+import { RoleDebugInfo } from "./components/debug/RoleDebugInfo";
 import { useAuth } from "./hooks/useAuth";
 import { AppRoles } from "./types/auth";
 import "./styles/main.scss";
@@ -54,6 +55,7 @@ function App(): React.ReactElement {
         </Routes>
       </main>
       <Footer />
+      <RoleDebugInfo />
     </div>
   );
 }

@@ -127,7 +127,9 @@ export class KeycloakService {
           new Date(this.keycloak.tokenParsed.exp * 1000).toISOString() : 'Unknown',
         user: this.keycloak.tokenParsed.preferred_username,
         email: this.keycloak.tokenParsed.email,
-        roles: this.keycloak.tokenParsed.realm_access?.roles || []
+        realmRoles: this.keycloak.tokenParsed.realm_access?.roles || [],
+        resourceAccess: this.keycloak.tokenParsed.resource_access || {},
+        marketplaceRoles: this.keycloak.tokenParsed.resource_access?.marketplace?.roles || []
       });
 
       // Store tokens
@@ -248,12 +250,23 @@ export class KeycloakService {
   }
 
   /**
-   * Check if user has specific roles
+   * Check if user has specific roles (checks both realm and resource roles)
    */
   hasRoles(roles: string[]): boolean {
-    return roles.some(role => 
-      this.keycloak.hasRealmRole(role) || this.keycloak.hasResourceRole(role)
-    );
+    return roles.some(role => {
+      // Check realm roles
+      if (this.keycloak.hasRealmRole(role)) {
+        return true;
+      }
+      
+      // Check resource roles for marketplace
+      if (this.keycloak.hasResourceRole(role, 'marketplace')) {
+        return true;
+      }
+      
+      // Check other resource roles
+      return this.keycloak.hasResourceRole(role);
+    });
   }
 }
 
