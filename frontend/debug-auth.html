@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Authentication State</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; }
+        .warning { background-color: #fff3cd; }
+        .error { background-color: #f8d7da; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>Authentication Debug Dashboard</h1>
+    
+    <div id="localStorage-section" class="section">
+        <h3>localStorage Data</h3>
+        <div id="localStorage-content"></div>
+    </div>
+    
+    <div id="cookie-section" class="section">
+        <h3>Cookies</h3>
+        <div id="cookie-content"></div>
+    </div>
+    
+    <div id="environment-section" class="section">
+        <h3>Environment Variables</h3>
+        <div id="environment-content"></div>
+    </div>
+    
+    <div id="keycloak-section" class="section">
+        <h3>Keycloak State</h3>
+        <div id="keycloak-content"></div>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const section = document.getElementById('localStorage-content');
+            const authToken = localStorage.getItem('marketplace_auth_token');
+            const refreshToken = localStorage.getItem('marketplace_refresh_token');
+            const userInfo = localStorage.getItem('marketplace_user_info');
+            
+            if (authToken || refreshToken || userInfo) {
+                section.parentElement.className = 'section success';
+                section.innerHTML = `
+                    <p><strong>✅ Authentication data found!</strong></p>
+                    <p>Auth Token: ${authToken ? 'Present (length: ' + authToken.length + ')' : 'Missing'}</p>
+                    <p>Refresh Token: ${refreshToken ? 'Present' : 'Missing'}</p>
+                    <p>User Info: ${userInfo ? 'Present' : 'Missing'}</p>
+                    ${userInfo ? '<h4>User Info:</h4><pre>' + JSON.stringify(JSON.parse(userInfo), null, 2) + '</pre>' : ''}
+                `;
+            } else {
+                section.parentElement.className = 'section error';
+                section.innerHTML = '<p><strong>❌ No authentication data in localStorage</strong></p>';
+            }
+        }
+        
+        function checkCookies() {
+            const section = document.getElementById('cookie-content');
+            const cookies = document.cookie.split(';').map(c => c.trim()).filter(c => c);
+            
+            if (cookies.length > 0) {
+                section.parentElement.className = 'section warning';
+                section.innerHTML = `
+                    <p><strong>🍪 Found ${cookies.length} cookies:</strong></p>
+                    <pre>${cookies.join('\\n')}</pre>
+                `;
+            } else {
+                section.innerHTML = '<p>No cookies found</p>';
+            }
+        }
+        
+        function checkEnvironment() {
+            const section = document.getElementById('environment-content');
+            // Try to detect environment variables from the page source or make assumptions
+            section.innerHTML = `
+                <p><strong>Environment Detection:</strong></p>
+                <p>URL: ${window.location.href}</p>
+                <p>Domain: ${window.location.hostname}</p>
+                <p>Protocol: ${window.location.protocol}</p>
+                <p>Environment appears to be: ${window.location.hostname.includes('localhost') ? 'Development' : 'Production'}</p>
+            `;
+        }
+        
+        function checkKeycloakState() {
+            const section = document.getElementById('keycloak-content');
+            
+            // Check if Keycloak is available in the global scope
+            if (typeof window.keycloak !== 'undefined') {
+                section.parentElement.className = 'section success';
+                section.innerHTML = `
+                    <p><strong>✅ Keycloak object found!</strong></p>
+                    <p>Authenticated: ${window.keycloak.authenticated}</p>
+                    <p>Token: ${window.keycloak.token ? 'Present' : 'Missing'}</p>
+                    <p>Token Parsed: ${window.keycloak.tokenParsed ? 'Present' : 'Missing'}</p>
+                `;
+            } else {
+                section.parentElement.className = 'section warning';
+                section.innerHTML = '<p><strong>⚠️ Keycloak object not found in global scope</strong></p>';
+            }
+        }
+        
+        // Run all checks
+        checkLocalStorage();
+        checkCookies();
+        checkEnvironment();
+        checkKeycloakState();
+        
+        // Add refresh button
+        document.body.innerHTML += '<button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px;">🔄 Refresh Checks</button>';
+    </script>
+</body>
+</html>

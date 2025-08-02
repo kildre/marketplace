@@ -48,6 +48,31 @@ vi.mock("./pages/request-detail/request-detail", () => ({
   RequestDetail: () => <div data-testid="request-detail">Request Detail</div>,
 }));
 
+vi.mock("./components/debug/RoleDebugInfo", () => ({
+  RoleDebugInfo: () => <div data-testid="role-debug-info">Role Debug Info</div>,
+}));
+
+// Mock the authentication providers
+vi.mock("./contexts/EnhancedMockKeycloakProvider", () => ({
+  EnhancedMockKeycloakProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-keycloak-provider">{children}</div>
+  ),
+  MockUserSwitcher: () => <div data-testid="mock-user-switcher">Mock User Switcher</div>,
+}));
+
+// Mock the Keycloak service
+vi.mock("./services/keycloakService", () => ({
+  KeycloakService: {
+    getInstance: vi.fn(() => ({
+      getKeycloak: vi.fn(() => ({
+        authenticated: true,
+        token: "mock-token",
+        tokenParsed: { preferred_username: "testuser" },
+      })),
+    })),
+  },
+}));
+
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 
