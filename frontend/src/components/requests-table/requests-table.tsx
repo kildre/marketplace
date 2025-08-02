@@ -48,8 +48,6 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
     const username = userInfo?.username?.toLowerCase();
     const email = userInfo?.email?.toLowerCase();
     if (username?.includes('kberres') || email?.includes('kberres')) {
-      // eslint-disable-next-line no-console
-      console.log('🔍 Kberres detected - forcing to show kberres requests');
       return 'kberres'; // Force to kberres to match mock data
     }
 
@@ -70,18 +68,6 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   // Use provided data or default mock data, filtered by effectiveUserId if specified
   const allRequests = data || mockRequestData;
   
-  // Debug logging for production
-  // eslint-disable-next-line no-console
-    console.log('🔍 RequestsTable Debug:', {
-    userInfo,
-    userId,
-    effectiveUserId,
-    isRequestorResult: isRequestor(),
-    isApproverResult: isApprover(),
-    mockRequestDataLength: mockRequestData.length,
-    currentUrl: window.location.href
-  });
-  
   const requests = effectiveUserId
     ? allRequests.filter((request) => {
         // Extract the user ID part from the email (before the @)
@@ -98,18 +84,6 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           (normalizedEffectiveUserId.includes('kberres') && normalizedEmailUserId.includes('kberres'));
         
         const matches = exactMatch || containsMatch || kberresMatch;
-        
-        // Debug logging for filtering - always log for now to debug production
-        // eslint-disable-next-line no-console
-        console.log('🔍 Request filtering:', {
-          requestEmail: request.personalData.email,
-          emailUserId: normalizedEmailUserId,
-          effectiveUserId: normalizedEffectiveUserId,
-          exactMatch,
-          containsMatch,
-          kberresMatch,
-          finalMatches: matches
-        });
         
         return matches;
       })
