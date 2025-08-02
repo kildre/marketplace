@@ -5,7 +5,7 @@ export const mockRequestData = [
     ticketNumber: "9001",
     personalData: {
       name: "K Berres",
-      email: "kberres@metrostar.com",
+      email: "kberres@metronstar.com",
       designation: "Contractor",
       agency: "CDAO",
     },
@@ -14,7 +14,7 @@ export const mockRequestData = [
       organizationOther: "",
       pocName: "K Berres",
       pocPhone: "5555551234",
-      pocEmail: "kberres@metrostar.com",
+      pocEmail: "kberres@metronstar.com",
       useCaseDescription:
         "Data analytics platform for machine learning model training and deployment. Need access to advanced ML tools for predictive analytics on DoD datasets.",
     },
@@ -57,7 +57,7 @@ export const mockRequestData = [
     ticketNumber: "9002",
     personalData: {
       name: "K Berres",
-      email: "kberres@metrostar.com",
+      email: "kberres@metronstar.com",
       designation: "Contractor",
       agency: "CDAO",
     },
@@ -66,7 +66,7 @@ export const mockRequestData = [
       organizationOther: "",
       pocName: "K Berres",
       pocPhone: "5555551234",
-      pocEmail: "kberres@metrostar.com",
+      pocEmail: "kberres@metronstar.com",
       useCaseDescription:
         "Cloud infrastructure for development and testing environments. Required for secure application deployment and CI/CD pipeline implementation.",
     },
@@ -108,7 +108,7 @@ export const mockRequestData = [
     ticketNumber: "9003",
     personalData: {
       name: "K Berres",
-      email: "kberres@metrostar.com",
+      email: "kberres@metronstar.com",
       designation: "Contractor",
       agency: "CDAO",
     },
@@ -117,7 +117,7 @@ export const mockRequestData = [
       organizationOther: "",
       pocName: "K Berres",
       pocPhone: "5555551234",
-      pocEmail: "kberres@metrostar.com",
+      pocEmail: "kberres@metronstar.com",
       useCaseDescription:
         "Business intelligence and data visualization tools for executive dashboards and reporting. Requirement for sensitive data handling capabilities.",
     },
