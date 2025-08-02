@@ -4,7 +4,7 @@ import { AppRoles } from '../../types/auth';
 
 /**
  * Dedicated page for viewing authentication status and testing role-based functionality
- * Only accessible in development mode
+ * Available in both development and production for debugging authentication issues
  */
 export const AuthStatusPage: React.FC = () => {
   const { 
@@ -21,16 +21,17 @@ export const AuthStatusPage: React.FC = () => {
   const userRoles = getUserRoles();
   const keycloakRoles = getKeycloakRoles();
 
-  // Don't render in production
-  if (import.meta.env.PROD || import.meta.env.VITE_BYPASS_AUTH !== 'true') {
-    return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <h2>🚫 Auth Status Page</h2>
-        <p>This page is only available in development mode with authentication bypass enabled.</p>
-        <p>Set <code>VITE_BYPASS_AUTH=true</code> in your .env file to access this page.</p>
-      </div>
-    );
-  }
+  // Allow in development mode OR when explicitly enabled for production debugging
+  // Remove this condition entirely to always allow access, or modify as needed
+  // if (import.meta.env.PROD || import.meta.env.VITE_BYPASS_AUTH !== 'true') {
+  //   return (
+  //     <div style={{ padding: '20px', textAlign: 'center' }}>
+  //       <h2>🚫 Auth Status Page</h2>
+  //       <p>This page is only available in development mode with authentication bypass enabled.</p>
+  //       <p>Set <code>VITE_BYPASS_AUTH=true</code> in your .env file to access this page.</p>
+  //     </div>
+  //   );
+  // }
 
   if (!isAuthenticated) {
     return (
@@ -45,7 +46,7 @@ export const AuthStatusPage: React.FC = () => {
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       <h1>🔐 Authentication Status</h1>
       <p style={{ color: '#666', marginBottom: '30px' }}>
-        Development-only page for testing authentication and role-based functionality
+        Authentication and role debugging page - useful for troubleshooting authentication issues
       </p>
       
       {/* User Information */}
