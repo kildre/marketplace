@@ -1,7 +1,7 @@
 include:
   - project: promotion/tekton-promotion-gitlab
-    # file: routes/container-only.yml 
-    file: routes/helm-only.yml
+    file: routes/container-only.yml 
+    # file: routes/helm-only.yml
     # file: routes/dragon-full.yml
 
 stages:
@@ -35,7 +35,7 @@ variables:
     value: "4d551dd86f749beb68793f5f09e4c820892d852c" # ${CI_COMMIT_SHA}
   CONTAINER_ONLY:
     description: "only build container"
-    value: "false"
+    value: "true"
     options:
       - "true"
       - "false"
