@@ -1,7 +1,7 @@
 include:
   - project: promotion/tekton-promotion-gitlab
-    # file: routes/container-only.yml 
-    file: routes/helm-only.yml
+    file: routes/container-only.yml 
+    # file: routes/helm-only.yml
     # file: routes/dragon-full.yml
 
 stages:
@@ -18,10 +18,14 @@ workflow:
       variables:
         HELM_UPGRADE_EXTRA_ARGS: >-
           --set image.tag=${CI_COMMIT_SHA}
+          --set image.pullPolicy=Always
+          --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
     - if: $HELM_ONLY == "true"
       variables:
         HELM_UPGRADE_EXTRA_ARGS: >
           --set image.tag=${IMAGE_TAG_FOR_HELM_ONLY}
+          --set image.pullPolicy=Always
+          --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
 
 variables:
   HELM_ONLY:
