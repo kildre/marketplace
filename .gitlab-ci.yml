@@ -1,6 +1,6 @@
 include:
   - project: promotion/tekton-promotion-gitlab
-    # file: routes/container-only.yml 
+    # file: routes/container-only.yml
     file: routes/helm-only.yml
     # file: routes/dragon-full.yml
 
@@ -14,35 +14,14 @@ workflow:
       when: always
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-    - if: $HELM_ONLY == "false"
-      variables:
-        HELM_UPGRADE_EXTRA_ARGS: >-
-          --set image.tag=${CI_COMMIT_SHA}
-          --set image.pullPolicy=Always
-          --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
-    - if: $HELM_ONLY == "true"
-      variables:
-        HELM_UPGRADE_EXTRA_ARGS: >
-          --set image.tag=${IMAGE_TAG_FOR_HELM_ONLY}
-          --set image.pullPolicy=Always
-          --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
 
 variables:
-  HELM_ONLY:
-    description: "only build chart"
-    value: "true"
-    options:
-      - "true"
-      - "false"
+  HELM_UPGRADE_EXTRA_ARGS: >
+    --set image.pullPolicy=Always
+    --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
   IMAGE_TAG_FOR_HELM_ONLY:
     description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
     value: "fce1d132fbc8b88c1a93ce02fa5b315e8acefe6b" # ${CI_COMMIT_SHA}
-  CONTAINER_ONLY:
-    description: "only build container"
-    value: "true"
-    options:
-      - "true"
-      - "false"
   DOCKERFILE_VERSION:
     description: "Choose Dockerfile version for security compliance"
     value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
