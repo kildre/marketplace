@@ -21,7 +21,7 @@ variables:
     --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
   IMAGE_TAG_FOR_HELM_ONLY:
     description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-    value: "fce1d132fbc8b88c1a93ce02fa5b315e8acefe6b" # ${CI_COMMIT_SHA}
+    value: "ee902cfab28fd442bf9adba25d24cffc0d45caec" # ${CI_COMMIT_SHA}
   DOCKERFILE_VERSION:
     description: "Choose Dockerfile version for security compliance"
     value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
