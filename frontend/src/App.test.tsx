@@ -52,12 +52,20 @@ vi.mock("./components/debug/RoleDebugInfo", () => ({
   RoleDebugInfo: () => <div data-testid="role-debug-info">Role Debug Info</div>,
 }));
 
+vi.mock("./pages/auth-status/auth-status", () => ({
+  AuthStatusPage: () => <div data-testid="auth-status">Auth Status</div>,
+}));
+
 // Mock the authentication providers
 vi.mock("./contexts/EnhancedMockKeycloakProvider", () => ({
-  EnhancedMockKeycloakProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="mock-keycloak-provider">{children}</div>
+  EnhancedMockKeycloakProvider: ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) => <div data-testid="mock-keycloak-provider">{children}</div>,
+  MockUserSwitcher: () => (
+    <div data-testid="mock-user-switcher">Mock User Switcher</div>
   ),
-  MockUserSwitcher: () => <div data-testid="mock-user-switcher">Mock User Switcher</div>,
 }));
 
 // Mock the Keycloak service
@@ -312,5 +320,87 @@ describe("App", () => {
     );
     expect(screen.getByTestId("request-detail")).toBeInTheDocument();
     unmount4();
+  });
+
+  test("should render ProductCatalog as fallback for users with no specific role", () => {
+    // Mock user with no specific role (empty roles array)
+    mockUseAuth.mockReturnValue({
+      userInfo: {
+        id: "test-user-123",
+        username: "testuser",
+        email: "test@advana.mil",
+        firstName: "Test",
+        lastName: "User",
+        roles: [],
+        permissions: [],
+      },
+      keycloak: {},
+      isAuthenticated: true,
+      isRequestor: () => false,
+      isApprover: () => false,
+      hasRole: () => false, // No roles
+      hasPermission: () => false,
+      logout: vi.fn(),
+      login: vi.fn(),
+    });
+
+    window.history.pushState({}, "Test page", "/");
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByTestId("product-catalog")).toBeInTheDocument();
+    expect(screen.queryByTestId("requests")).not.toBeInTheDocument();
+  });
+
+  test("should render requests route with userId parameter", () => {
+    renderAppWithRouter("/requests/user123", AppRoles.APPROVER);
+
+    expect(screen.getByTestId("requests")).toBeInTheDocument();
+    expect(screen.queryByTestId("product-catalog")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cart")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("request-detail")).not.toBeInTheDocument();
+  });
+
+  test("should render auth status page in development mode", () => {
+    // Mock development environment using vi.stubEnv for DEV
+    vi.stubEnv("DEV", true);
+
+    renderAppWithRouter("/auth-status", AppRoles.REQUESTOR);
+
+    expect(screen.getByTestId("auth-status")).toBeInTheDocument();
+    expect(screen.queryByTestId("product-catalog")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cart")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("requests")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("request-detail")).not.toBeInTheDocument();
+
+    // Restore environment
+    vi.unstubAllEnvs();
+  });
+
+  test("should not render auth status route in production mode", () => {
+    // Mock production environment using vi.stubEnv for DEV
+    vi.stubEnv("DEV", false);
+
+    renderAppWithRouter("/auth-status", AppRoles.REQUESTOR);
+
+    expect(screen.queryByTestId("auth-status")).not.toBeInTheDocument();
+
+    // Should not find any route match, so no page component should render
+    expect(screen.queryByTestId("product-catalog")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cart")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("requests")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("request-detail")).not.toBeInTheDocument();
+
+    // Restore environment
+    vi.unstubAllEnvs();
+  });
+
+  test("should render role debug info component", () => {
+    renderAppWithRouter("/", AppRoles.REQUESTOR);
+
+    expect(screen.getByTestId("role-debug-info")).toBeInTheDocument();
   });
 });

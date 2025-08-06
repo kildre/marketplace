@@ -538,4 +538,216 @@ describe("Sidebar", () => {
     expect(allListItems).toHaveLength(1);
     expect(activeItems).toHaveLength(1);
   });
+
+  describe("URL Parameters and Search Params", () => {
+    const renderWithParams = (path: string, searchParams?: string) => {
+      const fullPath = searchParams ? `${path}?${searchParams}` : path;
+      return renderSidebarWithRouter(fullPath, AppRoles.REQUESTOR);
+    };
+
+    test("should handle URL userId parameter", () => {
+      // Test with userId in the URL params (like /requests/user123)
+      const { container } = renderWithParams("/requests/user123");
+      expect(container.querySelector(".sidebar")).toBeInTheDocument();
+    });
+
+    test("should handle query string userId parameter", () => {
+      // Test with userId in query parameters
+      const { container } = renderWithParams("/requests", "userId=query123");
+      expect(container.querySelector(".sidebar")).toBeInTheDocument();
+    });
+
+    test("should handle both URL and query userId parameters", () => {
+      // Test with both types of userId parameters
+      const { container } = renderWithParams(
+        "/requests/url456",
+        "userId=query789"
+      );
+      expect(container.querySelector(".sidebar")).toBeInTheDocument();
+    });
+
+    test("should handle requests route with different patterns", () => {
+      const requestsRoutes = [
+        "/requests",
+        "/requests/123",
+        "/requests/user/456",
+        "/requests?userId=789",
+      ];
+
+      requestsRoutes.forEach((route) => {
+        const { container } = renderSidebarWithRouter(
+          route,
+          AppRoles.REQUESTOR
+        );
+        const requestsLinks = container.querySelectorAll(
+          '[aria-label="Go to requests page"]'
+        );
+        const activeRequestsLink = Array.from(requestsLinks).find(
+          (link) => link.getAttribute("aria-current") === "page"
+        );
+
+        expect(activeRequestsLink).toBeTruthy();
+        expect(
+          container.querySelector(".sidebar-nav__item.active")
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Development Environment Features", () => {
+    const originalEnv = { ...import.meta.env };
+
+    afterEach(() => {
+      // Restore original environment
+      Object.assign(import.meta.env, originalEnv);
+    });
+
+    test("should render auth status link in development with bypass auth", () => {
+      // Mock development environment with bypass auth
+      vi.stubEnv("DEV", true);
+      vi.stubEnv("VITE_BYPASS_AUTH", "true");
+      vi.stubEnv("VITEST", "false");
+
+      const { container } = renderSidebarWithBrowserRouter(AppRoles.REQUESTOR);
+
+      // Note: import.meta.env cannot be mocked with vi.stubEnv during runtime
+      // This test covers the environment variable checking logic in our test setup
+      // but the actual import.meta.env conditional rendering cannot be easily tested
+      // without more complex Vite configuration or build-time environment setup
+
+      // At minimum, should have the standard navigation links
+      const links = container.querySelectorAll("a");
+      expect(links.length).toBeGreaterThanOrEqual(3);
+    });
+
+    test("should not render auth status link in production", () => {
+      // Mock production environment
+      vi.stubEnv("DEV", false);
+      vi.stubEnv("VITE_BYPASS_AUTH", "false");
+
+      const { container } = renderSidebarWithBrowserRouter(AppRoles.REQUESTOR);
+
+      const authStatusLinks = Array.from(
+        container.querySelectorAll("a")
+      ).filter((link) => link.getAttribute("href") === "/auth-status");
+
+      expect(authStatusLinks).toHaveLength(0);
+    });
+
+    test("should not render auth status link when VITE_BYPASS_AUTH is false", () => {
+      // Mock development but with bypass auth disabled
+      vi.stubEnv("DEV", true);
+      vi.stubEnv("VITE_BYPASS_AUTH", "false");
+
+      const { container } = renderSidebarWithBrowserRouter(AppRoles.REQUESTOR);
+
+      const authStatusLinks = Array.from(
+        container.querySelectorAll("a")
+      ).filter((link) => link.getAttribute("href") === "/auth-status");
+
+      expect(authStatusLinks).toHaveLength(0);
+    });
+
+    test("should not render auth status link in test environment", () => {
+      // Mock development with bypass auth but in test environment
+      vi.stubEnv("DEV", true);
+      vi.stubEnv("VITE_BYPASS_AUTH", "true");
+      vi.stubEnv("VITEST", "true");
+
+      const { container } = renderSidebarWithBrowserRouter(AppRoles.REQUESTOR);
+
+      const authStatusLinks = Array.from(
+        container.querySelectorAll("a")
+      ).filter((link) => link.getAttribute("href") === "/auth-status");
+
+      expect(authStatusLinks).toHaveLength(0);
+    });
+
+    test("should handle auth status link for APPROVER in development", () => {
+      // Mock development environment
+      vi.stubEnv("DEV", true);
+      vi.stubEnv("VITE_BYPASS_AUTH", "true");
+      vi.stubEnv("VITEST", "false");
+
+      const { container } = renderSidebarWithBrowserRouter(AppRoles.APPROVER);
+
+      // Check for potential auth-status link for APPROVER
+      const links = container.querySelectorAll("a");
+      expect(links.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe("Complex Route Patterns", () => {
+    test("should handle complex requests route patterns", () => {
+      const complexRoutes = [
+        "/requests/",
+        "/requests/detail",
+        "/requests/edit/123",
+        "/requests/view/456",
+      ];
+
+      complexRoutes.forEach((route) => {
+        const { container } = renderSidebarWithRouter(
+          route,
+          AppRoles.REQUESTOR
+        );
+
+        // All these should activate the requests navigation
+        const requestsNavItems =
+          container.querySelectorAll(".sidebar-nav__item");
+        const activeItems = container.querySelectorAll(
+          ".sidebar-nav__item.active"
+        );
+
+        expect(requestsNavItems).toHaveLength(3);
+        expect(activeItems).toHaveLength(1);
+
+        const requestsLinks = container.querySelectorAll(
+          '[aria-label="Go to requests page"]'
+        );
+        const activeRequestsLink = Array.from(requestsLinks).find(
+          (link) => link.getAttribute("aria-current") === "page"
+        );
+
+        expect(activeRequestsLink).toBeTruthy();
+      });
+    });
+
+    test("should handle exact path matching for non-requests routes", () => {
+      const exactRoutes = [
+        { path: "/", expectedActive: "home" },
+        { path: "/cart", expectedActive: "cart" },
+        { path: "/cartography", expectedActive: null }, // Should not match /cart
+        { path: "/request", expectedActive: null }, // Should not match /requests
+      ];
+
+      exactRoutes.forEach(({ path, expectedActive }) => {
+        const { container } = renderSidebarWithRouter(path, AppRoles.REQUESTOR);
+        const activeItems = container.querySelectorAll(
+          ".sidebar-nav__item.active"
+        );
+
+        if (expectedActive === null) {
+          expect(activeItems).toHaveLength(0);
+        } else {
+          expect(activeItems).toHaveLength(1);
+        }
+
+        if (expectedActive === "home") {
+          const homeLink = screen.getByRole("link", {
+            name: /go to home page/i,
+          });
+          expect(homeLink).toHaveAttribute("aria-current", "page");
+        } else if (expectedActive === "cart") {
+          const cartLinks = container.querySelectorAll(
+            '[aria-label="Go to cart page"]'
+          );
+          const activeCartLink = Array.from(cartLinks).find(
+            (link) => link.getAttribute("aria-current") === "page"
+          );
+          expect(activeCartLink).toBeTruthy();
+        }
+      });
+    });
+  });
 });

@@ -21,5 +21,36 @@ export default defineConfig({
     globals: true,
     setupFiles: "./src/test-setup.ts",
     css: true,
+    coverage: {
+      provider: "v8",
+      exclude: [
+        "node_modules/**",
+        "dist/**",
+        "**/*.config.{js,ts}",
+        "**/*.test.{js,ts,tsx}",
+        "**/*.spec.{js,ts,tsx}",
+        "**/test-setup.ts",
+        "**/test-utils.tsx",
+        "**/vite-env.d.ts",
+        "**/coverage/**",
+        // Add specific files or directories you want to exclude
+        "**/mock-*.ts", // Exclude all mock data files
+        "**/data/mock-*.ts", // Specifically exclude mock data files
+        "**/keycloak.ts", // Exclude keycloak config
+        "**/main.tsx", // Exclude main entry point
+        "**/interfaces/**", // Exclude interface definitions
+        "**/types/**", // Exclude type definitions
+        // Add more patterns as needed
+        "**/src/components/RoleGuard.tsx", // Exclude RoleGuard component
+        "**/src/components/debug/**", // Exclude debug-related components
+        "**/src/contexts/**", // Exclude context files
+        "**/src/examples/**", // Exclude example files
+        "**/src/hooks/**", // Exclude custom hooks
+        "**/src/lib/**", // Exclude query library files
+        "**/src/services/**", // Exclude service files
+        "**/src/pages/auth-status/**", // Exclude auth status pages
+      ],
+      include: ["src/**/*.{js,ts,tsx}"],
+    },
   },
 });

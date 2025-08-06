@@ -8,7 +8,7 @@ import {
 import { vi } from "vitest";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { ProductCard } from "./product-card";
-import { Product } from "../../types/products";
+import { Product } from "../../interfaces";
 
 // Create a theme with ripple effects disabled for testing
 const testTheme = createTheme({
@@ -361,6 +361,144 @@ describe("ProductCard", () => {
 
       // Button should be disabled when quantity is 0
       expect(decreaseButton).toBeDisabled();
+    });
+
+    test("should handle touch events for increase button", () => {
+      renderProductCard();
+
+      const increaseButton = screen.getByRole("button", {
+        name: "Increase quantity for Test Product",
+      });
+
+      act(() => {
+        fireEvent.touchStart(increaseButton);
+        fireEvent.touchEnd(increaseButton);
+      });
+
+      const quantityInput = screen.getByRole("spinbutton");
+      expect(quantityInput).toHaveValue(2); // Should increase from 1 to 2
+    });
+
+    test("should handle touch events for decrease button", () => {
+      renderProductCard(mockProductInCart);
+
+      const decreaseButton = screen.getByRole("button", {
+        name: "Decrease quantity for Product In Cart",
+      });
+
+      act(() => {
+        fireEvent.touchStart(decreaseButton);
+        fireEvent.touchEnd(decreaseButton);
+      });
+
+      const quantityInput = screen.getByRole("spinbutton");
+      expect(quantityInput).toHaveValue(4); // Should decrease from 5 to 4
+    });
+
+    test("should handle repeated increase with interval when button held down", () => {
+      renderProductCard();
+
+      const increaseButton = screen.getByRole("button", {
+        name: "Increase quantity for Test Product",
+      });
+
+      act(() => {
+        fireEvent.mouseDown(increaseButton);
+      });
+
+      // Advance timers to trigger interval callbacks
+      act(() => {
+        vi.advanceTimersByTime(300); // Should trigger at least 2 intervals (150ms each)
+      });
+
+      const quantityInput = screen.getByRole("spinbutton");
+      // Should be more than the initial value of 1 due to intervals
+      expect(quantityInput).toHaveProperty("value");
+      const currentValue = Number((quantityInput as any).value);
+      expect(currentValue).toBeGreaterThan(2);
+
+      act(() => {
+        fireEvent.mouseUp(increaseButton);
+      });
+    });
+
+    test("should handle repeated decrease with interval when button held down", () => {
+      renderProductCard(mockProductInCart);
+
+      const decreaseButton = screen.getByRole("button", {
+        name: "Decrease quantity for Product In Cart",
+      });
+
+      act(() => {
+        fireEvent.mouseDown(decreaseButton);
+      });
+
+      // Advance timers to trigger interval callbacks
+      act(() => {
+        vi.advanceTimersByTime(300); // Should trigger at least 2 intervals (150ms each)
+      });
+
+      const quantityInput = screen.getByRole("spinbutton");
+      // Should be less than the initial value of 5 due to intervals
+      expect(quantityInput).toHaveProperty("value");
+      const currentValue = Number((quantityInput as any).value);
+      expect(currentValue).toBeLessThan(4);
+
+      act(() => {
+        fireEvent.mouseUp(decreaseButton);
+      });
+    });
+
+    test("should stop interval when mouse leaves increase button", () => {
+      renderProductCard();
+
+      const increaseButton = screen.getByRole("button", {
+        name: "Increase quantity for Test Product",
+      });
+
+      act(() => {
+        fireEvent.mouseDown(increaseButton);
+      });
+
+      act(() => {
+        fireEvent.mouseLeave(increaseButton);
+      });
+
+      const quantityInput = screen.getByRole("spinbutton");
+      const initialValue = Number((quantityInput as any).value);
+
+      // Advance timers - should not change since interval was stopped
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
+
+      expect(quantityInput).toHaveValue(initialValue);
+    });
+
+    test("should stop interval when mouse leaves decrease button", () => {
+      renderProductCard(mockProductInCart);
+
+      const decreaseButton = screen.getByRole("button", {
+        name: "Decrease quantity for Product In Cart",
+      });
+
+      act(() => {
+        fireEvent.mouseDown(decreaseButton);
+      });
+
+      act(() => {
+        fireEvent.mouseLeave(decreaseButton);
+      });
+
+      const quantityInput = screen.getByRole("spinbutton");
+      const initialValue = Number((quantityInput as any).value);
+
+      // Advance timers - should not change since interval was stopped
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
+
+      expect(quantityInput).toHaveValue(initialValue);
     });
   });
 
