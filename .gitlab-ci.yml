@@ -4,25 +4,37 @@ include:
     file: routes/helm-only.yml
     # file: routes/dragon-full.yml
 
-stages:
-  - "🧪 unit-test"
-  - pipeline-trigger
-
 workflow:
   rules:
-    # - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main" # && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH || $CI_JOB_MANUAL = true
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main" || $CI_JOB_MANUAL == 'true'
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main" # && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH || $CI_JOB_MANUAL = true
       when: always
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
+    - if: $HELM_ONLY == "false"
+      variables:
+        HELM_UPGRADE_EXTRA_ARGS: >-
+          --set image.tag=${CI_COMMIT_SHA}
+    - if: $HELM_ONLY == "true"
+      variables:
+        HELM_UPGRADE_EXTRA_ARGS: >
+          --set image.tag=${IMAGE_TAG_FOR_HELM_ONLY}
 
 variables:
-  HELM_UPGRADE_EXTRA_ARGS: >
-    --set image.pullPolicy=Always
-    --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
+  HELM_ONLY:
+    description: "only build chart"
+    value: "true"
+    options:
+      - "true"
+      - "false"
   IMAGE_TAG_FOR_HELM_ONLY:
     description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-    value: "c43e299615c9189d989cf1d658a6c9f32c25120c" # ${CI_COMMIT_SHA}
+    value: "9fcec8c97305aba3a5359cbb1a58887043e69cd8" # ${CI_COMMIT_SHA}
+  CONTAINER_ONLY:
+    description: "only build container"
+    value: "false"
+    options:
+      - "true"
+      - "false"
   DOCKERFILE_VERSION:
     description: "Choose Dockerfile version for security compliance"
     value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
