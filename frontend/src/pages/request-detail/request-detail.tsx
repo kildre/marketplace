@@ -58,8 +58,6 @@ export const RequestDetail = (): React.ReactElement => {
       buttonClass += " button--denied";
     } else if (request.status === "Pending") {
       buttonClass += " button--pending";
-    } else {
-      buttonClass = "button"; // Default case
     }
 
     const updateRequest = () => {
