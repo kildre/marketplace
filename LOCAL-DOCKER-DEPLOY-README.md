@@ -31,7 +31,7 @@ This guide explains how to deploy the Advana Marketplace frontend container loca
 Open a terminal in the project root (`c:\Repos\advana-marketplace`) and run:
 
 ```powershell
-# Build the Docker image for the frontend
+# Build the Docker image for the frontend. Make sure to include the period with the space at the end of the command.
 $ docker build -f Dockerfile.local --no-cache -t advana-marketplace-frontend:local .
 ```
 
