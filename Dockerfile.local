@@ -1,5 +1,5 @@
-ARG BASE_IMAGE="231134345536.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/node-fips:22"
-FROM "${BASE_IMAGE}-dev" AS builder
+ARG BASE_IMAGE="node:24-alpine"
+FROM "${BASE_IMAGE}" AS builder
 USER root
 ENV APP_UID=65532
 ENV APP_GID=65532
@@ -62,14 +62,17 @@ RUN chown -R ${APP_UID}:${APP_GID} /var/log/nginx
 RUN chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d
 RUN touch /var/run/nginx.pid && chown -R ${APP_UID}:${APP_GID} /var/run/nginx.pid
 
+# Create /tmp/nginx/client_temp and set ownership
+RUN mkdir -p /tmp/nginx/client_temp && chown -R ${APP_UID}:${APP_GID} /tmp/nginx
+
 USER ${APP_UID}:${APP_GID}
 
 # Add healthcheck to address compliance requirements - using nc to avoid wget dependency
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD nc -z localhost 8080 || exit 1
 
-# Expose port 8080
-EXPOSE 8080
+# Expose port 7500
+EXPOSE 7500
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]

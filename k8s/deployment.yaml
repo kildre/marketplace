@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: advana-marketplace
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: advana-marketplace-frontend:latest
+        imagePullPolicy: Never  # Use local image, don't pull from registry
+        ports:
+        - containerPort: 7500  # nginx serves on port 7500 per Dockerfile
+        env:
+        - name: REACT_APP_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: REACT_APP_API_URL
+        - name: REACT_APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: REACT_APP_ENV
+        - name: REACT_APP_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: REACT_APP_LOG_LEVEL
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 7500
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 7500
+          initialDelaySeconds: 10
+          periodSeconds: 10
