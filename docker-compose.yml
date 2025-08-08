@@ -1,0 +1,25 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    image: advana-marketplace-frontend:local
+    container_name: advana-marketplace
+    ports:
+      - "8080:8080"
+    environment:
+      APP_UID: 65532
+      APP_GID: 65532
+      REACT_APP_API_URL: "http://localhost:30080"
+      REACT_APP_ENV: "local"
+      REACT_APP_LOG_LEVEL: "debug"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8080"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    restart: unless-stopped
+networks:
+  default:
+    driver: bridge

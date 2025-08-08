@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: advana-marketplace
+data:
+  # API endpoint to reach backend service
+  # For local development, use the NodePort to reach backend
+  REACT_APP_API_URL: "http://localhost:30080"
+
+  REACT_APP_ENV: "local"
+  REACT_APP_LOG_LEVEL: "debug"
