@@ -8,8 +8,8 @@ spec:
   selector:
     app: frontend
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 7500
+    targetPort: 7500
     nodePort: 30090  # access via localhost:30090
     protocol: TCP
     name: http

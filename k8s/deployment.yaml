@@ -20,7 +20,7 @@ spec:
         image: advana-marketplace-frontend:latest
         imagePullPolicy: Never  # Use local image, don't pull from registry
         ports:
-        - containerPort: 8080  # nginx serves on port 8080 per Dockerfile
+        - containerPort: 7500  # nginx serves on port 7500 per Dockerfile
         env:
         - name: REACT_APP_API_URL
           valueFrom:
@@ -47,12 +47,12 @@ spec:
         livenessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: 7500
           initialDelaySeconds: 30
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: 7500
           initialDelaySeconds: 10
           periodSeconds: 10

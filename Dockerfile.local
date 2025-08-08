@@ -71,8 +71,8 @@ USER ${APP_UID}:${APP_GID}
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD nc -z localhost 8080 || exit 1
 
-# Expose port 3080
-EXPOSE 3080
+# Expose port 7500
+EXPOSE 7500
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
