@@ -17,7 +17,7 @@ ARG VITE_KEYCLOAK_URL="https://keycloak.cdao.us/auth"
 ARG VITE_KEYCLOAK_REALM="baby-yoda"
 ARG VITE_KEYCLOAK_CLIENT_ID="marketplace"
 ARG VITE_KEYCLOAK_CHECK_LOGIN_IFRAME="false"
-ARG VITE_BYPASS_AUTH="false"
+ARG VITE_BYPASS_AUTH="true"
 
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
