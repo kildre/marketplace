@@ -6,7 +6,7 @@ services:
     image: advana-marketplace-frontend:local
     container_name: advana-marketplace
     ports:
-      - "8080:8080"
+      - "7500:7500"
     environment:
       APP_UID: 65532
       APP_GID: 65532
