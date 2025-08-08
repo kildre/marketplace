@@ -7,6 +7,7 @@ services:
     container_name: advana-marketplace
     ports:
       - "7500:7500"
+      - "30090:30090"
     environment:
       APP_UID: 65532
       APP_GID: 65532
