@@ -71,6 +71,7 @@ You should see the Advana Marketplace frontend running locally.
 - **Port conflicts**: Ensure port 7500 is not in use by another process.
 - **Kubernetes not running**: Make sure Kubernetes is enabled and running in Docker Desktop.
 - **Healthcheck failures**: The container uses `nc` to check port 7500. If the healthcheck fails, check Nginx logs inside the container.
+- **Docker build cache errors:** If you see errors about missing image layers, run `docker system prune -a` and follow the steps above to rebuild and recompose.
 
 ---
 
