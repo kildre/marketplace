@@ -1,8 +1,7 @@
 import { AuthService } from "./authService";
 
 // Base configuration for API calls
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 // Interface definitions for API requests and responses
 export interface SubmitRequestApiRequest {
@@ -71,7 +70,7 @@ export class ApiService {
     };
 
     // In bypass auth mode, try to use mock user email
-    if (import.meta.env.VITE_BYPASS_AUTH === 'true') {
+    if (import.meta.env.VITE_BYPASS_AUTH === "true") {
       // Still try to get the stored token from mock keycloak
       const token = AuthService.getStoredToken();
       if (token) {
@@ -120,7 +119,7 @@ export class ApiService {
   ): Promise<SubmitRequestApiResponse> {
     try {
       const headers = this.getAuthHeaders();
-      
+
       // eslint-disable-next-line no-console
       console.log("Submitting request to:", `${API_BASE_URL}/api/requests`);
       // eslint-disable-next-line no-console
@@ -132,25 +131,27 @@ export class ApiService {
         method: "POST",
         headers: headers,
         body: JSON.stringify(requestData),
-        mode: 'cors',
-        credentials: 'omit'
+        mode: "cors",
+        credentials: "omit",
       });
 
       return this.handleResponse<SubmitRequestApiResponse>(response);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error submitting request:", error);
-      
+
       // In development mode with bypass auth, return a mock success response
-      if (import.meta.env.VITE_BYPASS_AUTH === 'true') {
+      if (import.meta.env.VITE_BYPASS_AUTH === "true") {
         // eslint-disable-next-line no-console
-        console.log("API call failed in bypass auth mode, returning mock success response");
+        console.log(
+          "API call failed in bypass auth mode, returning mock success response"
+        );
         return {
           requestNumber: `MOCK-${Date.now()}`,
-          errMsg: undefined
+          errMsg: undefined,
         };
       }
-      
+
       throw error;
     }
   }
