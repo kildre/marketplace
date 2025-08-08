@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { mockRequestData } from "../data/mock-requestData";
 import { RequestData } from "../interfaces/interfaceStore";
+import { ApiService, UseCaseRequestApiDto } from "../services/apiService";
 
 interface UseRequestsDataResult {
   requests: RequestData[];
@@ -18,26 +19,73 @@ interface UseRequestDataResult {
   refetch: () => Promise<void>;
 }
 
-// Simulate API functions for the new data structure
-const getAllRequests = (): Promise<RequestData[]> => {
-  return new Promise((resolve) => {
-    window.setTimeout(() => {
-      resolve(mockRequestData);
-    }, 100); // Simulate network delay
-  });
+// Transform backend API response to frontend RequestData format
+const transformApiRequestToRequestData = (
+  apiRequest: UseCaseRequestApiDto
+): RequestData => {
+  return {
+    requestId: apiRequest.requestNumber,
+    ticketNumber: apiRequest.requestNumber,
+    personalData: {
+      name: apiRequest.pointOfContact,
+      email: apiRequest.requestorEmail,
+      designation: apiRequest.designation,
+      agency: apiRequest.agency,
+    },
+    requestDetails: {
+      organization: apiRequest.organization,
+      organizationOther: apiRequest.otherOrganization,
+      pocName: apiRequest.pointOfContact,
+      pocPhone: apiRequest.phoneNumber,
+      pocEmail: apiRequest.email,
+      useCaseDescription: apiRequest.description,
+    },
+    cartItems: [], // TODO: Populate from cart items API
+    summary: {
+      totalItems: 0,
+      totalQuantity: 0,
+      pendingPriceItems: 0,
+      estimatedROM: "",
+    },
+    submittedAt: apiRequest.createdAt,
+    status:
+      apiRequest.statusId === 1
+        ? "PENDING"
+        : apiRequest.statusId === 2
+        ? "APPROVED"
+        : "REJECTED",
+    statusReason: "",
+  };
 };
 
-const getRequestsByUserId = (userId: string): Promise<RequestData[]> => {
-  return new Promise((resolve) => {
-    window.setTimeout(() => {
-      const userRequests = mockRequestData.filter((request) => {
-        // Extract the user ID part from the email (before the @)
-        const emailUserId = request.personalData.email.split("@")[0];
-        return emailUserId.toLowerCase() === userId.toLowerCase();
-      });
-      resolve(userRequests);
-    }, 100); // Simulate network delay
-  });
+// API functions that fallback to mock data
+const getAllRequests = async (): Promise<RequestData[]> => {
+  try {
+    // TODO: Get current user email from auth context
+    const userEmail = "admin@example.com"; // Placeholder
+    const response = await ApiService.getAllRequests(userEmail);
+    return response.requests?.map(transformApiRequestToRequestData) || [];
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to fetch all requests, using mock data:", error);
+    return mockRequestData;
+  }
+};
+
+const getRequestsByUserId = async (userId: string): Promise<RequestData[]> => {
+  try {
+    // Convert userId to email format for API
+    const userEmail = `${userId}@example.com`; // This should come from auth context
+    const response = await ApiService.getRequestsForRequestor(userEmail);
+    return response.requests?.map(transformApiRequestToRequestData) || [];
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to fetch user requests, using mock data:", error);
+    return mockRequestData.filter((request) => {
+      const emailUserId = request.personalData.email.split("@")[0];
+      return emailUserId.toLowerCase() === userId.toLowerCase();
+    });
+  }
 };
 
 const getRequestById = (requestId: string): Promise<RequestData | null> => {
