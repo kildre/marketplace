@@ -12,38 +12,62 @@ RUN node -v
 RUN npm -v
 RUN npm config set strict-ssl=false
 RUN npm set @advana:registry=https://nexus.cdao.us/repository/advana-npm-group/
+# Keycloak build arguments
+ARG VITE_KEYCLOAK_URL="https://keycloak.cdao.us/auth"
+ARG VITE_KEYCLOAK_REALM="baby-yoda"
+ARG VITE_KEYCLOAK_CLIENT_ID="marketplace"
+ARG VITE_KEYCLOAK_CHECK_LOGIN_IFRAME="false"
+ARG VITE_BYPASS_AUTH="true"
+
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
 RUN cd "${APP_FRONTEND_DIR}" \
     && npm install \
-    && npm run build
+    && VITE_KEYCLOAK_URL="${VITE_KEYCLOAK_URL}" \
+    VITE_KEYCLOAK_REALM="${VITE_KEYCLOAK_REALM}" \
+    VITE_KEYCLOAK_CLIENT_ID="${VITE_KEYCLOAK_CLIENT_ID}" \
+    VITE_KEYCLOAK_CHECK_LOGIN_IFRAME="${VITE_KEYCLOAK_CHECK_LOGIN_IFRAME}" \
+    VITE_BYPASS_AUTH="${VITE_BYPASS_AUTH}" \
+    npm run build
 
 # Use nginx for serving static files - using latest version to avoid tiff vulnerability in alpine-minirootfs-3.22.0
-FROM nginx:1.27-alpine AS server
+FROM nginx:1.27-alpine-slim AS server
 ENV APP_UID=65532
 ENV APP_GID=65532
 
-# Security hardening: Remove vulnerable packages and update all packages
+# Ultra-aggressive security hardening to eliminate tiff vulnerability
 RUN apk update && \
     apk upgrade && \
-    # Force remove vulnerable packages and their dependencies
+    # Remove ALL graphics-related packages that might contain tiff
     apk del --purge --force \
-    tiff \
-    curl \
-    busybox \
+    tiff tiff-dev libtiff libtiff-dev \
+    curl wget \
+    busybox busybox-binsh \
     ssl_client \
-    libtiff \
-    tiff-dev \
-    libtiff-dev 2>/dev/null || true && \
-    # Remove any tiff-related files manually
-    find / -name "*tiff*" -type f -delete 2>/dev/null || true && \
-    find / -name "*libtiff*" -type f -delete 2>/dev/null || true && \
-    # Install minimal busybox for essential functionality
+    libwebp libwebp-dev \
+    libjpeg-turbo libjpeg-turbo-dev \
+    libpng libpng-dev \
+    freetype freetype-dev \
+    fontconfig fontconfig-dev \
+    2>/dev/null || true && \
+    # Manual cleanup of any remaining tiff files
+    find / -type f \( -name "*tiff*" -o -name "*libtiff*" \) -delete 2>/dev/null || true && \
+    find / -type d \( -name "*tiff*" -o -name "*libtiff*" \) -exec rm -rf {} + 2>/dev/null || true && \
+    # Install only absolutely essential packages
     apk add --no-cache \
-    busybox-static && \
-    # Verify tiff is completely removed
-    apk info | grep -i tiff || echo "tiff packages successfully removed" && \
-    rm -rf /var/cache/apk/*
+    busybox-static \
+    ca-certificates && \
+    # Final verification that tiff is gone
+    ! apk info | grep -i tiff && \
+    # Comprehensive cleanup
+    rm -rf /var/cache/apk/* \
+    /tmp/* \
+    /var/tmp/* \
+    /var/lib/apk/* \
+    /usr/share/man/* \
+    /usr/share/doc/* && \
+    # Remove unnecessary nginx modules/configs
+    rm -rf /etc/nginx/conf.d/default.conf
 
 # Copy the built React app from builder stage
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html
@@ -51,19 +75,26 @@ COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 # Copy complete nginx configuration (eliminates user directive warning)
 COPY nginx.conf.full /etc/nginx/nginx.conf
 
+# Copy startup script
+COPY start-nginx.sh /usr/local/bin/start-nginx.sh
+RUN chmod +x /usr/local/bin/start-nginx.sh
+
 # Create user and group to match your existing setup
 RUN addgroup -g ${APP_GID} appgroup && \
     adduser -D -u ${APP_UID} -G appgroup appuser
 
-# Set proper ownership
-RUN chown -R ${APP_UID}:${APP_GID} /usr/share/nginx/html
-RUN chown -R ${APP_UID}:${APP_GID} /var/cache/nginx
-RUN chown -R ${APP_UID}:${APP_GID} /var/log/nginx
-RUN chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d
-RUN touch /var/run/nginx.pid && chown -R ${APP_UID}:${APP_GID} /var/run/nginx.pid
-
-# Create /tmp/nginx/client_temp and set ownership
-RUN mkdir -p /tmp/nginx/client_temp && chown -R ${APP_UID}:${APP_GID} /tmp/nginx
+# Set proper ownership and fix potential permission issues
+RUN chown -R ${APP_UID}:${APP_GID} /usr/share/nginx/html && \
+    chown -R ${APP_UID}:${APP_GID} /var/cache/nginx && \
+    chown -R ${APP_UID}:${APP_GID} /var/log/nginx && \
+    chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d && \
+    # Create writable directories for nginx in /tmp
+    mkdir -p /tmp/nginx && \
+    chown -R ${APP_UID}:${APP_GID} /tmp/nginx && \
+    # Make /tmp writable for nginx user and create PID file
+    chmod 777 /tmp && \
+    touch /tmp/nginx.pid && \
+    chown ${APP_UID}:${APP_GID} /tmp/nginx.pid
 
 USER ${APP_UID}:${APP_GID}
 
@@ -74,5 +105,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Expose port 7500
 EXPOSE 7500
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start nginx with custom startup script
+CMD ["/usr/local/bin/start-nginx.sh"]
