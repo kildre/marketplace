@@ -1,12 +1,12 @@
 include:
   - project: promotion/tekton-promotion-gitlab
-    file: routes/container-only.yml
-    # file: routes/helm-only.yml
+    # file: routes/container-only.yml
+    file: routes/helm-only.yml
     # file: routes/dragon-full.yml
 
-stages:
-  - "🧪 unit-test"
-  - pipeline-trigger
+# stages:
+#   - "🧪 unit-test"
+#   - pipeline-trigger
 
 workflow:
   rules:
@@ -16,22 +16,23 @@ workflow:
      when: never
 
 variables:
-  HELM_UPGRADE_EXTRA_ARGS: >
-   --set image.pullPolicy=Always
-   --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
-   --set image.tag=${CI_COMMIT_SHA}
+  # HELM_UPGRADE_EXTRA_ARGS: >-
+  #  --set image.pullPolicy=Always
+  #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
+  #  --set image.tag=${CI_COMMIT_SHA}
   IMAGE_TAG_FOR_HELM_ONLY:
    description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-   value: "4a5981addf8d2e253a50b8179089552e0d770058" # ${CI_COMMIT_SHA}
-  DOCKERFILE_VERSION:
-   description: "Choose Dockerfile version for security compliance"
-   value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
-   options:
-     - "main"
-     - "secure"
-     - "distroless"
-     - "minimal"
+  #  value: "93a1cb8d37a4b164df0987dcb5f76cb10f7dc83e" # ${CI_COMMIT_SHA}
+   value: "ae84ffdb8a4960a57e9e4a6a727976746806b715"
+  # DOCKERFILE_VERSION:
+  #  description: "Choose Dockerfile version for security compliance"
+  #  value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
+  #  options:
+  #    - "main"
+  #    - "secure"
+  #    - "distroless"
+  #    - "minimal"
   UPSTREAM_PROJECT_DIR: "."
   HELM_RELEASE_NAME: "advana-marketplace"
   HELM_CHART_DIR: "./chart"
-  DOCKERFILE_PATH: "./Dockerfile.${DOCKERFILE_VERSION}" # Dynamic Dockerfile selection
+  DOCKERFILE_PATH: "./Dockerfile.distroless"  # Use distroless Dockerfile for build

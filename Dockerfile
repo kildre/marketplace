@@ -16,6 +16,10 @@ RUN npm set @advana:registry=https://nexus.cdao.us/repository/advana-npm-group/
 COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
 RUN cd "${APP_FRONTEND_DIR}" \
     && npm install \
+    && mkdir -p public/assets/images \
+    && cp node_modules/@advana/platform-ui/dist/images/*.png public/assets/images/ 2>/dev/null || true \
+    && cp -r node_modules/@advana/platform-ui/dist/images/logos public/assets/images/ 2>/dev/null || true \
+    && cp node_modules/@advana/platform-ui/dist/images/*.svg public/assets/images/ 2>/dev/null || true \
     && npm run build
 
 # Use nginx for serving static files - using latest version to avoid tiff vulnerability in alpine-minirootfs-3.22.0

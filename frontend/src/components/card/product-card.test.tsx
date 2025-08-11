@@ -272,7 +272,7 @@ describe("ProductCard", () => {
       const increaseButton = screen.getByRole("button", {
         name: "Increase quantity for Test Product",
       });
-      const quantityInput = screen.getByLabelText("Quantity for Test Product");
+      const quantityInput = screen.getByRole("spinbutton");
 
       expect(decreaseButton).toBeInTheDocument();
       expect(increaseButton).toBeInTheDocument();
