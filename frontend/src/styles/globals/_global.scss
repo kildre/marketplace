@@ -24,3 +24,168 @@ body {
   font-weight: bold;
   color: $primary-color;
 }
+
+// Override AdvanaMenu styles to remove fixed positioning and margin-top
+// Target the pageTitleRow style that AdvanaMenu uses internally
+div[style*="position: fixed"][style*="margin-top: 30px"] {
+  position: static !important;
+  margin-top: 0 !important;
+  width: 100% !important;
+}
+
+// CUI Banner Styles
+.cui-banner {
+  background: linear-gradient(90deg, #6f3aaf 0%, #7e47b6 100%);
+  width: 100%;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 101;
+
+  &__text {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+}
+
+// Alternative targeting
+.advana-menu-override {
+  div[style*="position: fixed"] {
+    position: static !important;
+    margin-top: 0 !important;
+    width: 100% !important;
+  }
+}
+
+// Service Desk Style Overrides for AdvanaMenu
+.advana-service-desk-style {
+  // Hide the triangular decorator element - multiple selectors for different variations
+  div[style*="border-top"][style*="border-right"][style*="transparent"],
+  div[style*="border-top: 100px solid"][style*="border-right: 100px solid transparent"],
+  div[style*="width: 0px; height: 0px"][style*="border-top"][style*="border-right"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  // Override the main container
+  > div {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a73 50%, #1e3a5f 100%),
+                url('/assets/images/AdobeStock_165172656.jpeg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-blend-mode: overlay !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    border-bottom: none !important;
+    min-height: 80px !important;
+    
+    // Override any inner div styles
+    > div {
+      background: transparent !important;
+      padding: 12px 24px !important;
+      max-width: 1400px;
+      margin: 0 auto;
+      
+      // Target the logo container
+      > div:first-child {
+        display: flex !important;
+        align-items: center !important;
+        flex: 1 !important;
+      }
+      
+      // Target navigation icons on the right
+      > div:last-child {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        
+        // Style navigation buttons to match Service Desk
+        button, a {
+          background: none !important;
+          border: none !important;
+          color: white !important;
+          padding: 8px !important;
+          border-radius: 4px !important;
+          cursor: pointer !important;
+          transition: background-color 0.2s ease !important;
+          
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+          }
+          
+          svg {
+            width: 20px !important;
+            height: 20px !important;
+            color: white !important;
+          }
+        }
+      }
+    }
+    
+    // Override any text colors to white
+    * {
+      color: white !important;
+    }
+    
+    // Override any background colors that might interfere
+    div, span, a {
+      background-color: transparent !important;
+    }
+    
+    // Style the menu items if they exist
+    .menu-item, .nav-item {
+      color: white !important;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+    }
+  }
+  
+  // Position sticky for the header
+  position: sticky !important;
+  top: 32px !important; // Account for CUI banner
+  z-index: 100 !important;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .advana-service-desk-style {
+    > div > div {
+      padding: 8px 16px !important;
+    }
+  }
+}
+
+// Cart in header styling
+.advana-service-desk-style {
+  // Ensure the custom logo section spans full width and has proper positioning
+  > div > div {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  // Position cart at the far right edge
+  a[href="/cart"] {
+    position: absolute !important;
+    right: 16px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 10 !important;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-radius: 4px !important;
+    }
+
+    &:focus {
+      outline: 2px solid white !important;
+      outline-offset: 2px !important;
+    }
+  }
+}

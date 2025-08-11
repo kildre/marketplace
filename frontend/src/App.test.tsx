@@ -18,10 +18,6 @@ vi.mock("./components/government-banner/government-banner", () => ({
   ),
 }));
 
-vi.mock("./components/header/header-component", () => ({
-  Header: () => <div data-testid="header">Header</div>,
-}));
-
 vi.mock("./components/sidebar/sidebar", () => ({
   Sidebar: () => <div data-testid="sidebar">Sidebar</div>,
 }));
@@ -81,6 +77,22 @@ vi.mock("./services/keycloakService", () => ({
   },
 }));
 
+// Mock the AdvanaMenu component from @advana/platform-ui
+vi.mock("@advana/platform-ui/dist/AdvanaMenu", () => ({
+  default: ({ menuLogoSection }: { menuLogoSection: React.ReactNode }) => (
+    <div data-testid="advana-menu">
+      <div data-testid="menu-logo-section">{menuLogoSection}</div>
+    </div>
+  ),
+}));
+
+// Mock CustomMenuLogoSection component
+vi.mock("./components/CustomMenuLogoSection", () => ({
+  default: () => (
+    <div data-testid="custom-menu-logo-section">Custom Menu Logo Section</div>
+  ),
+}));
+
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 
@@ -129,9 +141,32 @@ describe("App", () => {
     renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     expect(screen.getByTestId("government-banner")).toBeInTheDocument();
-    expect(screen.getByTestId("header")).toBeInTheDocument();
+    expect(screen.getByTestId("advana-menu")).toBeInTheDocument();
+    expect(screen.getByTestId("custom-menu-logo-section")).toBeInTheDocument();
     expect(screen.getByTestId("sidebar")).toBeInTheDocument();
     expect(screen.getByTestId("footer")).toBeInTheDocument();
+    expect(screen.getByTestId("role-debug-info")).toBeInTheDocument();
+  });
+
+  test("should render CUI banner", () => {
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
+    
+    const cuiBanner = container.querySelector(".cui-banner");
+    expect(cuiBanner).toBeInTheDocument();
+    
+    const cuiText = container.querySelector(".cui-banner__text");
+    expect(cuiText).toBeInTheDocument();
+    expect(cuiText).toHaveTextContent("CUI");
+  });
+
+  test("should render AdvanaMenu with Service Desk styling", () => {
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
+    
+    const advanaMenuContainer = container.querySelector(".advana-menu-override.advana-service-desk-style");
+    expect(advanaMenuContainer).toBeInTheDocument();
+    
+    expect(screen.getByTestId("advana-menu")).toBeInTheDocument();
+    expect(screen.getByTestId("menu-logo-section")).toBeInTheDocument();
   });
 
   test("should have correct DOM structure", () => {
@@ -208,7 +243,7 @@ describe("App", () => {
         container.querySelector('[data-testid="government-banner"]')
       ).toBeInTheDocument();
       expect(
-        container.querySelector('[data-testid="header"]')
+        container.querySelector('[data-testid="advana-menu"]')
       ).toBeInTheDocument();
       expect(
         container.querySelector('[data-testid="sidebar"]')

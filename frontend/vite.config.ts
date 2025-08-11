@@ -15,6 +15,13 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    assetsDir: "assets",
+  },
+  resolve: {
+    alias: {
+      // Try to alias the entire images directory
+      '@advana/platform-ui/dist/images': '/assets/images',
+    },
   },
   test: {
     environment: "jsdom",
