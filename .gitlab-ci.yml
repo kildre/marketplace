@@ -19,10 +19,11 @@ variables:
   HELM_UPGRADE_EXTRA_ARGS: >
    --set image.pullPolicy=Always
    --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
-   --set image.tag=${CI_COMMIT_SHA}
+  #  --set image.tag=${CI_COMMIT_SHA}
   IMAGE_TAG_FOR_HELM_ONLY:
    description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-   value: "93a1cb8d37a4b164df0987dcb5f76cb10f7dc83e" # ${CI_COMMIT_SHA}
+  #  value: "93a1cb8d37a4b164df0987dcb5f76cb10f7dc83e" # ${CI_COMMIT_SHA}
+  value: "d7254ef58d321196b1d073b6d28cc40091f92633"
   DOCKERFILE_VERSION:
    description: "Choose Dockerfile version for security compliance"
    value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
