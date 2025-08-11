@@ -15,6 +15,8 @@ import { AppRoles } from "./types/auth";
 import AdvanaMenu from '@advana/platform-ui/dist/AdvanaMenu';
 import CustomMenuLogoSection from "./components/CustomMenuLogoSection";
 import "./styles/main.scss";
+// import { useEffect } from 'react';
+import CartOverlayButton from './components/CartOverlayButton';
 
 function App(): React.ReactElement {
   const { hasRole } = useAuth();
@@ -48,8 +50,9 @@ function App(): React.ReactElement {
       </div>
       
       <GovernmentBanner />
-      <div className="advana-menu-override advana-service-desk-style" style={{ position: 'static', marginTop: 0 }}>
+      <div className="advana-menu-override advana-service-desk-style header-with-cart" style={{ position: 'static', marginTop: 0 }}>
         <AdvanaMenu menuLogoSection={customLogoSection} />
+        <CartOverlayButton />
       </div>
       <main className="main-content">
         <Sidebar />

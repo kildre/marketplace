@@ -3,7 +3,6 @@ import { axe, toHaveNoViolations } from "jest-axe";
 import { vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import CustomMenuLogoSection from "./CustomMenuLogoSection";
-import { AppRoles } from "../types/auth";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
@@ -296,68 +295,6 @@ describe("CustomMenuLogoSection", () => {
         "src",
         "/assets/images/Jupiter_logo.png"
       );
-    });
-  });
-
-  describe("Shopping Cart Integration", () => {
-    it("shows cart when user has REQUESTOR role", () => {
-      mockHasRole.mockImplementation((role) => role === AppRoles.REQUESTOR);
-      renderWithRouter(<CustomMenuLogoSection />);
-
-      const cartLink = screen.getByLabelText(/go to cart page/i);
-      expect(cartLink).toBeInTheDocument();
-      expect(cartLink).toHaveAttribute("href", "/cart");
-
-      const cartIcon = screen.getByAltText("Cart Icon");
-      expect(cartIcon).toBeInTheDocument();
-      expect(cartIcon).toHaveAttribute("src", "/assets/icons/cart-icon.png");
-
-      const cartCount = screen.getByText("(3)");
-      expect(cartCount).toBeInTheDocument();
-    });
-
-    it("hides cart when user does not have REQUESTOR role", () => {
-      mockHasRole.mockReturnValue(false);
-      renderWithRouter(<CustomMenuLogoSection />);
-
-      expect(screen.queryByLabelText(/go to cart page/i)).not.toBeInTheDocument();
-      expect(screen.queryByAltText("Cart Icon")).not.toBeInTheDocument();
-      expect(screen.queryByText("(3)")).not.toBeInTheDocument();
-    });
-
-    it("shows cart for Jupiter enclave when user has REQUESTOR role", () => {
-      mockHasRole.mockImplementation((role) => role === AppRoles.REQUESTOR);
-      renderWithRouter(<CustomMenuLogoSection enclave="jupiter" />);
-
-      const cartLink = screen.getByLabelText(/go to cart page/i);
-      expect(cartLink).toBeInTheDocument();
-      expect(cartLink).toHaveAttribute("href", "/cart");
-    });
-
-    it("displays correct accessibility label for cart with items", () => {
-      mockHasRole.mockImplementation((role) => role === AppRoles.REQUESTOR);
-      renderWithRouter(<CustomMenuLogoSection />);
-
-      const cartLink = screen.getByLabelText("Go to cart page. 3 items in cart");
-      expect(cartLink).toBeInTheDocument();
-    });
-
-    it("has proper cart styling", () => {
-      mockHasRole.mockImplementation((role) => role === AppRoles.REQUESTOR);
-      renderWithRouter(<CustomMenuLogoSection />);
-
-      const cartLink = screen.getByLabelText(/go to cart page/i);
-      expect(cartLink).toHaveStyle({
-        display: "flex",
-        color: "rgb(255, 255, 255)",
-      });
-
-      const cartIcon = screen.getByAltText("Cart Icon");
-      expect(cartIcon).toHaveStyle({
-        width: "24px",
-        height: "24px",
-        filter: "brightness(0) invert(1)",
-      });
     });
   });
 });

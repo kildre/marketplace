@@ -4,6 +4,7 @@ import { axe, toHaveNoViolations } from "jest-axe";
 import { vi } from "vitest";
 import App from "./App";
 import { AppRoles } from "./types/auth";
+import { CartProvider } from "./contexts/CartContext";
 
 // Mock the useAuth hook
 const mockUseAuth = vi.fn();
@@ -93,6 +94,11 @@ vi.mock("./components/CustomMenuLogoSection", () => ({
   ),
 }));
 
+// Mock CartOverlayButton component
+vi.mock("./components/CartOverlayButton", () => ({
+  default: () => <div data-testid="cart-overlay-btn">Cart Overlay</div>,
+}));
+
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 
@@ -125,7 +131,9 @@ describe("App", () => {
     window.history.pushState({}, "Test page", initialRoute);
     return render(
       <BrowserRouter>
-        <App />
+        <CartProvider>
+          <App />
+        </CartProvider>
       </BrowserRouter>
     );
   };

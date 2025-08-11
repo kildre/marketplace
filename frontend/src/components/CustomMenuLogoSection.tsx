@@ -1,8 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
-import { useAuth } from '../hooks/useAuth';
-import { AppRoles } from '../types/auth';
+// import { Link } from 'react-router-dom'; // removed with cart
+// import { useAuth } from '../hooks/useAuth'; // no longer needed
+// import { AppRoles } from '../types/auth'; // no longer needed
 
 // Import images statically - these will work with Vite
 import AdvanaDarkTheme from '/assets/images/AdvanaDarkTheme.png';
@@ -31,35 +30,6 @@ const styles = {
     alignItems: 'center',
     flex: 1
   },
-  cartContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    position: 'absolute' as const,
-    right: '16px',
-    top: '50%',
-    transform: 'translateY(-50%)'
-  },
-  cartLink: {
-    display: 'flex',
-    alignItems: 'center',
-    textDecoration: 'none',
-    color: 'white',
-    padding: '8px 12px',
-    borderRadius: '4px',
-    transition: 'background-color 0.2s ease',
-    backgroundColor: 'transparent'
-  },
-  cartIcon: {
-    width: '24px',
-    height: '24px',
-    marginRight: '8px',
-    filter: 'brightness(0) invert(1)' // Make icon white
-  },
-  cartCount: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    color: 'white'
-  },
   mainContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -82,12 +52,8 @@ const CustomMenuLogoSection: React.FC<CustomMenuLogoSectionProps> = ({
   megaMenuBaseDomain,
   isCRA = true 
 }) => {
-  const { cartCount } = useCart();
-  const { hasRole } = useAuth();
+  // const { hasRole } = useAuth(); // removed
   
-  // Only show cart for REQUESTOR role
-  const showCart = hasRole(AppRoles.REQUESTOR);
-
   // Function to handle page changes (copied from original AdvanaMenu logic)
   const changePage = (path: string, domain?: string, newTab = false, isCRAMode = true) => {
     if (newTab) {
@@ -130,22 +96,7 @@ const CustomMenuLogoSection: React.FC<CustomMenuLogoSectionProps> = ({
             style={styles.advanaLogo}
           />
         </div>
-        {showCart && (
-          <div style={styles.cartContainer}>
-            <Link 
-              to="/cart" 
-              style={styles.cartLink}
-              aria-label={`Go to cart page. ${cartCount} items in cart`}
-            >
-              <img
-                src="/assets/icons/cart-icon.png"
-                alt="Cart Icon"
-                style={styles.cartIcon}
-              />
-              <span style={styles.cartCount}>({cartCount})</span>
-            </Link>
-          </div>
-        )}
+        {/* Cart moved to overlay component */}
       </div>
     );
   } else {
@@ -178,22 +129,7 @@ const CustomMenuLogoSection: React.FC<CustomMenuLogoSectionProps> = ({
             />
           )}
         </div>
-        {showCart && (
-          <div style={styles.cartContainer}>
-            <Link 
-              to="/cart" 
-              style={styles.cartLink}
-              aria-label={`Go to cart page. ${cartCount} items in cart`}
-            >
-              <img
-                src="/assets/icons/cart-icon.png"
-                alt="Cart Icon"
-                style={styles.cartIcon}
-              />
-              <span style={styles.cartCount}>({cartCount})</span>
-            </Link>
-          </div>
-        )}
+        {/* Cart moved to overlay component */}
       </div>
     );
   }
