@@ -35,4 +35,4 @@ variables:
   UPSTREAM_PROJECT_DIR: "."
   HELM_RELEASE_NAME: "advana-marketplace"
   HELM_CHART_DIR: "./chart"
-  # DOCKERFILE_PATH: "./Dockerfile.${DOCKERFILE_VERSION}" # Dynamic Dockerfile selection
+  DOCKERFILE_PATH: "./Dockerfile.distroless"  # Use distroless Dockerfile for build
