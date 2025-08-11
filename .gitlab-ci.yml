@@ -4,9 +4,9 @@ include:
     file: routes/helm-only.yml
     # file: routes/dragon-full.yml
 
-stages:
-  - "🧪 unit-test"
-  - pipeline-trigger
+# stages:
+#   - "🧪 unit-test"
+#   - pipeline-trigger
 
 workflow:
   rules:
@@ -24,15 +24,15 @@ variables:
    description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
   #  value: "93a1cb8d37a4b164df0987dcb5f76cb10f7dc83e" # ${CI_COMMIT_SHA}
    value: "9add64197af2c5e389b55bffc23fec84a8c1f604"
-  DOCKERFILE_VERSION:
-   description: "Choose Dockerfile version for security compliance"
-   value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
-   options:
-     - "main"
-     - "secure"
-     - "distroless"
-     - "minimal"
+  # DOCKERFILE_VERSION:
+  #  description: "Choose Dockerfile version for security compliance"
+  #  value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
+  #  options:
+  #    - "main"
+  #    - "secure"
+  #    - "distroless"
+  #    - "minimal"
   UPSTREAM_PROJECT_DIR: "."
   HELM_RELEASE_NAME: "advana-marketplace"
   HELM_CHART_DIR: "./chart"
-  DOCKERFILE_PATH: "./Dockerfile.${DOCKERFILE_VERSION}" # Dynamic Dockerfile selection
+  # DOCKERFILE_PATH: "./Dockerfile.${DOCKERFILE_VERSION}" # Dynamic Dockerfile selection
