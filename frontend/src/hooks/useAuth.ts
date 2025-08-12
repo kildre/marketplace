@@ -14,18 +14,18 @@ export const useAuth = () => {
   const hasRole = (role: AppRoles): boolean => {
     if (!keycloak.authenticated) {
       // eslint-disable-next-line no-console
-      console.log('🔍 hasRole: Not authenticated');
+      console.log("🔍 hasRole: Not authenticated");
       return false;
     }
-    
+
     // Check against app roles first
     const userInfo = AuthService.getStoredUserInfo();
     // eslint-disable-next-line no-console
-    console.log('🔍 hasRole: Stored user info:', userInfo);
-    
+    console.log("🔍 hasRole: Stored user info:", userInfo);
+
     if (userInfo?.roles.includes(role)) {
       // eslint-disable-next-line no-console
-      console.log('🔍 hasRole: Found role in stored user info:', role);
+      console.log("🔍 hasRole: Found role in stored user info:", role);
       return true;
     }
 
@@ -37,18 +37,20 @@ export const useAuth = () => {
 
     const rolesToCheck = keycloakRoleMap[role] || [role];
     // eslint-disable-next-line no-console
-    console.log('🔍 hasRole: Checking roles:', rolesToCheck);
-    
-    const hasKeycloakRole = rolesToCheck.some(r => {
+    console.log("🔍 hasRole: Checking roles:", rolesToCheck);
+
+    const hasKeycloakRole = rolesToCheck.some((r) => {
       const hasRealm = keycloak.hasRealmRole(r);
       const hasResource = keycloak.hasResourceRole(r);
       // eslint-disable-next-line no-console
-      console.log(`🔍 hasRole: ${r} - realm: ${hasRealm}, resource: ${hasResource}`);
+      console.log(
+        `🔍 hasRole: ${r} - realm: ${hasRealm}, resource: ${hasResource}`
+      );
       return hasRealm || hasResource;
     });
-    
+
     // eslint-disable-next-line no-console
-    console.log('🔍 hasRole: Final result for', role, ':', hasKeycloakRole);
+    console.log("🔍 hasRole: Final result for", role, ":", hasKeycloakRole);
     return hasKeycloakRole;
   };
 
@@ -57,7 +59,7 @@ export const useAuth = () => {
    */
   const getKeycloakRoles = (): string[] => {
     if (!keycloak.authenticated || !keycloak.tokenParsed) return [];
-    
+
     return AuthService.extractRolesFromToken(keycloak.tokenParsed);
   };
 
@@ -108,7 +110,7 @@ export const useAuth = () => {
    */
   const getUserRoles = (): AppRoles[] => {
     if (!keycloak.authenticated) return [];
-    
+
     // Get from stored user info first
     const userInfo = AuthService.getStoredUserInfo();
     if (userInfo?.roles) {
@@ -133,6 +135,8 @@ export const useAuth = () => {
         firstName: storedUserInfo.firstName,
         lastName: storedUserInfo.lastName,
         roles: storedUserInfo.roles,
+        designation: storedUserInfo.designation,
+        agency: storedUserInfo.agency,
       };
     }
 
@@ -150,6 +154,8 @@ export const useAuth = () => {
       firstName: keycloak.tokenParsed.given_name,
       lastName: keycloak.tokenParsed.family_name,
       roles: getUserRoles(),
+      designation: keycloak.tokenParsed.designation,
+      agency: keycloak.tokenParsed.agency,
     };
   };
 

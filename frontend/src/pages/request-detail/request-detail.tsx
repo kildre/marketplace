@@ -12,7 +12,7 @@ export const RequestDetail = (): React.ReactElement => {
   const [searchParams] = useSearchParams();
   const requestId = searchParams.get("id");
   const userId = searchParams.get("userId"); // Get userId from URL
-  const { hasRole } = useAuth();
+  const { hasRole, getUserInfo } = useAuth();
 
   // Create the back link URL - preserve userId if it exists
   const backToRequestsUrl = userId ? `/requests?userId=${userId}` : "/requests";
@@ -60,11 +60,28 @@ export const RequestDetail = (): React.ReactElement => {
       buttonClass += " button--pending";
     }
 
-    const updateRequest = () => {
-      // Logic to update the request status
-      // @TODO: Replace with actual API call
-      /* eslint-disable-next-line */
-      console.log("Updated request: ", request);
+    const updateRequest = async () => {
+      const userInfo = getUserInfo();
+      const response = await window.fetch("/api/decisions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          requestId: request.requestId,
+          status: request.status,
+          statusReason: request.statusReason,
+          adjudicatorEmail: userInfo?.email || "",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      return result;
     };
 
     const handleReasoningChange = (
@@ -73,18 +90,26 @@ export const RequestDetail = (): React.ReactElement => {
       setStatusReason(event.target.value);
     };
 
-    const handleAccept = () => {
+    const handleAccept = async () => {
       // Logic to handle accept action
       request.status = "Approved";
       request.statusReason = statusReason || "Request accepted.";
-      updateRequest();
+      try {
+        await updateRequest();
+      } catch {
+        // Handle error appropriately in your UI
+      }
     };
 
-    const handleReject = () => {
+    const handleReject = async () => {
       // Logic to handle reject action
       request.status = "Denied";
       request.statusReason = statusReason || "Request denied.";
-      updateRequest();
+      try {
+        await updateRequest();
+      } catch {
+        // Handle error appropriately in your UI
+      }
     };
 
     // Render main layout with role-based approval section

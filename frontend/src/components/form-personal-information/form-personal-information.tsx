@@ -1,15 +1,21 @@
 import React from "react";
 import { FormPersonalInformationProps } from "../../interfaces";
+import { useAuth } from "../../hooks/useAuth";
 
 export const FormPersonalInformation = ({
   personalData,
 }: FormPersonalInformationProps = {}): React.ReactElement => {
-  // Use personalData if provided, otherwise use hardcoded values for backward compatibility
+  const { getUserInfo } = useAuth();
+  const userInfo = getUserInfo();
+
+  // Use personalData if provided, otherwise use mock user information from auth
   const data = personalData || {
-    name: "Joe Snuffy",
-    email: "Joe.Snuffy.mil@army.mil",
-    designation: "Military",
-    agency: "III Corps",
+    name: userInfo
+      ? `${userInfo.firstName} ${userInfo.lastName}`
+      : "Unknown User",
+    email: userInfo?.email || "unknown@example.com",
+    designation: userInfo?.designation || "Unknown",
+    agency: userInfo?.agency || "Unknown",
   };
 
   return (

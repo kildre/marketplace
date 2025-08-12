@@ -8,13 +8,18 @@ interface KeycloakTokenParsed {
   given_name?: string;
   family_name?: string;
   name?: string;
+  designation?: string;
+  agency?: string;
   exp?: number;
   realm_access?: {
     roles: string[];
   };
-  resource_access?: Record<string, {
-    roles: string[];
-  }>;
+  resource_access?: Record<
+    string,
+    {
+      roles: string[];
+    }
+  >;
 }
 
 interface UserInfo {
@@ -26,6 +31,8 @@ interface UserInfo {
   roles: AppRoles[];
   keycloakRoles: string[];
   tokenExpiry?: number;
+  designation?: string;
+  agency?: string;
 }
 
 /**
@@ -40,7 +47,7 @@ export class AuthService {
    * Check if we're in a browser environment
    */
   private static get hasLocalStorage(): boolean {
-    return typeof window !== 'undefined' && !!window.localStorage;
+    return typeof window !== "undefined" && !!window.localStorage;
   }
 
   /**
@@ -58,8 +65,8 @@ export class AuthService {
       "marketplace-approver": AppRoles.APPROVER,
       "marketplace-requestor": AppRoles.REQUESTOR,
       // Legacy mappings for backwards compatibility
-      "APPROVER": AppRoles.APPROVER,
-      "REQUESTOR": AppRoles.REQUESTOR,
+      APPROVER: AppRoles.APPROVER,
+      REQUESTOR: AppRoles.REQUESTOR,
     };
 
     return keycloakRoles
@@ -88,10 +95,11 @@ export class AuthService {
     }
 
     // Debug log for marketplace roles specifically
-    const marketplaceRoles = tokenParsed.resource_access?.marketplace?.roles || [];
+    const marketplaceRoles =
+      tokenParsed.resource_access?.marketplace?.roles || [];
     if (marketplaceRoles.length > 0) {
       // eslint-disable-next-line no-console
-      console.log('🎯 Marketplace roles found:', marketplaceRoles);
+      console.log("🎯 Marketplace roles found:", marketplaceRoles);
     }
 
     return roles;
@@ -106,14 +114,14 @@ export class AuthService {
 
     try {
       // eslint-disable-next-line no-console
-      console.log('💾 Storing Keycloak tokens to localStorage:', {
+      console.log("💾 Storing Keycloak tokens to localStorage:", {
         accessTokenLength: token.length,
         hasRefreshToken: !!refreshToken,
         refreshTokenLength: refreshToken?.length || 0,
         storageKeys: {
           accessToken: this.TOKEN_KEY,
-          refreshToken: this.REFRESH_TOKEN_KEY
-        }
+          refreshToken: this.REFRESH_TOKEN_KEY,
+        },
       });
 
       storage.setItem(this.TOKEN_KEY, token);
@@ -182,7 +190,7 @@ export class AuthService {
 
     try {
       const userInfoStr = storage.getItem(this.USER_INFO_KEY);
-      return userInfoStr ? JSON.parse(userInfoStr) as UserInfo : null;
+      return userInfoStr ? (JSON.parse(userInfoStr) as UserInfo) : null;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Failed to retrieve user information:", error);
@@ -227,13 +235,14 @@ export class AuthService {
    */
   static parseJwtToken(token: string): KeycloakTokenParsed | null {
     try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
       const jsonPayload = decodeURIComponent(
-        window.atob(base64)
-          .split('')
-          .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
-          .join('')
+        window
+          .atob(base64)
+          .split("")
+          .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
+          .join("")
       );
       return JSON.parse(jsonPayload) as KeycloakTokenParsed;
     } catch (error) {
@@ -259,16 +268,20 @@ export class AuthService {
       roles: appRoles,
       keycloakRoles,
       tokenExpiry: tokenParsed.exp,
+      designation: tokenParsed.designation || "",
+      agency: tokenParsed.agency || "",
     };
 
     // Debug log for user authentication
     // eslint-disable-next-line no-console
-    console.log('👤 User authenticated:', {
+    console.log("👤 User authenticated:", {
       username: userInfo.username,
       email: userInfo.email,
       keycloakRoles: userInfo.keycloakRoles,
       mappedAppRoles: userInfo.roles,
-      marketplaceRoles: tokenParsed.resource_access?.marketplace?.roles || []
+      marketplaceRoles: tokenParsed.resource_access?.marketplace?.roles || [],
+      designation: userInfo.designation,
+      agency: userInfo.agency,
     });
 
     return userInfo;
