@@ -21,6 +21,7 @@ export const Sidebar = (): React.ReactElement => {
     if (path === "/requests") {
       return location.pathname === "/requests" || location.pathname.startsWith("/requests/");
     }
+    // Exact match for other paths
     return location.pathname === path;
   };
 
@@ -40,6 +41,20 @@ export const Sidebar = (): React.ReactElement => {
                 aria-current={isActive("/") ? "page" : undefined}
               >
                 Requests <span className="sidebar__requests-count">({requestsCount})</span>
+              </Link>
+            </li>
+            {/* Metrics link visible to APPROVERs only */}
+            <li
+              className={
+                isActive("/metrics") ? "sidebar-nav__item active" : "sidebar-nav__item"
+              }
+            >
+              <Link
+                to="/metrics"
+                aria-label="Go to metrics page"
+                aria-current={isActive("/metrics") ? "page" : undefined}
+              >
+                Metrics
               </Link>
             </li>
             {/* Development-only auth status link */}
