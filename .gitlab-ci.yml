@@ -12,13 +12,17 @@ workflow:
      when: never
 
 variables:
+  #AWS_ACCOUNT_ID: "231388672283"
+  #AWS_REGION: "us-gov-west-1"
+  #ECR_REPOSITORY: "tenant/images"
+  #IMAGE_REPOSITORY: "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY"
   #HELM_UPGRADE_EXTRA_ARGS: >-
      #--set image.pullPolicy=Always
   #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)" #DELETE THIS
   #  --set image.tag=${CI_COMMIT_SHA} #DELETE THIS
   IMAGE_TAG_FOR_HELM_ONLY:
    description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-   value: "66d47990065c25b15d297c71733ec390c11a118d"
+   #value: "66d47990065c25b15d297c71733ec390c11a118d"
   # DOCKERFILE_VERSION:
   #  description: "Choose Dockerfile version for security compliance"
   #  value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
