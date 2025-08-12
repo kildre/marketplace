@@ -13,7 +13,7 @@ workflow:
 
 variables:
   #HELM_UPGRADE_EXTRA_ARGS: >-
-     #--set image.pullPolicy=Always
+  #  --set image.pullPolicy=Always
   #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)" #DELETE THIS
   #  --set image.tag=${CI_COMMIT_SHA} #DELETE THIS
   IMAGE_TAG_FOR_HELM_ONLY:
