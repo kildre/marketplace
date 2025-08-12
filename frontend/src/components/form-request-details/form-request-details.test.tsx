@@ -427,7 +427,9 @@ describe("FormRequestDetails", () => {
       const organizationField = screen.getByRole("combobox", {
         name: /organization/i,
       });
-      expect(organizationField).toBeRequired();
+      
+      // Check for the required attribute on the MUI Select component
+      expect(organizationField.parentElement?.querySelector('input')).toHaveAttribute('required');
     });
 
     test("should have correct labels with required indicators", () => {

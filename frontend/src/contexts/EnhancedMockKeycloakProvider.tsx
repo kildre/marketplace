@@ -248,16 +248,68 @@ export const MockUserSwitcher: React.FC = () => {
   const { switchMockUser, currentMockUser, availableUsers } =
     useEnhancedMockKeycloak();
 
+  // Draggable state - positioned at bottom left
+  const [position, setPosition] = useState({
+    x: 0,
+    y: window.innerHeight - 200,
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const panelRef = React.useRef<React.ElementRef<"div">>(null);
+
   if (import.meta.env.VITE_BYPASS_AUTH !== "true") {
     return null; // Don't show in production
   }
 
+  // Mouse event handlers for dragging
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!panelRef.current) return;
+
+    setIsDragging(true);
+    const rect = panelRef.current.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  const handleMouseMove = (e: globalThis.MouseEvent) => {
+    if (!isDragging) return;
+
+    setPosition({
+      x: e.clientX - dragOffset.x,
+      y: e.clientY - dragOffset.y,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add global mouse events when dragging
+  React.useEffect(() => {
+    if (isDragging) {
+      const mouseMoveHandler = (e: globalThis.MouseEvent) => handleMouseMove(e);
+      const mouseUpHandler = () => handleMouseUp();
+
+      document.addEventListener("mousemove", mouseMoveHandler);
+      document.addEventListener("mouseup", mouseUpHandler);
+
+      return () => {
+        document.removeEventListener("mousemove", mouseMoveHandler);
+        document.removeEventListener("mouseup", mouseUpHandler);
+      };
+    }
+  }, [isDragging, dragOffset.x, dragOffset.y]);
+
   return (
     <div
+      ref={panelRef}
       style={{
         position: "fixed",
-        top: "50px",
-        right: "230px",
+        bottom: "auto",
+        left: position.x,
+        top: position.y,
         zIndex: 1000,
         backgroundColor: "#f0f0f0",
         border: "1px solid #ccc",
@@ -266,10 +318,31 @@ export const MockUserSwitcher: React.FC = () => {
         fontSize: "12px",
         boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
         minWidth: "200px",
+        cursor: isDragging ? "grabbing" : "grab",
+        userSelect: "none",
       }}
+      onMouseDown={handleMouseDown}
     >
-      <div style={{ marginBottom: "8px" }}>
+      <div
+        style={{
+          marginBottom: "8px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <strong>🎭 Mock User:</strong>
+        <span
+          style={{
+            fontSize: "10px",
+            color: "#666",
+            fontWeight: "normal",
+          }}
+        >
+          🖱️ Drag to move
+        </span>
+      </div>
+      <div style={{ marginBottom: "8px" }}>
         <select
           value={currentMockUser}
           onChange={(e) =>

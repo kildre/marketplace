@@ -361,7 +361,7 @@ describe("RoleBasedDemo", () => {
 
       expect(screen.getByText("VITE_BYPASS_AUTH: true")).toBeInTheDocument();
       expect(
-        screen.getByText("VITE_MOCK_USER_ROLES: REQUESTOR")
+        screen.getByText("VITE_MOCK_USER_ROLES: marketplace-requestor")
       ).toBeInTheDocument();
     });
 

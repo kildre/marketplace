@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
 import { GovernmentBanner } from "./components/government-banner/government-banner";
-import { Header } from "./components/header/header-component";
 import { Sidebar } from "./components/sidebar/sidebar";
 import { Footer } from "./components/footer/footer-component";
 import { ProductCatalog } from "./pages/product-catalog/product-catalog";
@@ -12,7 +11,12 @@ import { AuthStatusPage } from "./pages/auth-status/auth-status";
 import { RoleDebugInfo } from "./components/debug/RoleDebugInfo";
 import { useAuth } from "./hooks/useAuth";
 import { AppRoles } from "./types/auth";
+// @ts-ignore
+import AdvanaMenu from '@advana/platform-ui/dist/AdvanaMenu';
+import CustomMenuLogoSection from "./components/CustomMenuLogoSection";
 import "./styles/main.scss";
+// import { useEffect } from 'react';
+import CartOverlayButton from './components/CartOverlayButton';
 
 function App(): React.ReactElement {
   const { hasRole } = useAuth();
@@ -29,10 +33,27 @@ function App(): React.ReactElement {
     }
   };
 
+  // Create custom logo section for AdvanaMenu
+  const customLogoSection = (
+    <CustomMenuLogoSection 
+      enclave="advana" 
+      megaMenuBaseDomain="/"
+      isCRA={true}
+    />
+  );
+
   return (
     <div className="app-wrapper">
+      {/* CUI Banner */}
+      <div className="cui-banner">
+        <span className="cui-banner__text">CUI</span>
+      </div>
+      
       <GovernmentBanner />
-      <Header />
+      <div className="advana-menu-override advana-service-desk-style header-with-cart" style={{ position: 'static', marginTop: 0 }}>
+        <AdvanaMenu menuLogoSection={customLogoSection} />
+        <CartOverlayButton />
+      </div>
       <main className="main-content">
         <Sidebar />
         <Routes>

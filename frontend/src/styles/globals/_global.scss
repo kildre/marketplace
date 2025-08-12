@@ -1,5 +1,9 @@
 @use "colors" as *;
 
+html, body {
+  overflow-x: hidden !important;
+}
+
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: $secondary-color;
@@ -24,3 +28,346 @@ body {
   font-weight: bold;
   color: $primary-color;
 }
+
+// Override AdvanaMenu styles to remove fixed positioning and margin-top
+// Target the pageTitleRow style that AdvanaMenu uses internally
+div[style*="position: fixed"][style*="margin-top: 30px"] {
+  position: static !important;
+  margin-top: 0 !important;
+  width: 100% !important;
+}
+
+// CUI Banner Styles
+.cui-banner {
+  background: linear-gradient(90deg, #6f3aaf 0%, #7e47b6 100%);
+  width: 100%;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 101;
+
+  &__text {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+}
+
+// Alternative targeting
+.advana-menu-override {
+  div[style*="position: fixed"] {
+    position: static !important;
+    margin-top: 0 !important;
+    width: 100% !important;
+  }
+}
+
+// Service Desk Style Overrides for AdvanaMenu
+.advana-service-desk-style {
+  // Hide the triangular decorator element - multiple selectors for different variations
+  div[style*="border-top"][style*="border-right"][style*="transparent"],
+  div[style*="border-top: 100px solid"][style*="border-right: 100px solid transparent"],
+  div[style*="width: 0px; height: 0px"][style*="border-top"][style*="border-right"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  // Override the main container
+  > div {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a73 50%, #1e3a5f 100%),
+                url('/assets/images/AdobeStock_165172656.jpeg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-blend-mode: overlay !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    border-bottom: none !important;
+    min-height: 80px !important;
+    
+    // Override any inner div styles
+    > div {
+      background: transparent !important;
+      padding: 12px 24px !important;
+      max-width: 1400px;
+      margin: 0 auto;
+      
+      // Target the logo container
+          > div:first-child {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important; // reset so logo stays left
+            flex: 1 1 auto !important;
+      }
+      
+      // Target navigation icons on the right
+      > div:last-child {
+        display: flex !important; // removed stray 'sea'
+        align-items: center !important;
+        gap: 8px !important;
+        
+        // Style navigation buttons to match Service Desk
+        button, a {
+          background: none !important;
+          border: none !important;
+          color: white !important;
+          padding: 8px !important;
+          border-radius: 4px !important;
+          cursor: pointer !important;
+          transition: background-color 0.2s ease !important;
+          
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+          }
+          
+          svg {
+            width: 20px !important;
+            height: 20px !important;
+            color: white !important;
+          }
+        }
+      }
+    }
+    
+    // Override any text colors to white
+    * {
+      color: white !important;
+    }
+    
+    // Override any background colors that might interfere
+    div, span, a {
+      background-color: transparent !important;
+    }
+    
+    // Style the menu items if they exist
+    .menu-item, .nav-item {
+      color: white !important;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+    }
+  }
+  
+  // Position sticky for the header
+  position: sticky !important;
+  top: 32px !important; // Account for CUI banner
+  z-index: 100 !important;
+}
+
+// RESET header inner layout to normal flex and space-between
+.advana-service-desk-style > div > div {
+  display: flex !important;
+  justify-content: space-between !important;
+  position: relative !important; // keep for any positioning needs
+}
+// Remove previous absolute positioning on icon container
+.advana-service-desk-style > div > div > div:last-child {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+// Restore logo container to natural width (no forced 100% / padding-right)
+.advana-service-desk-style > div > div > div:first-child {
+  width: auto !important;
+  padding-right: 0 !important;
+  flex: 0 1 auto !important;
+}
+// Ensure cart link participates in flex flow and appears AFTER user icon
+// (Give it a very large order so it sorts to the end; other items default order:0)
+.advana-service-desk-style a[href="/cart"] {
+  position: static !important; // override earlier absolute rule
+  order: 100 !important;
+  margin-left: 16px !important;
+  transform: none !important;
+}
+// OPTIONAL: shrink cart count spacing if needed
+.advana-service-desk-style a[href="/cart"] span { margin-left: 4px !important; }
+
+// Force nav/icons (including cart) to far right edge of full header width
+.advana-service-desk-style > div > div > div:last-child {
+  position: absolute !important;
+  right: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin: 0 !important;
+  width: auto !important;
+}
+
+// Ensure logo block spans remaining space without pushing icons
+.advana-service-desk-style > div > div > div:first-child {
+  width: 100% !important;
+  padding-right: 140px !important; // leave room so content doesn’t sit under icons
+}
+
+// Reorder: place cart after user icon
+.advana-service-desk-style > div > div > div:last-child a[href="/cart"] {
+  position: static !important; // remove absolute so it participates in flex ordering
+  top: auto !important;
+  right: auto !important;
+  transform: none !important;
+  order: 99 !important; // push to end
+  margin-left: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .advana-service-desk-style {
+    > div > div {
+      padding: 8px 16px !important;
+    }
+  }
+}
+
+// Cart in header styling
+.advana-service-desk-style {
+  // Ensure the custom logo section spans full width and has proper positioning
+  > div > div {
+    position: static !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important; // remove 1400px constraint so cart can sit at far edge
+    overflow: visible !important;
+  }
+  > div { position: relative !important; overflow: visible !important; }
+
+  // Position cart at the far right edge of full header (not limited by inner max-width)
+  a[href="/cart"] {
+    position: absolute !important;
+    right: 16px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 10 !important;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-radius: 4px !important;
+    }
+
+    &:focus {
+      outline: 2px solid white !important;
+      outline-offset: 2px !important;
+    }
+  }
+}
+
+/* Final header alignment overrides */
+.advana-service-desk-style > div > div { 
+  display:flex !important; 
+  justify-content:space-between !important; 
+}
+.advana-service-desk-style > div > div > div:first-child { 
+  width:auto !important; 
+  padding-right:0 !important; 
+  flex:0 1 auto !important; 
+}
+.advana-service-desk-style > div > div > div:last-child { 
+  position:static !important; 
+  top:auto !important; 
+  right:auto !important; 
+  transform:none !important; 
+  display:flex !important; 
+  align-items:center !important; 
+  gap:16px !important; 
+}
+.advana-service-desk-style > div > div > div:last-child a[href="/cart"] { 
+  position:static !important; 
+  order:999 !important; 
+  margin-left:16px !important; 
+  transform:none !important; 
+}
+
+/* ----- Consolidated Advana header layout fix (cleanup of earlier conflicting rules) ----- */
+.advana-service-desk-style {
+  > div > div {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    position: relative !important;
+    padding: 12px 24px !important;
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+
+    > div:first-child {
+      flex: 0 1 auto !important;
+      display: flex !important;
+      align-items: center !important;
+      width: auto !important;
+      padding-right: 0 !important;
+    }
+    > div:last-child {
+      flex: 0 0 auto !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 16px !important;
+      position: static !important; /* remove absolute */
+      right: auto !important;
+      top: auto !important;
+      transform: none !important;
+      z-index: 2 !important;
+    }
+    > div:last-child a[href="/cart"] {
+      order: 10 !important; /* ensure last */
+      position: static !important;
+      margin-left: 16px !important;
+      right: auto !important;
+      top: auto !important;
+      transform: none !important;
+    }
+    > div:last-child a:not([href="/cart"]) {
+      pointer-events: none !important; /* disable */
+      cursor: default !important;
+      opacity: 0.85 !important;
+    }
+  }
+  /* Neutralize any earlier absolute cart positioning */
+  a[href="/cart"] {
+    position: static !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+}
+
+/* Cart overlay button styles */
+.header-with-cart .cart-overlay-btn {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: none; /* border removed */
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(2px);
+  transition: background 0.2s ease, border-color 0.2s ease;
+  z-index: 30;
+}
+.header-with-cart .cart-overlay-btn:hover { background: rgba(255,255,255,0.15); }
+.header-with-cart .cart-overlay-btn:focus { outline: 2px solid #fff; outline-offset:2px; }
+.header-with-cart .cart-overlay-icon { width: 22px; height: 22px; filter: brightness(0) invert(1); margin-right: 6px; }
+.header-with-cart .cart-overlay-count { font-weight: 600; }
+/* Hide any original cart link still present in AdvanaMenu */
+.advana-service-desk-style a[href="/cart"] { display: none !important; }
+
+/* Vertical centering for header logos, icons, and cart */
+// .header-with-cart { position: relative !important; }
+.advana-service-desk-style > div > div { align-items: center !important; }
+.advana-service-desk-style > div > div > div:first-child { align-items: center !important; }
+.advana-service-desk-style > div > div > div:last-child { align-items: center !important; }
+.header-with-cart .cart-overlay-btn { top: 70%; transform: translateY(-50%); }
+/* Ensure images don't introduce extra baseline spacing */
+.header-with-cart img { display: block; }

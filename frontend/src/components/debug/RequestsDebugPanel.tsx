@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { mockRequestData } from '../../data/mock-requestData';
 
@@ -16,6 +16,12 @@ export const RequestsDebugPanel: React.FC<RequestsDebugProps> = ({
   const { getUserInfo, isRequestor, isApprover } = useAuth();
   const userInfo = getUserInfo();
   
+  // Draggable state - positioned at bottom right
+  const [position, setPosition] = useState({ x: window.innerWidth - 420, y: window.innerHeight - 200 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const panelRef = useRef<React.ElementRef<'div'>>(null);
+  
   // Only show in development or when URL contains debug=true
   const shouldShow = import.meta.env.DEV || 
     (typeof window !== 'undefined' && 
@@ -28,22 +34,85 @@ export const RequestsDebugPanel: React.FC<RequestsDebugProps> = ({
     request.personalData.email.toLowerCase().includes('kberres')
   );
 
+  // Mouse event handlers for dragging
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!panelRef.current) return;
+    
+    setIsDragging(true);
+    const rect = panelRef.current.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  const handleMouseMove = (e: globalThis.MouseEvent) => {
+    if (!isDragging) return;
+    
+    setPosition({
+      x: e.clientX - dragOffset.x,
+      y: e.clientY - dragOffset.y
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add global mouse events when dragging
+  React.useEffect(() => {
+    if (isDragging) {
+      const mouseMoveHandler = (e: globalThis.MouseEvent) => handleMouseMove(e);
+      const mouseUpHandler = () => handleMouseUp();
+      
+      document.addEventListener('mousemove', mouseMoveHandler);
+      document.addEventListener('mouseup', mouseUpHandler);
+      
+      return () => {
+        document.removeEventListener('mousemove', mouseMoveHandler);
+        document.removeEventListener('mouseup', mouseUpHandler);
+      };
+    }
+  }, [isDragging, dragOffset.x, dragOffset.y]);
+
   return (
-    <div style={{
-      position: 'fixed',
-      bottom: '20px',
-      right: '20px',
-      zIndex: 1000,
-      backgroundColor: '#fff3cd',
-      border: '1px solid #ffeaa7',
-      borderRadius: '6px',
-      padding: '16px',
-      fontSize: '12px',
-      maxWidth: '400px',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-    }}>
-      <div style={{ fontWeight: 'bold', marginBottom: '12px', color: '#856404' }}>
-        📊 Requests Debug Panel
+    <div 
+      ref={panelRef}
+      style={{
+        position: 'fixed',
+        bottom: 'auto',
+        right: 'auto',
+        left: position.x,
+        top: position.y,
+        zIndex: 1000,
+        backgroundColor: '#fff3cd',
+        border: '1px solid #ffeaa7',
+        borderRadius: '6px',
+        padding: '16px',
+        fontSize: '12px',
+        maxWidth: '400px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
+        cursor: isDragging ? 'grabbing' : 'grab',
+        userSelect: 'none',
+      }}
+      onMouseDown={handleMouseDown}
+    >
+      <div style={{ 
+        fontWeight: 'bold', 
+        marginBottom: '12px', 
+        color: '#856404',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <span>📊 Requests Debug Panel</span>
+        <span style={{ 
+          fontSize: '10px', 
+          color: '#666',
+          fontWeight: 'normal'
+        }}>
+          🖱️ Drag to move
+        </span>
       </div>
       
       <div style={{ marginBottom: '8px' }}>
