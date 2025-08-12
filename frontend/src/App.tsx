@@ -17,6 +17,8 @@ import CustomMenuLogoSection from "./components/CustomMenuLogoSection";
 import "./styles/main.scss";
 // import { useEffect } from 'react';
 import CartOverlayButton from './components/CartOverlayButton';
+import Metrics from "./pages/metrics/metrics";
+import { RoleGuard } from "./components/auth/RoleGuard";
 
 function App(): React.ReactElement {
   const { hasRole } = useAuth();
@@ -69,6 +71,14 @@ function App(): React.ReactElement {
           <Route path="/requests" element={<Requests />} />
           <Route path="/requests/:userId" element={<Requests />} />
           <Route path="/request-detail" element={<RequestDetail />} />
+          <Route
+            path="/metrics"
+            element={
+              <RoleGuard roles={[AppRoles.APPROVER]}>
+                <Metrics />
+              </RoleGuard>
+            }
+          />
           {/* Development-only auth status page */}
           {import.meta.env.DEV && (
             <Route path="/auth-status" element={<AuthStatusPage />} />

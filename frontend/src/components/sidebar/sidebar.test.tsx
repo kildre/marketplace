@@ -131,14 +131,18 @@ describe("Sidebar", () => {
   test("should render limited navigation links for APPROVER role", () => {
     renderSidebarWithBrowserRouter(AppRoles.APPROVER);
 
-    // APPROVER should only see the home link (which shows as "Requests")
+    // APPROVER should see the home link (Requests) and the Metrics link
     const homeLink = screen.getByRole("link", {
       name: /go to home page/i,
     });
     expect(homeLink).toBeInTheDocument();
     expect(homeLink).toHaveTextContent("Requests");
 
-    // APPROVER should not see cart or separate requests links
+    const metricsLink = screen.getByRole("link", { name: /go to metrics page/i });
+    expect(metricsLink).toBeInTheDocument();
+    expect(metricsLink).toHaveTextContent("Metrics");
+
+    // APPROVER should not see cart or a separate requests nav link
     expect(
       screen.queryByRole("link", { name: /go to cart page/i })
     ).not.toBeInTheDocument();
@@ -169,8 +173,10 @@ describe("Sidebar", () => {
     const homeLink = screen.getByRole("link", {
       name: /go to home page/i,
     });
-
     expect(homeLink).toHaveAttribute("href", "/");
+
+    const metricsLink = screen.getByRole("link", { name: /go to metrics page/i });
+    expect(metricsLink).toHaveAttribute("href", "/metrics");
   });
 
   test("should have proper semantic structure for REQUESTOR role", () => {
@@ -194,7 +200,7 @@ describe("Sidebar", () => {
 
     expect(nav).toBeInTheDocument();
     expect(list).toBeInTheDocument();
-    expect(listItems).toHaveLength(1);
+    expect(listItems).toHaveLength(2);
   });
 
   test("should display cart and requests counters for REQUESTOR role", () => {
@@ -252,7 +258,7 @@ describe("Sidebar", () => {
 
     expect(sidebar).toHaveClass("sidebar");
     expect(nav).toHaveClass("sidebar-nav");
-    expect(listItems).toHaveLength(1);
+    expect(listItems).toHaveLength(2);
     listItems.forEach((item) => {
       expect(item).toHaveClass("sidebar-nav__item");
     });
@@ -316,9 +322,24 @@ describe("Sidebar", () => {
     const listItems = container.querySelectorAll(".sidebar-nav__item");
     const activeItems = container.querySelectorAll(".sidebar-nav__item.active");
 
-    expect(listItems).toHaveLength(1);
+    expect(listItems).toHaveLength(2);
     expect(activeItems).toHaveLength(1);
     expect(listItems[0]).toHaveClass("active");
+  });
+
+  // New: verify active state on /metrics for APPROVER
+  test("should apply active class correctly for APPROVER on metrics page", () => {
+    const { container } = renderSidebarWithRouter("/metrics", AppRoles.APPROVER);
+
+    const metricsLink = screen.getByRole("link", { name: /go to metrics page/i });
+    expect(metricsLink).toHaveAttribute("aria-current", "page");
+
+    const listItems = container.querySelectorAll(".sidebar-nav__item");
+    const activeItems = container.querySelectorAll(".sidebar-nav__item.active");
+    expect(listItems).toHaveLength(2);
+    expect(activeItems).toHaveLength(1);
+    // metrics is the second li under approver sidebar
+    expect(listItems[1]).toHaveClass("active");
   });
 
   test("should handle router context properly for REQUESTOR", () => {
@@ -330,7 +351,7 @@ describe("Sidebar", () => {
   test("should handle router context properly for APPROVER", () => {
     const { container } = renderSidebarWithBrowserRouter(AppRoles.APPROVER);
     expect(container.querySelector(".sidebar")).toBeInTheDocument();
-    expect(container.querySelectorAll("a")).toHaveLength(1);
+    expect(container.querySelectorAll("a")).toHaveLength(2);
   });
 
   test("should have proper DOM structure for REQUESTOR", () => {
@@ -367,12 +388,14 @@ describe("Sidebar", () => {
     expect(nav).toBeInTheDocument();
     expect(nav?.parentElement).toBe(sidebar);
     expect(ul?.parentElement).toBe(nav);
-    expect(listItems).toHaveLength(1);
+    expect(listItems).toHaveLength(2);
 
-    // Check that the list item contains a link
-    const link = listItems[0].querySelector("a");
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href");
+    // Check each list item contains a link
+    listItems.forEach((item) => {
+      const link = item.querySelector("a");
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute("href");
+    });
   });
 
   test("should render component snapshot consistently for REQUESTOR", () => {
@@ -437,7 +460,7 @@ describe("Sidebar", () => {
 
     // Test link accessibility
     const links = container.querySelectorAll("a");
-    expect(links).toHaveLength(1);
+    expect(links).toHaveLength(2);
 
     links.forEach((link) => {
       expect(link).toHaveAttribute("href");
@@ -487,12 +510,14 @@ describe("Sidebar", () => {
 
     // Check for proper list items
     const listItems = screen.getAllByRole("listitem");
-    expect(listItems).toHaveLength(1);
+    expect(listItems).toHaveLength(2);
 
-    // Check that the list item contains a link
-    const link = listItems[0].querySelector("a");
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href");
+    // Check that each list item contains a link
+    listItems.forEach((item) => {
+      const link = item.querySelector("a");
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute("href");
+    });
   });
 
   test("should handle navigation state consistently for REQUESTOR", () => {
@@ -532,10 +557,10 @@ describe("Sidebar", () => {
     const homeLink = screen.getByRole("link", { name: /go to home page/i });
     expect(homeLink).toHaveAttribute("aria-current", "page");
 
-    // Should only have one list item for APPROVER
+    // Should have two list items (Requests + Metrics) for APPROVER
     const allListItems = container.querySelectorAll(".sidebar-nav__item");
     const activeItems = container.querySelectorAll(".sidebar-nav__item.active");
-    expect(allListItems).toHaveLength(1);
+    expect(allListItems).toHaveLength(2);
     expect(activeItems).toHaveLength(1);
   });
 
