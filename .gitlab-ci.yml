@@ -16,8 +16,9 @@ variables:
   #AWS_REGION: "us-gov-west-1"
   #ECR_REPOSITORY: "tenant/images"
   #IMAGE_REPOSITORY: "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY"
-  #HELM_UPGRADE_EXTRA_ARGS: >-
-     #--set image.pullPolicy=Always
+  HELM_UPGRADE_EXTRA_ARGS: >-
+     --set image.commitsha=${UPSTREAM_COMMIT_SHA}
+  #  --set image.pullPolicy=Always
   #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)" #DELETE THIS
   #  --set image.tag=${CI_COMMIT_SHA} #DELETE THIS
   IMAGE_TAG_FOR_HELM_ONLY:
