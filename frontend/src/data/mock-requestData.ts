@@ -51,7 +51,10 @@ export const mockRequestData = [
       estimatedROM: "$1,100",
     },
     submittedAt: "2025-07-31T09:15:30.000Z",
+    createdAt: "2025-07-31T09:15:30.000Z",
+    updatedAt: "2025-07-31T09:15:30.000Z",
   },
+  // Additional requests for kberres user
   {
     requestId: "KBER-REQ-002",
     ticketNumber: "9002",
@@ -102,6 +105,8 @@ export const mockRequestData = [
       estimatedROM: "$5,000",
     },
     submittedAt: "2025-07-25T14:22:15.000Z",
+    createdAt: "2025-07-25T14:22:15.000Z",
+    updatedAt: "2025-07-26T10:30:00.000Z",
   },
   {
     requestId: "KBER-REQ-003",
@@ -144,7 +149,8 @@ export const mockRequestData = [
       },
     ],
     status: "Denied",
-    statusReason: "Security clearance requirements not met for requested data classification level",
+    statusReason:
+      "Security clearance requirements not met for requested data classification level",
     decisionNumber: "KBER-DEN-003",
     summary: {
       totalItems: 2,
@@ -153,6 +159,8 @@ export const mockRequestData = [
       estimatedROM: "$1,598",
     },
     submittedAt: "2025-07-20T11:45:00.000Z",
+    createdAt: "2025-07-20T11:45:00.000Z",
+    updatedAt: "2025-07-20T15:20:00.000Z",
   },
   // Existing requests below
   {
@@ -266,6 +274,8 @@ export const mockRequestData = [
       estimatedROM: "$35,600",
     },
     submittedAt: "2025-07-22T14:36:05.624Z",
+    createdAt: "2025-07-22T14:36:05.624Z",
+    updatedAt: "2025-07-23T09:15:30.000Z",
   },
   {
     requestId: "JQkIwF3-1983cde1845",
@@ -357,6 +367,8 @@ export const mockRequestData = [
       estimatedROM: "$3,500",
     },
     submittedAt: "2025-07-22T14:40:51.358Z",
+    createdAt: "2025-07-22T14:40:51.358Z",
+    updatedAt: "2025-07-22T14:40:51.358Z",
   },
   {
     requestId: "8OdN4Sp-1983cde76dd",
@@ -438,6 +450,8 @@ export const mockRequestData = [
       estimatedROM: "$2,700",
     },
     submittedAt: "2025-07-22T14:42:10.543Z",
+    createdAt: "2025-07-22T14:42:10.543Z",
+    updatedAt: "2025-07-22T16:25:30.000Z",
   },
   {
     requestId: "FD4kFZp-1983cdecda4",
@@ -509,6 +523,8 @@ export const mockRequestData = [
       estimatedROM: "$2,200",
     },
     submittedAt: "2025-07-22T14:43:28.427Z",
+    createdAt: "2025-07-22T14:43:28.427Z",
+    updatedAt: "2025-07-22T14:43:28.427Z",
   },
   // Sarah Wilson - 3 requests
   {
@@ -535,7 +551,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 5,
         price: 299,
-        description: "Data integration and analytics platform for large-scale decision-making.",
+        description:
+          "Data integration and analytics platform for large-scale decision-making.",
         unit: 100,
       },
       {
@@ -544,7 +561,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 3,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
     ],
@@ -558,6 +576,8 @@ export const mockRequestData = [
       estimatedROM: "$3,000",
     },
     submittedAt: "2025-07-20T09:15:30.427Z",
+    createdAt: "2025-07-20T09:15:30.427Z",
+    updatedAt: "2025-07-20T11:45:00.000Z",
   },
   {
     requestId: "SW2def-1983cde5678",
@@ -583,7 +603,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 2,
         price: 600,
-        description: "AI lifecycle platform for building and deploying machine learning models.",
+        description:
+          "AI lifecycle platform for building and deploying machine learning models.",
         unit: 500,
       },
       {
@@ -592,7 +613,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 5,
         price: 200,
-        description: "Interactive data visualization software for business intelligence.",
+        description:
+          "Interactive data visualization software for business intelligence.",
         unit: 100,
       },
     ],
@@ -606,6 +628,8 @@ export const mockRequestData = [
       estimatedROM: "$2,200",
     },
     submittedAt: "2025-07-19T14:22:15.123Z",
+    createdAt: "2025-07-19T14:22:15.123Z",
+    updatedAt: "2025-07-19T14:22:15.123Z",
   },
   {
     requestId: "SW3ghi-1983cde9012",
@@ -622,7 +646,8 @@ export const mockRequestData = [
       pocName: "Captain Lee",
       pocPhone: "555-0103",
       pocEmail: "lee.cpt@army.mil",
-      useCaseDescription: "Data pipeline automation for operational intelligence.",
+      useCaseDescription:
+        "Data pipeline automation for operational intelligence.",
     },
     cartItems: [
       {
@@ -631,7 +656,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 10,
         price: 275,
-        description: "Robotic process automation (RPA) software for automating workflows.",
+        description:
+          "Robotic process automation (RPA) software for automating workflows.",
         unit: 100,
       },
     ],
@@ -645,6 +671,8 @@ export const mockRequestData = [
       estimatedROM: "$2,750",
     },
     submittedAt: "2025-07-18T11:45:45.567Z",
+    createdAt: "2025-07-18T11:45:45.567Z",
+    updatedAt: "2025-07-18T14:20:30.000Z",
   },
   // Mike Johnson - 2 requests
   {
@@ -671,7 +699,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 5,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
       {
@@ -680,7 +709,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 2,
         price: null,
-        description: "Unified platform for data engineering, analytics, and AI.",
+        description:
+          "Unified platform for data engineering, analytics, and AI.",
         unit: 100,
         rom: "Custom ROM",
       },
@@ -695,6 +725,8 @@ export const mockRequestData = [
       estimatedROM: "$2,500",
     },
     submittedAt: "2025-07-17T16:30:20.789Z",
+    createdAt: "2025-07-17T16:30:20.789Z",
+    updatedAt: "2025-07-18T08:15:00.000Z",
   },
   {
     requestId: "MJ2mno-1983cde7890",
@@ -720,7 +752,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 15,
         price: 0,
-        description: "DevOps platform enabling source code management and CI/CD pipelines.",
+        description:
+          "DevOps platform enabling source code management and CI/CD pipelines.",
         unit: 100,
       },
       {
@@ -729,7 +762,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 3,
         price: 200,
-        description: "Interactive data visualization software for business intelligence.",
+        description:
+          "Interactive data visualization software for business intelligence.",
         unit: 100,
       },
     ],
@@ -743,6 +777,8 @@ export const mockRequestData = [
       estimatedROM: "$600",
     },
     submittedAt: "2025-07-16T13:15:35.234Z",
+    createdAt: "2025-07-16T13:15:35.234Z",
+    updatedAt: "2025-07-16T13:15:35.234Z",
   },
   // Lisa Brown - 2 requests
   {
@@ -769,7 +805,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 8,
         price: 299,
-        description: "Data integration and analytics platform for large-scale decision-making.",
+        description:
+          "Data integration and analytics platform for large-scale decision-making.",
         unit: 100,
       },
       {
@@ -778,7 +815,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 1,
         price: 600,
-        description: "AI lifecycle platform for building and deploying machine learning models.",
+        description:
+          "AI lifecycle platform for building and deploying machine learning models.",
         unit: 500,
       },
     ],
@@ -792,6 +830,8 @@ export const mockRequestData = [
       estimatedROM: "$3,000",
     },
     submittedAt: "2025-07-15T10:45:12.890Z",
+    createdAt: "2025-07-15T10:45:12.890Z",
+    updatedAt: "2025-07-15T13:20:00.000Z",
   },
   {
     requestId: "LB2stu-1983cde8901",
@@ -817,7 +857,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 10,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
     ],
@@ -831,6 +872,8 @@ export const mockRequestData = [
       estimatedROM: "$5,000",
     },
     submittedAt: "2025-07-14T14:20:45.345Z",
+    createdAt: "2025-07-14T14:20:45.345Z",
+    updatedAt: "2025-07-14T14:20:45.345Z",
   },
   // David Garcia - 4 requests
   {
@@ -857,7 +900,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 3,
         price: 600,
-        description: "AI lifecycle platform for building and deploying machine learning models.",
+        description:
+          "AI lifecycle platform for building and deploying machine learning models.",
         unit: 500,
       },
       {
@@ -866,7 +910,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 5,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
     ],
@@ -880,6 +925,8 @@ export const mockRequestData = [
       estimatedROM: "$4,300",
     },
     submittedAt: "2025-07-13T08:30:15.678Z",
+    createdAt: "2025-07-13T08:30:15.678Z",
+    updatedAt: "2025-07-13T11:45:00.000Z",
   },
   {
     requestId: "DG2yz1-1983cde9012",
@@ -905,7 +952,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 12,
         price: 200,
-        description: "Interactive data visualization software for business intelligence.",
+        description:
+          "Interactive data visualization software for business intelligence.",
         unit: 100,
       },
       {
@@ -914,7 +962,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 6,
         price: 275,
-        description: "Robotic process automation (RPA) software for automating workflows.",
+        description:
+          "Robotic process automation (RPA) software for automating workflows.",
         unit: 100,
       },
     ],
@@ -928,6 +977,8 @@ export const mockRequestData = [
       estimatedROM: "$4,050",
     },
     submittedAt: "2025-07-12T15:45:30.123Z",
+    createdAt: "2025-07-12T15:45:30.123Z",
+    updatedAt: "2025-07-12T15:45:30.123Z",
   },
   {
     requestId: "DG3ab2-1983cde3456",
@@ -953,7 +1004,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 3,
         price: null,
-        description: "Unified platform for data engineering, analytics, and AI.",
+        description:
+          "Unified platform for data engineering, analytics, and AI.",
         unit: 100,
         rom: "Custom ROM",
       },
@@ -963,7 +1015,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 4,
         price: 299,
-        description: "Data integration and analytics platform for large-scale decision-making.",
+        description:
+          "Data integration and analytics platform for large-scale decision-making.",
         unit: 100,
       },
     ],
@@ -977,6 +1030,8 @@ export const mockRequestData = [
       estimatedROM: "$1,200",
     },
     submittedAt: "2025-07-11T12:10:20.456Z",
+    createdAt: "2025-07-11T12:10:20.456Z",
+    updatedAt: "2025-07-11T15:30:00.000Z",
   },
   {
     requestId: "DG4cd3-1983cde7890",
@@ -1002,7 +1057,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 20,
         price: 0,
-        description: "DevOps platform enabling source code management and CI/CD pipelines.",
+        description:
+          "DevOps platform enabling source code management and CI/CD pipelines.",
         unit: 100,
       },
       {
@@ -1011,7 +1067,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 8,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
     ],
@@ -1025,6 +1082,8 @@ export const mockRequestData = [
       estimatedROM: "$4,000",
     },
     submittedAt: "2025-07-10T09:25:40.789Z",
+    createdAt: "2025-07-10T09:25:40.789Z",
+    updatedAt: "2025-07-10T12:15:00.000Z",
   },
   // Emma Davis - 2 requests
   {
@@ -1051,7 +1110,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 6,
         price: 299,
-        description: "Data integration and analytics platform for large-scale decision-making.",
+        description:
+          "Data integration and analytics platform for large-scale decision-making.",
         unit: 100,
       },
       {
@@ -1060,7 +1120,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 8,
         price: 200,
-        description: "Interactive data visualization software for business intelligence.",
+        description:
+          "Interactive data visualization software for business intelligence.",
         unit: 100,
       },
     ],
@@ -1074,6 +1135,8 @@ export const mockRequestData = [
       estimatedROM: "$3,394",
     },
     submittedAt: "2025-07-09T11:15:25.012Z",
+    createdAt: "2025-07-09T11:15:25.012Z",
+    updatedAt: "2025-07-09T14:30:00.000Z",
   },
   {
     requestId: "ED2gh5-1983cde8901",
@@ -1099,7 +1162,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 2,
         price: 600,
-        description: "AI lifecycle platform for building and deploying machine learning models.",
+        description:
+          "AI lifecycle platform for building and deploying machine learning models.",
         unit: 500,
       },
       {
@@ -1108,7 +1172,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 5,
         price: 275,
-        description: "Robotic process automation (RPA) software for automating workflows.",
+        description:
+          "Robotic process automation (RPA) software for automating workflows.",
         unit: 100,
       },
     ],
@@ -1122,6 +1187,8 @@ export const mockRequestData = [
       estimatedROM: "$2,575",
     },
     submittedAt: "2025-07-08T14:40:50.345Z",
+    createdAt: "2025-07-08T14:40:50.345Z",
+    updatedAt: "2025-07-08T14:40:50.345Z",
   },
   // Chris Miller - 3 requests
   {
@@ -1148,7 +1215,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 10,
         price: 299,
-        description: "Data integration and analytics platform for large-scale decision-making.",
+        description:
+          "Data integration and analytics platform for large-scale decision-making.",
         unit: 100,
       },
       {
@@ -1157,7 +1225,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 7,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
     ],
@@ -1171,6 +1240,8 @@ export const mockRequestData = [
       estimatedROM: "$6,490",
     },
     submittedAt: "2025-07-07T07:20:15.678Z",
+    createdAt: "2025-07-07T07:20:15.678Z",
+    updatedAt: "2025-07-07T10:45:00.000Z",
   },
   {
     requestId: "CM2kl7-1983cde9012",
@@ -1196,7 +1267,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 1,
         price: 600,
-        description: "AI lifecycle platform for building and deploying machine learning models.",
+        description:
+          "AI lifecycle platform for building and deploying machine learning models.",
         unit: 500,
       },
       {
@@ -1205,7 +1277,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 6,
         price: 200,
-        description: "Interactive data visualization software for business intelligence.",
+        description:
+          "Interactive data visualization software for business intelligence.",
         unit: 100,
       },
     ],
@@ -1219,6 +1292,8 @@ export const mockRequestData = [
       estimatedROM: "$1,800",
     },
     submittedAt: "2025-07-06T16:35:30.890Z",
+    createdAt: "2025-07-06T16:35:30.890Z",
+    updatedAt: "2025-07-06T16:35:30.890Z",
   },
   {
     requestId: "CM3mn8-1983cde3456",
@@ -1244,7 +1319,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 2,
         price: null,
-        description: "Unified platform for data engineering, analytics, and AI.",
+        description:
+          "Unified platform for data engineering, analytics, and AI.",
         unit: 100,
         rom: "Custom ROM",
       },
@@ -1254,7 +1330,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 8,
         price: 275,
-        description: "Robotic process automation (RPA) software for automating workflows.",
+        description:
+          "Robotic process automation (RPA) software for automating workflows.",
         unit: 100,
       },
     ],
@@ -1268,6 +1345,8 @@ export const mockRequestData = [
       estimatedROM: "$2,200",
     },
     submittedAt: "2025-07-05T13:50:45.123Z",
+    createdAt: "2025-07-05T13:50:45.123Z",
+    updatedAt: "2025-07-05T16:20:00.000Z",
   },
   // Amy Anderson - 2 requests
   {
@@ -1294,7 +1373,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 15,
         price: 200,
-        description: "Interactive data visualization software for business intelligence.",
+        description:
+          "Interactive data visualization software for business intelligence.",
         unit: 100,
       },
       {
@@ -1303,7 +1383,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 25,
         price: 0,
-        description: "DevOps platform enabling source code management and CI/CD pipelines.",
+        description:
+          "DevOps platform enabling source code management and CI/CD pipelines.",
         unit: 100,
       },
     ],
@@ -1317,6 +1398,8 @@ export const mockRequestData = [
       estimatedROM: "$3,000",
     },
     submittedAt: "2025-07-04T10:25:20.456Z",
+    createdAt: "2025-07-04T10:25:20.456Z",
+    updatedAt: "2025-07-04T13:40:00.000Z",
   },
   {
     requestId: "AA2qr0-1983cde4567",
@@ -1342,7 +1425,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 1,
         price: 600,
-        description: "AI lifecycle platform for building and deploying machine learning models.",
+        description:
+          "AI lifecycle platform for building and deploying machine learning models.",
         unit: 500,
       },
       {
@@ -1351,7 +1435,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 4,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
     ],
@@ -1365,6 +1450,8 @@ export const mockRequestData = [
       estimatedROM: "$2,600",
     },
     submittedAt: "2025-07-03T15:10:35.789Z",
+    createdAt: "2025-07-03T15:10:35.789Z",
+    updatedAt: "2025-07-03T15:10:35.789Z",
   },
   // Ryan Taylor - 3 requests
   {
@@ -1391,7 +1478,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 7,
         price: 299,
-        description: "Data integration and analytics platform for large-scale decision-making.",
+        description:
+          "Data integration and analytics platform for large-scale decision-making.",
         unit: 100,
       },
       {
@@ -1400,7 +1488,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 1,
         price: null,
-        description: "Unified platform for data engineering, analytics, and AI.",
+        description:
+          "Unified platform for data engineering, analytics, and AI.",
         unit: 100,
         rom: "Custom ROM",
       },
@@ -1415,6 +1504,8 @@ export const mockRequestData = [
       estimatedROM: "$2,093",
     },
     submittedAt: "2025-07-02T08:45:15.012Z",
+    createdAt: "2025-07-02T08:45:15.012Z",
+    updatedAt: "2025-07-02T11:30:00.000Z",
   },
   {
     requestId: "RT2uv2-1983cde5678",
@@ -1440,7 +1531,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 6,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
       {
@@ -1449,7 +1541,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 4,
         price: 275,
-        description: "Robotic process automation (RPA) software for automating workflows.",
+        description:
+          "Robotic process automation (RPA) software for automating workflows.",
         unit: 100,
       },
     ],
@@ -1463,6 +1556,8 @@ export const mockRequestData = [
       estimatedROM: "$4,100",
     },
     submittedAt: "2025-07-01T12:30:40.345Z",
+    createdAt: "2025-07-01T12:30:40.345Z",
+    updatedAt: "2025-07-01T12:30:40.345Z",
   },
   {
     requestId: "RT3wx3-1983cde9012",
@@ -1488,7 +1583,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 10,
         price: 200,
-        description: "Interactive data visualization software for business intelligence.",
+        description:
+          "Interactive data visualization software for business intelligence.",
         unit: 100,
       },
       {
@@ -1497,7 +1593,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 12,
         price: 0,
-        description: "DevOps platform enabling source code management and CI/CD pipelines.",
+        description:
+          "DevOps platform enabling source code management and CI/CD pipelines.",
         unit: 100,
       },
     ],
@@ -1511,6 +1608,8 @@ export const mockRequestData = [
       estimatedROM: "$2,000",
     },
     submittedAt: "2025-06-30T14:55:25.678Z",
+    createdAt: "2025-06-30T14:55:25.678Z",
+    updatedAt: "2025-06-30T17:10:00.000Z",
   },
   // Jessica White - 2 requests
   {
@@ -1537,7 +1636,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 12,
         price: 299,
-        description: "Data integration and analytics platform for large-scale decision-making.",
+        description:
+          "Data integration and analytics platform for large-scale decision-making.",
         unit: 100,
       },
       {
@@ -1546,7 +1646,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 2,
         price: 600,
-        description: "AI lifecycle platform for building and deploying machine learning models.",
+        description:
+          "AI lifecycle platform for building and deploying machine learning models.",
         unit: 500,
       },
     ],
@@ -1560,6 +1661,8 @@ export const mockRequestData = [
       estimatedROM: "$4,788",
     },
     submittedAt: "2025-06-29T09:15:50.901Z",
+    createdAt: "2025-06-29T09:15:50.901Z",
+    updatedAt: "2025-06-29T12:45:00.000Z",
   },
   {
     requestId: "JW2ab5-1983cde7890",
@@ -1585,7 +1688,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 15,
         price: 275,
-        description: "Robotic process automation (RPA) software for automating workflows.",
+        description:
+          "Robotic process automation (RPA) software for automating workflows.",
         unit: 100,
       },
       {
@@ -1594,7 +1698,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 3,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
     ],
@@ -1608,6 +1713,8 @@ export const mockRequestData = [
       estimatedROM: "$5,625",
     },
     submittedAt: "2025-06-28T11:40:30.234Z",
+    createdAt: "2025-06-28T11:40:30.234Z",
+    updatedAt: "2025-06-28T11:40:30.234Z",
   },
   // Kevin Martin - 4 requests
   {
@@ -1634,7 +1741,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 20,
         price: 200,
-        description: "Interactive data visualization software for business intelligence.",
+        description:
+          "Interactive data visualization software for business intelligence.",
         unit: 100,
       },
       {
@@ -1643,7 +1751,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 5,
         price: 299,
-        description: "Data integration and analytics platform for large-scale decision-making.",
+        description:
+          "Data integration and analytics platform for large-scale decision-making.",
         unit: 100,
       },
     ],
@@ -1657,6 +1766,8 @@ export const mockRequestData = [
       estimatedROM: "$5,495",
     },
     submittedAt: "2025-06-27T07:20:15.567Z",
+    createdAt: "2025-06-27T07:20:15.567Z",
+    updatedAt: "2025-06-27T10:15:00.000Z",
   },
   {
     requestId: "KM2ef7-1983cde8901",
@@ -1682,7 +1793,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 3,
         price: 600,
-        description: "AI lifecycle platform for building and deploying machine learning models.",
+        description:
+          "AI lifecycle platform for building and deploying machine learning models.",
         unit: 500,
       },
       {
@@ -1691,7 +1803,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 10,
         price: 500,
-        description: "Cloud computing platform offering scalable infrastructure and services.",
+        description:
+          "Cloud computing platform offering scalable infrastructure and services.",
         unit: 100,
       },
     ],
@@ -1705,6 +1818,8 @@ export const mockRequestData = [
       estimatedROM: "$6,800",
     },
     submittedAt: "2025-06-26T13:35:45.890Z",
+    createdAt: "2025-06-26T13:35:45.890Z",
+    updatedAt: "2025-06-26T13:35:45.890Z",
   },
   {
     requestId: "KM3gh8-1983cde5678",
@@ -1730,7 +1845,8 @@ export const mockRequestData = [
         productType: "Consumption Based Tool",
         quantity: 4,
         price: null,
-        description: "Unified platform for data engineering, analytics, and AI.",
+        description:
+          "Unified platform for data engineering, analytics, and AI.",
         unit: 100,
         rom: "Custom ROM",
       },
@@ -1740,7 +1856,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 10,
         price: 275,
-        description: "Robotic process automation (RPA) software for automating workflows.",
+        description:
+          "Robotic process automation (RPA) software for automating workflows.",
         unit: 100,
       },
     ],
@@ -1754,6 +1871,8 @@ export const mockRequestData = [
       estimatedROM: "$2,750",
     },
     submittedAt: "2025-06-25T16:50:20.123Z",
+    createdAt: "2025-06-25T16:50:20.123Z",
+    updatedAt: "2025-06-25T19:30:00.000Z",
   },
   {
     requestId: "KM4ij9-1983cde9012",
@@ -1779,7 +1898,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 30,
         price: 0,
-        description: "DevOps platform enabling source code management and CI/CD pipelines.",
+        description:
+          "DevOps platform enabling source code management and CI/CD pipelines.",
         unit: 100,
       },
       {
@@ -1788,7 +1908,8 @@ export const mockRequestData = [
         productType: "License Based",
         quantity: 8,
         price: 200,
-        description: "Interactive data visualization software for business intelligence.",
+        description:
+          "Interactive data visualization software for business intelligence.",
         unit: 100,
       },
     ],
@@ -1802,5 +1923,7 @@ export const mockRequestData = [
       estimatedROM: "$1,600",
     },
     submittedAt: "2025-06-24T10:05:35.456Z",
+    createdAt: "2025-06-24T10:05:35.456Z",
+    updatedAt: "2025-06-24T13:20:00.000Z",
   },
 ];

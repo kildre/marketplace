@@ -211,6 +211,8 @@ export interface RequestData {
   status: string;
   decisionNumber?: string;
   submittedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================================

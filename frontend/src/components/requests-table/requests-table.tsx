@@ -44,13 +44,6 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       return undefined; // Show all requests
     }
 
-    // Special handling for kberres user - always show their requests
-    const username = userInfo?.username?.toLowerCase();
-    const email = userInfo?.email?.toLowerCase();
-    if (username?.includes('kberres') || email?.includes('kberres')) {
-      return 'kberres'; // Force to kberres to match mock data
-    }
-
     // If user is a requestor (and not an approver viewing all), show their own requests
     if (isRequestor() && !isApprover()) {
       return userInfo?.username; // Use their actual username
@@ -67,24 +60,21 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
   // Use provided data or default mock data, filtered by effectiveUserId if specified
   const allRequests = data || mockRequestData;
-  
+
   const requests = effectiveUserId
     ? allRequests.filter((request) => {
         // Extract the user ID part from the email (before the @)
         const emailUserId = request.personalData.email.split("@")[0];
         const normalizedEffectiveUserId = effectiveUserId.toLowerCase();
         const normalizedEmailUserId = emailUserId.toLowerCase();
-        
+
         // Multiple matching strategies for robust filtering
         const exactMatch = normalizedEmailUserId === normalizedEffectiveUserId;
-        const containsMatch = 
+        const containsMatch =
           normalizedEmailUserId.includes(normalizedEffectiveUserId) ||
           normalizedEffectiveUserId.includes(normalizedEmailUserId);
-        const kberresMatch = 
-          (normalizedEffectiveUserId.includes('kberres') && normalizedEmailUserId.includes('kberres'));
-        
-        const matches = exactMatch || containsMatch || kberresMatch;
-        
+        const matches = exactMatch || containsMatch;
+
         return matches;
       })
     : allRequests;
@@ -92,19 +82,19 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   // Convert to format expected by DataGrid
   const tableData = requests.map((request) => ({
     id: request.requestId,
-    ticketNumber: request.ticketNumber,
+    ticketNumber: request.requestId.substring(0, 4),
     userId: request.personalData.name,
     userEmail: request.personalData.email,
     ticketType: "Application", // Default since this isn't in the new structure
     asset: request.cartItems.map((item) => item.productName).join(", "),
     qtySize: request.summary.totalQuantity,
     estimatedPrice: request.summary.estimatedROM,
-    dateCreated: new Date(request.submittedAt).toLocaleDateString("en-US", {
+    dateCreated: new Date(request.createdAt).toLocaleDateString("en-US", {
       day: "2-digit",
       month: "short",
       year: "2-digit",
     }),
-    lastUpdated: new Date(request.submittedAt).toLocaleDateString("en-US", {
+    lastUpdated: new Date(request.updatedAt).toLocaleDateString("en-US", {
       day: "2-digit",
       month: "short",
       year: "2-digit",
@@ -254,7 +244,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           }}
         />
       </Paper>
-      <RequestsDebugPanel 
+      <RequestsDebugPanel
         userId={userId}
         effectiveUserId={effectiveUserId}
         filteredRequestsCount={requests.length}
