@@ -16,6 +16,7 @@ global:
 
 image:
   repository: tenant/images/advana-marketplace
+  tag: b9ef33ba670afcc70e8bce6060a08c70b3bf3857
   pullPolicy: Always
 
 serviceAccount:
