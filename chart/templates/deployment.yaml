@@ -19,7 +19,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: advana-marketplace-web
-          image: {{ .Values.image.repository }}@{{ .Values.image.digest }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: Always
           resources:
             requests:
@@ -56,4 +56,3 @@ spec:
         - name: secret-volume
           secret:
             secretName: your-secret
-{{ include "common.deployment" $ }}
