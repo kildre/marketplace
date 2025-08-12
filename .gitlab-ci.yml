@@ -1,8 +1,8 @@
 include:
   - project: promotion/tekton-promotion-gitlab
-    #file: routes/container-only.yml
-    # file: routes/helm-only.yml
-    file: routes/dragon-full.yml
+    # file: routes/container-only.yml
+    file: routes/helm-only.yml
+    # file: routes/dragon-full.yml
 
 workflow:
   rules:
@@ -13,12 +13,12 @@ workflow:
 
 variables:
   #HELM_UPGRADE_EXTRA_ARGS: >-
-  #  --set image.pullPolicy=Always
+     #--set image.pullPolicy=Always
   #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)" #DELETE THIS
   #  --set image.tag=${CI_COMMIT_SHA} #DELETE THIS
   IMAGE_TAG_FOR_HELM_ONLY:
    description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
-   #value: "66d47990065c25b15d297c71733ec390c11a118d"
+   value: "caf5d3b37ab67a68b730ca16c5791e4bd662cce4"
   # DOCKERFILE_VERSION:
   #  description: "Choose Dockerfile version for security compliance"
   #  value: "distroless" # Changed to distroless as it successfully removes tiff vulnerability
