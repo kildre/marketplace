@@ -8,7 +8,7 @@ global:
   awsRegion: us-gov-west-1
   appName: advana-marketplace
   baseDomain: app.advana.cdao.us
-  registry: 231134345536.dkr.ecr.us-gov-west-1.amazonaws.com
+  registry: 231388672283.dkr.ecr.us-gov-west-1.amazonaws.com
   vaultPrefix: aws/csn/dev/advana-marketplace
 
 ###############################################################################
@@ -32,20 +32,20 @@ crossplane:
   postgres: 
     enabled: true
 
-deployment:
-  web:
-    replicaCount: 1 # unused if autoscaling is enabled
-    podAnnotations:
-      iam.amazonaws.com/role: arn:aws:iam::231134345536:role/advana/k8s/s3.wildcard
-    container:
-      web:
-        resources: # only set values in environment-specific overrides
-          limits:
-            cpu: 4
-            memory: 2Gi
-          requests:
-            cpu: 2
-            memory: 500Mi
+#deployment:
+#  web:
+#    replicaCount: 1 # unused if autoscaling is enabled
+#    podAnnotations:
+#      iam.amazonaws.com/role: arn:aws:iam::231134345536:role/advana/k8s/s3.wildcard
+#    container:
+#      web:
+#        resources: # only set values in environment-specific overrides
+#          limits:
+#            cpu: 4
+#            memory: 2Gi
+#          requests:
+#            cpu: 2
+#            memory: 500Mi
 
 # public values that are stored as a secret object for convenience, remove if using values from vault
 secret:
