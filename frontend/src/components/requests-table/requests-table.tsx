@@ -123,7 +123,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
       const mappedData = {
         id: (apiRequest.requestNumber as string) || `request-${index}`,
-        userId: (apiRequest.designation as string) || "N/A",
+        userId: (apiRequest.requestorEmail as string) || "N/A",
         userEmail: (apiRequest.requestorEmail as string) || "N/A",
         ticketType: "Application", // Default since this isn't in the new structure
         asset: assetText,
@@ -197,7 +197,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
     if (showUserColumn && isApprover()) {
       baseColumns.push({
         field: "userId",
-        headerName: "User ID",
+        headerName: "User",
         width: 120,
         filterable: true,
       });
@@ -205,14 +205,14 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
     // Add remaining columns
     baseColumns.push(
-      {
-        field: "ticketType",
-        headerName: "Ticket Type",
-        width: 90,
-        filterable: true,
-        type: "singleSelect",
-        valueOptions: ["Application", "Hardware", "Software", "Access"],
-      },
+      // {
+      //   field: "ticketType",
+      //   headerName: "Ticket Type",
+      //   width: 90,
+      //   filterable: true,
+      //   type: "singleSelect",
+      //   valueOptions: ["Application", "Hardware", "Software", "Access"],
+      // },
       {
         field: "asset",
         headerName: "Asset",

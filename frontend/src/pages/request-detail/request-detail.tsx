@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { PageTitle } from "../../components/page-title/page-title";
 import { RequestDetailView } from "../../components/common/request-detail-view";
 import { useAuth } from "@/hooks/useAuth";
@@ -122,6 +122,7 @@ const transformApiRequestToRequestData = (
 
 export const RequestDetail = (): React.ReactElement => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const requestId = searchParams.get("id");
   const userId = searchParams.get("userId"); // Get userId from URL
   const { hasRole, getUserInfo } = useAuth();
@@ -302,6 +303,10 @@ export const RequestDetail = (): React.ReactElement => {
       buttonClass += " button--pending";
     }
 
+    // Determine status number for API request
+    const statusNumber =
+      request.status === "Pending" ? 1 : request.status === "Approved" ? 2 : 3;
+
     const updateRequest = async () => {
       const userInfo = getUserInfo();
       const computedDecisionNumber = generateRequestId(12);
@@ -312,10 +317,14 @@ export const RequestDetail = (): React.ReactElement => {
         },
         body: JSON.stringify({
           decisionNumber: computedDecisionNumber,
-          requestNumber: request.requestId, // Use requestId from transformed RequestData
-          statusId: request.status,
+          requestNumber: request.requestId,
+          adjudicatorEmail: userInfo?.email,
+          statusId: statusNumber,
           comments: request.statusReason,
-          adjudicatorEmail: userInfo?.email || "",
+          ticketType: "Request",
+          asset: "",
+          quantity: 0,
+          estimatedPrice: 0,
         }),
       });
 
@@ -340,6 +349,8 @@ export const RequestDetail = (): React.ReactElement => {
       request.statusReason = statusReason || "Request accepted.";
       try {
         await updateRequest();
+        // Navigate to home page after successful approval
+        navigate("/");
       } catch {
         // Handle error appropriately in your UI
       }
@@ -351,6 +362,8 @@ export const RequestDetail = (): React.ReactElement => {
       request.statusReason = statusReason || "Request denied.";
       try {
         await updateRequest();
+        // Navigate to home page after successful rejection
+        navigate("/");
       } catch {
         // Handle error appropriately in your UI
       }

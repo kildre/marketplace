@@ -91,7 +91,7 @@ export const FormRequestDetails = ({
             Please specify the organization you are requesting on behalf of.
           </Alert>
         )}
-      <Accordion defaultExpanded slotProps={{ heading: { component: "h2" } }}>
+      <Accordion defaultExpanded>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="request-details-content"

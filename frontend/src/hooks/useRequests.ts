@@ -4,43 +4,64 @@ import { useRequestsRefresh } from "./useRequestsRefresh";
 
 export const useRequests = (
   overrideUserId?: string,
-  enabled: boolean = true
+  enabled: boolean = false
 ) => {
-  const { isRequestor, isApprover, getUserInfo } = useAuth();
+  const { getUserInfo, isApprover, isRequestor } = useAuth();
   const { subscribe } = useRequestsRefresh();
-  const [allRequests, setAllRequests] = useState<
-    Array<Record<string, unknown>>
-  >([]);
+  const [allRequests, setAllRequests] = useState<Record<string, unknown>[]>([]);
 
-  // Determine which user's requests to show
-  const userId = useMemo(() => {
-    // If overrideUserId is provided (from URL), use it regardless of auth status
+  // Track user info changes to trigger re-renders in development mode
+  const [userTracker, setUserTracker] = useState(0);
+  const userInfo = getUserInfo();
+
+  // Effect to poll for user changes in development mode
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      const interval = window.setInterval(() => {
+        const currentUserInfo = getUserInfo();
+        // Compare user info and trigger refresh if changed
+        if (
+          currentUserInfo?.email !== userInfo?.email ||
+          currentUserInfo?.username !== userInfo?.username
+        ) {
+          setUserTracker((prev) => prev + 1);
+        }
+      }, 1000); // Check every second
+
+      return () => window.clearInterval(interval);
+    }
+  }, [getUserInfo, userInfo?.email, userInfo?.username]);
+
+  // Determine actual user ID to use for API calls
+  const actualUserId = useMemo(() => {
+    // Get fresh user info to ensure we get the latest values
+    const userInfo = getUserInfo();
+    const currentIsApprover = isApprover();
+    const currentIsRequestor = isRequestor();
+
     if (overrideUserId) {
       return overrideUserId;
     }
 
-    // If user is an approver, they can see all requests or filter by specific user
-    if (isApprover()) {
-      return undefined; // undefined = all requests
+    if (currentIsRequestor && userInfo?.email) {
+      return userInfo.email;
     }
 
-    // If user is a requestor, they can only see their own requests
-    if (isRequestor()) {
-      // We'll get the username when we actually need it in the fetch function
-      return "current-user"; // Placeholder to indicate we want current user's requests
+    if (currentIsApprover && userInfo?.email) {
+      return userInfo.email;
     }
 
-    // Default fallback - show all requests
     return undefined;
-  }, [overrideUserId, isApprover, isRequestor]); // Remove getUserInfo from dependencies
+  }, [overrideUserId, isApprover, isRequestor, getUserInfo, userTracker]); // Include userTracker to make it reactive
 
   // Fetch requests from API - memoized to prevent infinite loops
   const fetchRequests = useCallback(async () => {
-    // Get fresh user info inside the function
-    const currentUserInfo = getUserInfo();
+    // Get fresh auth info to ensure we have the latest values
+    const userInfo = getUserInfo();
     const currentIsApprover = isApprover();
+    const currentIsRequestor = isRequestor();
 
-    if (!currentUserInfo?.email) {
+    if (!userInfo?.email) {
       setAllRequests([]);
       return;
     }
@@ -49,17 +70,17 @@ export const useRequests = (
       let response;
 
       if (currentIsApprover) {
-        // Approvers can see all requests, pass their email
+        // Approvers can see all requests
         response = await window.fetch("/api/requests/viewAll", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userEmail: currentUserInfo.email,
+            userEmail: userInfo.email,
           }),
         });
-      } else {
+      } else if (currentIsRequestor) {
         // Requestors see only their own requests
         response = await window.fetch("/api/requests/viewForRequestor", {
           method: "POST",
@@ -67,40 +88,42 @@ export const useRequests = (
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userEmail: currentUserInfo.email,
+            userEmail: actualUserId || userInfo.email, // Use actualUserId if available
           }),
         });
+      } else {
+        setAllRequests([]);
+        return;
       }
 
       if (response.ok) {
         const requestsData = await response.json();
 
         // Handle API response format: { requests: [...], errMsg: "..." }
-        let dataToSet = [];
+        let apiRequests = [];
         if (requestsData && Array.isArray(requestsData.requests)) {
-          dataToSet = requestsData.requests;
+          apiRequests = requestsData.requests;
         } else if (Array.isArray(requestsData)) {
-          dataToSet = requestsData;
-        } else {
-          dataToSet = [];
+          apiRequests = requestsData;
         }
 
-        setAllRequests(dataToSet);
+        setAllRequests(apiRequests);
       } else {
-        // Fallback to empty array if API fails
+        // Handle error responses
         setAllRequests([]);
       }
-    } catch {
-      // Fallback to empty array if API fails
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error fetching requests:", error);
       setAllRequests([]);
     }
-  }, []); // No dependencies - get fresh values inside the function
+  }, [actualUserId]); // Include actualUserId as dependency
 
   useEffect(() => {
     if (enabled) {
       fetchRequests();
     }
-  }, [fetchRequests, enabled]);
+  }, [fetchRequests, enabled, actualUserId]); // Include actualUserId to refetch when user changes
 
   // Subscribe to global refresh events
   useEffect(() => {
@@ -110,26 +133,12 @@ export const useRequests = (
       }
     });
     return unsubscribe;
-  }, [subscribe, fetchRequests, enabled]);
-
-  const requests = useMemo(() => {
-    return allRequests;
-  }, [allRequests]);
-
-  const requestsCount = useMemo(() => {
-    return requests.length;
-  }, [requests]);
-
-  const refetch = useCallback(async () => {
-    if (enabled) {
-      await fetchRequests();
-    }
-  }, [fetchRequests, enabled]);
+  }, [subscribe, fetchRequests, enabled, actualUserId]); // Include actualUserId to refetch when user changes
 
   return {
-    requestsCount,
-    requests,
-    userId, // Expose the actual userId being used for debugging
-    refetch, // Expose refetch function for manual updates
+    requestsCount: allRequests.length,
+    requests: allRequests,
+    userId: actualUserId, // Expose the actual userId being used for debugging
+    refetch: fetchRequests,
   };
 };

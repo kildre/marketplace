@@ -64,12 +64,52 @@ const mockUserConfigurations = {
     designation: "CDAO Approver",
     agency: "CDAO",
   },
+  approver_jennifer: {
+    id: "approver-user-jennifer",
+    username: "jennifer.a.cowley",
+    email: "jennifer.a.cowley.civ@mail.mil",
+    firstName: "Jennifer",
+    lastName: "Cowley",
+    roles: [MockRoleOptions.MARKETPLACE_APPROVER],
+    designation: "CDAO Approver",
+    agency: "CDAO",
+  },
+  approver_jane: {
+    id: "approver-user-jane",
+    username: "jane.f.roberts",
+    email: "jane.f.roberts.civ@mail.mil",
+    firstName: "Jane",
+    lastName: "Roberts",
+    roles: [MockRoleOptions.MARKETPLACE_APPROVER],
+    designation: "CDAO Approver",
+    agency: "CDAO",
+  },
   requestor_vinoth: {
     id: "requestor-user-vinoth",
     username: "vinoth.jagannathan",
     email: "vinoth.jagannathan.civ@mail.mil",
     firstName: "Vinoth",
     lastName: "Jagannathan",
+    roles: [MockRoleOptions.MARKETPLACE_REQUESTOR],
+    designation: "CDAO Requestor",
+    agency: "CDAO",
+  },
+  requestor_elizabeth: {
+    id: "requestor-user-elizabeth",
+    username: "elizabeth.y.ahn",
+    email: "elizabeth.y.ahn.civ@mail.mil",
+    firstName: "Elizabeth",
+    lastName: "Ahn",
+    roles: [MockRoleOptions.MARKETPLACE_REQUESTOR],
+    designation: "CDAO Requestor",
+    agency: "CDAO",
+  },
+  requestor_daniel: {
+    id: "requestor-user-daniel",
+    username: "daniel.e.allen",
+    email: "daniel.e.allen.civ@mail.mil",
+    firstName: "Daniel",
+    lastName: "Allen",
     roles: [MockRoleOptions.MARKETPLACE_REQUESTOR],
     designation: "CDAO Requestor",
     agency: "CDAO",
@@ -116,9 +156,29 @@ interface MockKeycloakProviderProps {
 
 export const EnhancedMockKeycloakProvider: React.FC<
   MockKeycloakProviderProps
-> = ({ children, initialUser = "requestor_vinoth" }) => {
-  const [currentUser, setCurrentUser] =
-    useState<keyof typeof mockUserConfigurations>(initialUser);
+> = ({ children, initialUser = "custom" }) => {
+  // Get initial user from localStorage or fallback to default
+  const getInitialUser = (): keyof typeof mockUserConfigurations => {
+    if (initialUser && initialUser !== "custom") return initialUser;
+
+    try {
+      const stored =
+        typeof window !== "undefined" && window.localStorage
+          ? window.localStorage.getItem("mockUserSelection")
+          : null;
+      if (stored && stored in mockUserConfigurations) {
+        return stored as keyof typeof mockUserConfigurations;
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+
+    return "custom";
+  };
+
+  const [currentUser, setCurrentUser] = useState<
+    keyof typeof mockUserConfigurations
+  >(getInitialUser());
 
   // Get current mock user data
   const getMockUserData = () => mockUserConfigurations[currentUser];
@@ -163,6 +223,15 @@ export const EnhancedMockKeycloakProvider: React.FC<
   }; // Switch mock user and update stored data
   const switchMockUser = (userType: keyof typeof mockUserConfigurations) => {
     setCurrentUser(userType);
+
+    // Persist selection in localStorage for page reloads
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem("mockUserSelection", userType);
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
 
     // Update stored auth data to simulate real behavior
     const userData = mockUserConfigurations[userType];
@@ -345,11 +414,21 @@ export const MockUserSwitcher: React.FC = () => {
       <div style={{ marginBottom: "8px" }}>
         <select
           value={currentMockUser}
-          onChange={(e) =>
-            switchMockUser(
-              e.target.value as keyof typeof mockUserConfigurations
-            )
-          }
+          onChange={(e) => {
+            const newUserType = e.target
+              .value as keyof typeof mockUserConfigurations;
+            switchMockUser(newUserType);
+
+            // Navigate to home page when user switches (in development mode)
+            if (import.meta.env.DEV) {
+              // eslint-disable-next-line no-console
+              console.log(
+                `🎭 User switched to: ${newUserType}, navigating to home page`
+              );
+              // Use window.location for immediate navigation since we can't use useNavigate hook here
+              window.location.href = "/";
+            }
+          }}
           style={{ marginLeft: "8px", fontSize: "12px", width: "100px" }}
         >
           {availableUsers.map((user) => (

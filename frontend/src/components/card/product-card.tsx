@@ -211,11 +211,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             type="number"
             value={inputQuantity}
             onChange={handleQuantityChange}
-            slotProps={{
-              input: {
-                style: { textAlign: "center" },
-                "aria-label": `Quantity for ${product.name}`,
-              },
+            InputProps={{
+              style: { textAlign: "center" },
+              "aria-label": `Quantity for ${product.name}`,
             }}
             inputProps={{
               min: 0,
