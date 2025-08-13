@@ -31,70 +31,76 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 }) => {
   const navigate = useNavigate();
   const { isApprover, getUserInfo } = useAuth();
-  const userInfo = getUserInfo();
   const [allRequests, setAllRequests] = React.useState(data || []);
 
-  // Fetch requests from API
-  React.useEffect(() => {
-    const fetchRequests = async () => {
-      if (!userInfo?.email) {
-        setAllRequests(data || []);
-        return;
+  // Fetch requests from API - memoized to prevent infinite loops
+  const fetchRequests = React.useCallback(async () => {
+    // Get fresh user info inside the function to avoid dependencies
+    const currentUserInfo = getUserInfo();
+    const currentIsApprover = isApprover();
+
+    if (!currentUserInfo?.email) {
+      setAllRequests(data || []);
+      return;
+    }
+
+    try {
+      let response;
+
+      if (currentIsApprover) {
+        // Approvers can see all requests, pass their email
+        response = await window.fetch("/api/requests/viewAll", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userEmail: currentUserInfo.email,
+          }),
+        });
+      } else {
+        // Requestors see only their own requests
+        response = await window.fetch("/api/requests/viewForRequestor", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userEmail: currentUserInfo.email,
+          }),
+        });
       }
 
-      try {
-        let response;
+      if (response.ok) {
+        const requestsData = await response.json();
 
-        if (isApprover()) {
-          // Approvers can see all requests, pass their email
-          response = await window.fetch("/api/requests/viewAll", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userEmail: userInfo.email,
-            }),
-          });
+        // Handle API response format: { requests: [...], errMsg: "..." }
+        let dataToSet = [];
+        if (requestsData && Array.isArray(requestsData.requests)) {
+          dataToSet = requestsData.requests;
+        } else if (Array.isArray(requestsData)) {
+          dataToSet = requestsData;
         } else {
-          // Requestors see only their own requests
-          response = await window.fetch("/api/requests/viewForRequestor", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userEmail: userInfo.email,
-            }),
-          });
+          dataToSet = [];
         }
 
-        if (response.ok) {
-          const requestsData = await response.json();
-
-          // Handle API response format: { requests: [...], errMsg: "..." }
-          let dataToSet = [];
-          if (requestsData && Array.isArray(requestsData.requests)) {
-            dataToSet = requestsData.requests;
-          } else if (Array.isArray(requestsData)) {
-            dataToSet = requestsData;
-          } else {
-            dataToSet = [];
-          }
-
-          setAllRequests(dataToSet);
-        } else {
-          // Fallback to empty array if API fails
-          setAllRequests(data || []);
-        }
-      } catch {
+        setAllRequests(dataToSet);
+      } else {
         // Fallback to empty array if API fails
         setAllRequests(data || []);
       }
-    };
+    } catch {
+      // Fallback to empty array if API fails
+      setAllRequests(data || []);
+    }
+  }, []); // No dependencies - get fresh values inside the function
 
-    fetchRequests();
-  }, [userInfo?.email, userInfo?.roles]); // Remove data dependency to prevent infinite loops
+  React.useEffect(() => {
+    // Only fetch requests if no data is provided
+    if (!data) {
+      fetchRequests();
+    }
+  }, [fetchRequests, data]);
 
   // Convert to format expected by DataGrid - ensure allRequests is always an array
   const safeRequests = Array.isArray(allRequests) ? allRequests : [];
@@ -188,7 +194,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
     const baseColumns: GridColDef[] = [];
 
     // Conditionally add User ID column - only for APPROVERs
-    if (showUserColumn && (isApprover() || !userInfo)) {
+    if (showUserColumn && isApprover()) {
       baseColumns.push({
         field: "userId",
         headerName: "User ID",

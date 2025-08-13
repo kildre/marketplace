@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiService } from "../services/apiService";
+import { useRequestsRefresh } from "./useRequestsRefresh";
 import {
   OrganizationFormData,
   RequestDetailsFormData,
@@ -113,6 +114,7 @@ export const useRequestDetailsForm = () => {
 // Hook for form submission
 export const useSubmitRequest = () => {
   const queryClient = useQueryClient();
+  const { triggerRefresh } = useRequestsRefresh();
 
   return useMutation({
     mutationFn: async (submissionData: SubmissionData) => {
@@ -152,6 +154,9 @@ export const useSubmitRequest = () => {
         pocEmail: "",
         useCaseDescription: "",
       });
+
+      // Trigger global refresh to update sidebar counter
+      triggerRefresh();
     },
   });
 };

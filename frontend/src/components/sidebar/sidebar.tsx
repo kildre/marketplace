@@ -19,7 +19,9 @@ export const Sidebar = (): React.ReactElement => {
 
   // Use the same logic as the requests page for consistency
   const currentUserId = urlUserId || queryUserId || undefined;
-  const { requestsCount } = useRequests(currentUserId);
+
+  // Fetch requests for sidebar counter - always enabled to ensure counter updates
+  const { requestsCount } = useRequests(currentUserId, true);
 
   const isActive = (path: string): boolean => {
     // Handle requests page with or without user parameters
