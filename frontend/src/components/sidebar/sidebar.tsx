@@ -1,4 +1,9 @@
-import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 import { useAuth } from "../../hooks/useAuth";
 import { AppRoles } from "../../types/auth";
@@ -10,8 +15,8 @@ export const Sidebar = (): React.ReactElement => {
   const { hasRole } = useAuth();
   const { userId: urlUserId } = useParams<{ userId: string }>();
   const [searchParams] = useSearchParams();
-  const queryUserId = searchParams.get('userId');
-  
+  const queryUserId = searchParams.get("userId");
+
   // Use the same logic as the requests page for consistency
   const currentUserId = urlUserId || queryUserId || undefined;
   const { requestsCount } = useRequests(currentUserId);
@@ -19,7 +24,18 @@ export const Sidebar = (): React.ReactElement => {
   const isActive = (path: string): boolean => {
     // Handle requests page with or without user parameters
     if (path === "/requests") {
-      return location.pathname === "/requests" || location.pathname.startsWith("/requests/");
+      return (
+        location.pathname === "/requests" ||
+        location.pathname.startsWith("/requests/")
+      );
+    }
+    // For approvers, the home page (/) should be active when on /requests too
+    if (path === "/" && hasRole(AppRoles.APPROVER)) {
+      return (
+        location.pathname === "/" ||
+        location.pathname === "/requests" ||
+        location.pathname.startsWith("/requests/")
+      );
     }
     // Exact match for other paths
     return location.pathname === path;
@@ -40,13 +56,18 @@ export const Sidebar = (): React.ReactElement => {
                 aria-label="Go to home page"
                 aria-current={isActive("/") ? "page" : undefined}
               >
-                Requests <span className="sidebar__requests-count">({requestsCount})</span>
+                Requests{" "}
+                <span className="sidebar__requests-count">
+                  ({requestsCount})
+                </span>
               </Link>
             </li>
             {/* Metrics link visible to APPROVERs only */}
             <li
               className={
-                isActive("/metrics") ? "sidebar-nav__item active" : "sidebar-nav__item"
+                isActive("/metrics")
+                  ? "sidebar-nav__item active"
+                  : "sidebar-nav__item"
               }
             >
               <Link
@@ -58,23 +79,31 @@ export const Sidebar = (): React.ReactElement => {
               </Link>
             </li>
             {/* Development-only auth status link */}
-            {import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === 'true' && !import.meta.env.VITEST && (
-              <li
-                className={
-                  isActive("/auth-status") ? "sidebar-nav__item active" : "sidebar-nav__item"
-                }
-                style={{ borderTop: '1px solid #ddd', marginTop: '10px', paddingTop: '10px' }}
-              >
-                <Link
-                  to="/auth-status"
-                  aria-label="Go to auth status page"
-                  aria-current={isActive("/auth-status") ? "page" : undefined}
-                  style={{ fontSize: '12px', color: '#666' }}
+            {import.meta.env.DEV &&
+              import.meta.env.VITE_BYPASS_AUTH === "true" &&
+              !import.meta.env.VITEST && (
+                <li
+                  className={
+                    isActive("/auth-status")
+                      ? "sidebar-nav__item active"
+                      : "sidebar-nav__item"
+                  }
+                  style={{
+                    borderTop: "1px solid #ddd",
+                    marginTop: "10px",
+                    paddingTop: "10px",
+                  }}
                 >
-                  🔐 Auth Status (Dev)
-                </Link>
-              </li>
-            )}
+                  <Link
+                    to="/auth-status"
+                    aria-label="Go to auth status page"
+                    aria-current={isActive("/auth-status") ? "page" : undefined}
+                    style={{ fontSize: "12px", color: "#666" }}
+                  >
+                    🔐 Auth Status (Dev)
+                  </Link>
+                </li>
+              )}
           </ul>
         </nav>
       </div>
@@ -124,30 +153,41 @@ export const Sidebar = (): React.ReactElement => {
                 aria-label="Go to requests page"
                 aria-current={isActive("/requests") ? "page" : undefined}
               >
-              Requests <span className="sidebar__requests-count">({requestsCount})</span>
-            </Link>
-          </li>
-          {/* Development-only auth status link */}
-          {import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === 'true' && !import.meta.env.VITEST && (
-            <li
-              className={
-                isActive("/auth-status") ? "sidebar-nav__item active" : "sidebar-nav__item"
-              }
-              style={{ borderTop: '1px solid #ddd', marginTop: '10px', paddingTop: '10px' }}
-            >
-              <Link
-                to="/auth-status"
-                aria-label="Go to auth status page"
-                aria-current={isActive("/auth-status") ? "page" : undefined}
-                style={{ fontSize: '12px', color: '#666' }}
-              >
-                🔐 Auth Status (Dev)
+                Requests{" "}
+                <span className="sidebar__requests-count">
+                  ({requestsCount})
+                </span>
               </Link>
             </li>
-          )}
-        </ul>
-      </nav>
-    </div>
+            {/* Development-only auth status link */}
+            {import.meta.env.DEV &&
+              import.meta.env.VITE_BYPASS_AUTH === "true" &&
+              !import.meta.env.VITEST && (
+                <li
+                  className={
+                    isActive("/auth-status")
+                      ? "sidebar-nav__item active"
+                      : "sidebar-nav__item"
+                  }
+                  style={{
+                    borderTop: "1px solid #ddd",
+                    marginTop: "10px",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <Link
+                    to="/auth-status"
+                    aria-label="Go to auth status page"
+                    aria-current={isActive("/auth-status") ? "page" : undefined}
+                    style={{ fontSize: "12px", color: "#666" }}
+                  >
+                    🔐 Auth Status (Dev)
+                  </Link>
+                </li>
+              )}
+          </ul>
+        </nav>
+      </div>
     );
   }
 };

@@ -21,11 +21,13 @@ vi.mock("@mui/x-data-grid", () => ({
           <div key={row.id || index} role="row">
             {columns.map((col: any) => (
               <div key={`${row.id}-${col.field}`} role="cell">
-                {col.renderCell ? (
-                  col.renderCell({ value: row[col.field], row, field: col.field })
-                ) : (
-                  row[col.field]
-                )}
+                {col.renderCell
+                  ? col.renderCell({
+                      value: row[col.field],
+                      row,
+                      field: col.field,
+                    })
+                  : row[col.field]}
               </div>
             ))}
           </div>
@@ -311,8 +313,9 @@ describe("RequestsTable", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText(testData[0].ticketNumber)).toBeInTheDocument();
-        expect(screen.getByText(testData[0].personalData.name)).toBeInTheDocument();
+        expect(
+          screen.getByText(testData[0].personalData.name)
+        ).toBeInTheDocument();
         expect(screen.getByText("Application")).toBeInTheDocument();
         expect(screen.getByText(testData[0].status)).toBeInTheDocument();
       });
@@ -322,12 +325,22 @@ describe("RequestsTable", () => {
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
       const pendingRequest = { ...mockRequestData[0], status: "Pending" };
-      const approvedRequest = { ...mockRequestData[0], status: "Approved", requestId: "req-002" };
-      const deniedRequest = { ...mockRequestData[0], status: "Denied", requestId: "req-003" };
+      const approvedRequest = {
+        ...mockRequestData[0],
+        status: "Approved",
+        requestId: "req-002",
+      };
+      const deniedRequest = {
+        ...mockRequestData[0],
+        status: "Denied",
+        requestId: "req-003",
+      };
 
       render(
         <TestWrapper>
-          <RequestsTable data={[pendingRequest, approvedRequest, deniedRequest]} />
+          <RequestsTable
+            data={[pendingRequest, approvedRequest, deniedRequest]}
+          />
         </TestWrapper>
       );
 
@@ -556,7 +569,7 @@ describe("RequestsTable", () => {
       await waitFor(() => {
         const grid = screen.getByRole("grid");
         expect(grid).toBeInTheDocument();
-        
+
         // Grid should be focusable
         grid.focus();
         expect(grid).toHaveFocus();

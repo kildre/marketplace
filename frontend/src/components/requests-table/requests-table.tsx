@@ -117,7 +117,6 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
       const mappedData = {
         id: (apiRequest.requestNumber as string) || `request-${index}`,
-        ticketNumber: (apiRequest.requestNumber as string) || `ticket-${index}`,
         userId: (apiRequest.designation as string) || "N/A",
         userEmail: (apiRequest.requestorEmail as string) || "N/A",
         ticketType: "Application", // Default since this isn't in the new structure
@@ -165,7 +164,6 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
     } catch {
       return {
         id: `error-${index}`,
-        ticketNumber: `error-${index}`,
         userId: "Error",
         userEmail: "Error",
         ticketType: "Error",
@@ -187,14 +185,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
   // Define columns for DataGrid with basic filtering
   const getColumns = (): GridColDef[] => {
-    const baseColumns: GridColDef[] = [
-      {
-        field: "ticketNumber",
-        headerName: "Ticket #",
-        width: 90,
-        filterable: true,
-      },
-    ];
+    const baseColumns: GridColDef[] = [];
 
     // Conditionally add User ID column - only for APPROVERs
     if (showUserColumn && (isApprover() || !userInfo)) {

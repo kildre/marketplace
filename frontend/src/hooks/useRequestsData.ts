@@ -25,7 +25,6 @@ const transformApiRequestToRequestData = (
 ): RequestData => {
   return {
     requestId: apiRequest.requestNumber,
-    ticketNumber: apiRequest.requestNumber,
     personalData: {
       name: apiRequest.pointOfContact,
       email: apiRequest.requestorEmail,
@@ -55,6 +54,8 @@ const transformApiRequestToRequestData = (
         ? "APPROVED"
         : "REJECTED",
     statusReason: "",
+    createdAt: apiRequest.createdAt,
+    updatedAt: apiRequest.updatedAt,
   };
 };
 

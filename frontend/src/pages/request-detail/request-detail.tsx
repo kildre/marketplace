@@ -59,7 +59,6 @@ const transformApiRequestToRequestData = (
 
   return {
     requestId: (apiRequest.requestNumber as string) || "",
-    ticketNumber: (apiRequest.requestNumber as string) || "",
     personalData: {
       name:
         (apiRequest.pointOfContact as string) ||

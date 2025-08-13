@@ -146,11 +146,12 @@ export const FormSelectedApplications = ({
 
   return (
     <div className="form-selected-applications__container">
-      <Accordion defaultExpanded slotProps={{ heading: { component: "h2" } }}>
+      <Accordion defaultExpanded>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="selected-applications-content"
           id="selected-applications-header"
+          component="h2"
         >
           Selected Applications ({displayCount}{" "}
           {displayCount === 1 ? "product" : "products"})
@@ -177,7 +178,14 @@ export const FormSelectedApplications = ({
                   <div className="cart-item-card__price">
                     <p>
                       Cost:{" "}
-                      <span>{item.price ? `$${item.price}` : "Pending"}</span>
+                      <span>
+                        {item.price === null
+                          ? formatPrice(null, item.rom)
+                          : formatPrice(
+                              (item.price ?? 0) * item.quantity,
+                              item.rom
+                            )}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -225,11 +233,9 @@ export const FormSelectedApplications = ({
                           onChange={(e) =>
                             handleQuantityChange(product.id, e.target.value)
                           }
-                          slotProps={{
-                            input: {
-                              style: { textAlign: "center" },
-                              "aria-label": `Quantity for ${product.name}`,
-                            },
+                          InputProps={{
+                            style: { textAlign: "center" },
+                            "aria-label": `Quantity for ${product.name}`,
                           }}
                           className="quantity-input quantity-input-clean"
                           size="small"
@@ -292,7 +298,7 @@ export const FormSelectedApplications = ({
                       Cost:{" "}
                       <span>
                         {product.price === null
-                          ? formatPrice(quantity * 0, product.rom)
+                          ? formatPrice(null, product.rom)
                           : formatPrice(quantity * product.price, product.rom)}
                       </span>
                     </p>

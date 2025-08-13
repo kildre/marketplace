@@ -2,7 +2,6 @@ export const mockRequestData = [
   // Requests for kberres user
   {
     requestId: "KBER-REQ-001",
-    ticketNumber: "9001",
     personalData: {
       name: "K Berres",
       email: "kberres@metronstar.com",
@@ -57,7 +56,6 @@ export const mockRequestData = [
   // Additional requests for kberres user
   {
     requestId: "KBER-REQ-002",
-    ticketNumber: "9002",
     personalData: {
       name: "K Berres",
       email: "kberres@metronstar.com",
@@ -110,7 +108,6 @@ export const mockRequestData = [
   },
   {
     requestId: "KBER-REQ-003",
-    ticketNumber: "9003",
     personalData: {
       name: "K Berres",
       email: "kberres@metronstar.com",
@@ -165,7 +162,6 @@ export const mockRequestData = [
   // Existing requests below
   {
     requestId: "GnTqm8c-1983cdc2be0",
-    ticketNumber: "0001",
     personalData: {
       name: "Joe Snuffy",
       email: "joe.snuffy.ctr@army.mil",
@@ -279,7 +275,6 @@ export const mockRequestData = [
   },
   {
     requestId: "JQkIwF3-1983cde1845",
-    ticketNumber: "0002",
     personalData: {
       name: "John Doe",
       email: "john.doe4.mil@army.mil",
@@ -372,7 +367,6 @@ export const mockRequestData = [
   },
   {
     requestId: "8OdN4Sp-1983cde76dd",
-    ticketNumber: "0003",
     personalData: {
       name: "Jane Smith",
       email: "jane.smith.mil@army.mil",
@@ -455,7 +449,6 @@ export const mockRequestData = [
   },
   {
     requestId: "FD4kFZp-1983cdecda4",
-    ticketNumber: "0004",
     personalData: {
       name: "Joe Snuffy",
       email: "joe.snuffy.ctr@army.mil",
@@ -529,7 +522,6 @@ export const mockRequestData = [
   // Sarah Wilson - 3 requests
   {
     requestId: "SW1abc-1983cde1234",
-    ticketNumber: "0005",
     personalData: {
       name: "Sarah Wilson",
       email: "sarah.wilson.mil@army.mil",
@@ -581,7 +573,6 @@ export const mockRequestData = [
   },
   {
     requestId: "SW2def-1983cde5678",
-    ticketNumber: "0006",
     personalData: {
       name: "Sarah Wilson",
       email: "sarah.wilson.mil@army.mil",
@@ -633,7 +624,6 @@ export const mockRequestData = [
   },
   {
     requestId: "SW3ghi-1983cde9012",
-    ticketNumber: "0007",
     personalData: {
       name: "Sarah Wilson",
       email: "sarah.wilson.mil@army.mil",
@@ -677,7 +667,6 @@ export const mockRequestData = [
   // Mike Johnson - 2 requests
   {
     requestId: "MJ1jkl-1983cde3456",
-    ticketNumber: "0008",
     personalData: {
       name: "Mike Johnson",
       email: "mike.johnson.ctr@navy.mil",
@@ -730,7 +719,6 @@ export const mockRequestData = [
   },
   {
     requestId: "MJ2mno-1983cde7890",
-    ticketNumber: "0009",
     personalData: {
       name: "Mike Johnson",
       email: "mike.johnson.ctr@navy.mil",
@@ -783,7 +771,6 @@ export const mockRequestData = [
   // Lisa Brown - 2 requests
   {
     requestId: "LB1pqr-1983cde4567",
-    ticketNumber: "0010",
     personalData: {
       name: "Lisa Brown",
       email: "lisa.brown.civ@dod.gov",
@@ -835,7 +822,6 @@ export const mockRequestData = [
   },
   {
     requestId: "LB2stu-1983cde8901",
-    ticketNumber: "0011",
     personalData: {
       name: "Lisa Brown",
       email: "lisa.brown.civ@dod.gov",
@@ -878,7 +864,6 @@ export const mockRequestData = [
   // David Garcia - 4 requests
   {
     requestId: "DG1vwx-1983cde5678",
-    ticketNumber: "0012",
     personalData: {
       name: "David Garcia",
       email: "david.garcia.mil@airforce.mil",
@@ -930,7 +915,6 @@ export const mockRequestData = [
   },
   {
     requestId: "DG2yz1-1983cde9012",
-    ticketNumber: "0013",
     personalData: {
       name: "David Garcia",
       email: "david.garcia.mil@airforce.mil",
@@ -982,7 +966,6 @@ export const mockRequestData = [
   },
   {
     requestId: "DG3ab2-1983cde3456",
-    ticketNumber: "0014",
     personalData: {
       name: "David Garcia",
       email: "david.garcia.mil@airforce.mil",
@@ -1035,7 +1018,6 @@ export const mockRequestData = [
   },
   {
     requestId: "DG4cd3-1983cde7890",
-    ticketNumber: "0015",
     personalData: {
       name: "David Garcia",
       email: "david.garcia.mil@airforce.mil",
@@ -1088,7 +1070,6 @@ export const mockRequestData = [
   // Emma Davis - 2 requests
   {
     requestId: "ED1ef4-1983cde4567",
-    ticketNumber: "0016",
     personalData: {
       name: "Emma Davis",
       email: "emma.davis.ctr@marines.mil",
@@ -1140,7 +1121,6 @@ export const mockRequestData = [
   },
   {
     requestId: "ED2gh5-1983cde8901",
-    ticketNumber: "0017",
     personalData: {
       name: "Emma Davis",
       email: "emma.davis.ctr@marines.mil",
@@ -1193,7 +1173,6 @@ export const mockRequestData = [
   // Chris Miller - 3 requests
   {
     requestId: "CM1ij6-1983cde5678",
-    ticketNumber: "0018",
     personalData: {
       name: "Chris Miller",
       email: "chris.miller.mil@socom.mil",
@@ -1245,7 +1224,6 @@ export const mockRequestData = [
   },
   {
     requestId: "CM2kl7-1983cde9012",
-    ticketNumber: "0019",
     personalData: {
       name: "Chris Miller",
       email: "chris.miller.mil@socom.mil",
@@ -1297,7 +1275,6 @@ export const mockRequestData = [
   },
   {
     requestId: "CM3mn8-1983cde3456",
-    ticketNumber: "0020",
     personalData: {
       name: "Chris Miller",
       email: "chris.miller.mil@socom.mil",
@@ -1351,7 +1328,6 @@ export const mockRequestData = [
   // Amy Anderson - 2 requests
   {
     requestId: "AA1op9-1983cde7890",
-    ticketNumber: "0021",
     personalData: {
       name: "Amy Anderson",
       email: "amy.anderson.civ@defense.gov",
@@ -1403,7 +1379,6 @@ export const mockRequestData = [
   },
   {
     requestId: "AA2qr0-1983cde4567",
-    ticketNumber: "0022",
     personalData: {
       name: "Amy Anderson",
       email: "amy.anderson.civ@defense.gov",
@@ -1456,7 +1431,6 @@ export const mockRequestData = [
   // Ryan Taylor - 3 requests
   {
     requestId: "RT1st1-1983cde8901",
-    ticketNumber: "0023",
     personalData: {
       name: "Ryan Taylor",
       email: "ryan.taylor.ctr@coast.mil",
@@ -1509,7 +1483,6 @@ export const mockRequestData = [
   },
   {
     requestId: "RT2uv2-1983cde5678",
-    ticketNumber: "0024",
     personalData: {
       name: "Ryan Taylor",
       email: "ryan.taylor.ctr@coast.mil",
@@ -1561,7 +1534,6 @@ export const mockRequestData = [
   },
   {
     requestId: "RT3wx3-1983cde9012",
-    ticketNumber: "0025",
     personalData: {
       name: "Ryan Taylor",
       email: "ryan.taylor.ctr@coast.mil",
@@ -1614,7 +1586,6 @@ export const mockRequestData = [
   // Jessica White - 2 requests
   {
     requestId: "JW1yz4-1983cde3456",
-    ticketNumber: "0026",
     personalData: {
       name: "Jessica White",
       email: "jessica.white.mil@army.mil",
@@ -1666,7 +1637,6 @@ export const mockRequestData = [
   },
   {
     requestId: "JW2ab5-1983cde7890",
-    ticketNumber: "0027",
     personalData: {
       name: "Jessica White",
       email: "jessica.white.mil@army.mil",
@@ -1719,7 +1689,6 @@ export const mockRequestData = [
   // Kevin Martin - 4 requests
   {
     requestId: "KM1cd6-1983cde4567",
-    ticketNumber: "0028",
     personalData: {
       name: "Kevin Martin",
       email: "kevin.martin.civ@pentagon.gov",
@@ -1771,7 +1740,6 @@ export const mockRequestData = [
   },
   {
     requestId: "KM2ef7-1983cde8901",
-    ticketNumber: "0029",
     personalData: {
       name: "Kevin Martin",
       email: "kevin.martin.civ@pentagon.gov",
@@ -1823,7 +1791,6 @@ export const mockRequestData = [
   },
   {
     requestId: "KM3gh8-1983cde5678",
-    ticketNumber: "0030",
     personalData: {
       name: "Kevin Martin",
       email: "kevin.martin.civ@pentagon.gov",
@@ -1876,7 +1843,6 @@ export const mockRequestData = [
   },
   {
     requestId: "KM4ij9-1983cde9012",
-    ticketNumber: "0031",
     personalData: {
       name: "Kevin Martin",
       email: "kevin.martin.civ@pentagon.gov",
