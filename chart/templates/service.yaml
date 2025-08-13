@@ -13,8 +13,8 @@ spec:
     app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - name: http
-      port: 8080
-      targetPort: 8080
+      port: 7500
+      targetPort: 7500
       protocol: TCP
     - name: httpx
       port: 8081
