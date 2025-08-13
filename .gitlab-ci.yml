@@ -12,9 +12,9 @@ workflow:
      when: never
 
 variables:
-  HELM_UPGRADE_EXTRA_ARGS: >-
+  #HELM_UPGRADE_EXTRA_ARGS: >-
 
-    --set image.tag=${CI_COMMIT_SHA}
+  #  --set image.tag=${CI_COMMIT_SHA}
     # --set image.pullPolicy=Always
     #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
   #IMAGE_TAG_FOR_HELM_ONLY:
