@@ -27,8 +27,21 @@ const styles = {
   },
   logoContainer: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    flexDirection: 'column' as const,
+    gap: '6px',
     flex: 1
+  },
+  logoRow: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  title: {
+    color: '#fff',
+    fontWeight: 800,
+    fontSize: '2.75rem', // 44px
+    lineHeight: 1.1 as const,
+    margin: 0
   },
   mainContainer: {
     display: 'flex',
@@ -71,30 +84,33 @@ const CustomMenuLogoSection: React.FC<CustomMenuLogoSectionProps> = ({
     return (
       <div style={styles.mainContainer}>
         <div style={styles.logoContainer}>
-          <img
-            alt="_navydeptlogo"
-            onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-            src={JupiterDONLogo}
-            style={styles.logo}
-          />
-          <img
-            alt="_marineslogo"
-            onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-            src={JupiterUSMCLogo}
-            style={styles.logo}
-          />
-          <img
-            alt="_navylogo"
-            onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-            src={JupiterUSNLogo}
-            style={styles.logo}
-          />
-          <img
-            alt="jupiter_logo"
-            onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-            src={JupiterLogo}
-            style={styles.advanaLogo}
-          />
+          <div style={styles.logoRow as React.CSSProperties}>
+            <img
+              alt="_navydeptlogo"
+              onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
+              src={JupiterDONLogo}
+              style={styles.logo}
+            />
+            <img
+              alt="_marineslogo"
+              onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
+              src={JupiterUSMCLogo}
+              style={styles.logo}
+            />
+            <img
+              alt="_navylogo"
+              onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
+              src={JupiterUSNLogo}
+              style={styles.logo}
+            />
+            <img
+              alt="jupiter_logo"
+              onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
+              src={JupiterLogo}
+              style={styles.advanaLogo}
+            />
+          </div>
+          {/* Optional: If needed, show a Jupiter title here */}
         </div>
         {/* Cart moved to overlay component */}
       </div>
@@ -104,30 +120,33 @@ const CustomMenuLogoSection: React.FC<CustomMenuLogoSectionProps> = ({
     return (
       <div style={styles.mainContainer}>
         <div style={styles.logoContainer}>
-          <img
-            alt="dod_logo"
-            src={DODLogo}
-            style={styles.logo}
-          />
-          <img
-            alt="cdao_logo"
-            src={CDAOLogo}
-            style={styles.logo}
-          />
-          {alternateLogo ? (
+          <div style={styles.logoRow as React.CSSProperties}>
             <img
-              alt="alternate_logo"
-              src={alternateLogo}
+              alt="dod_logo"
+              src={DODLogo}
               style={styles.logo}
             />
-          ) : (
             <img
-              alt="advana_logo"
-              onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-              src={AdvanaDarkTheme}
-              style={styles.advanaLogo}
+              alt="cdao_logo"
+              src={CDAOLogo}
+              style={styles.logo}
             />
-          )}
+            {alternateLogo ? (
+              <img
+                alt="alternate_logo"
+                src={alternateLogo}
+                style={styles.logo}
+              />
+            ) : (
+              <img
+                alt="advana_logo"
+                onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
+                src={AdvanaDarkTheme}
+                style={styles.advanaLogo}
+              />
+            )}
+          </div>
+          <h1 style={styles.title as React.CSSProperties}>Advana Marketplace</h1>
         </div>
         {/* Cart moved to overlay component */}
       </div>

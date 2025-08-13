@@ -1,14 +1,8 @@
 import Keycloak, { KeycloakConfig } from "keycloak-js";
 
-// Debug environment variables in development
+// Debug environment variables in development (logging removed)
 if (import.meta.env.DEV) {
-  // eslint-disable-next-line no-console
-  console.log('Keycloak Environment Variables:', {
-    url: import.meta.env.VITE_KEYCLOAK_URL,
-    realm: import.meta.env.VITE_KEYCLOAK_REALM,
-    clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
-    bypassAuth: import.meta.env.VITE_BYPASS_AUTH
-  });
+  // no-op
 }
 
 const keycloakConfig: KeycloakConfig = {
