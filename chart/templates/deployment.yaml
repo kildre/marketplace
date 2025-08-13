@@ -1,2 +1,6 @@
+<<<<<<< HEAD
 {{ include "common.deployment" $ }}
 
+=======
+{{ include "common.deployment" $ }}
+>>>>>>> c8e27b2 (Retweaking the image variable)
