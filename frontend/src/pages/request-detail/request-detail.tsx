@@ -57,6 +57,11 @@ const transformApiRequestToRequestData = (
     });
   };
 
+  // Extract decision information
+  const decision = apiRequest.decision as Record<string, unknown> | null;
+  const decisionComments = decision?.comments as string;
+  const hasDecision = decision !== null;
+
   return {
     requestId: (apiRequest.requestNumber as string) || "",
     personalData: {
@@ -114,7 +119,10 @@ const transformApiRequestToRequestData = (
         : (apiRequest.statusId as number) === 2
         ? "Approved"
         : "Denied",
-    statusReason: (apiRequest.statusReason as string) || "",
+    statusReason: hasDecision
+      ? decisionComments || ""
+      : (apiRequest.statusReason as string) || "",
+    decisionNumber: decision?.decisionNumber as string,
     createdAt: (apiRequest.createdAt as string) || new Date().toISOString(),
     updatedAt: (apiRequest.updatedAt as string) || new Date().toISOString(),
   };
@@ -131,14 +139,18 @@ export const RequestDetail = (): React.ReactElement => {
   const [error, setError] = useState<string | null>(null);
   // State for managing the reasoning field value - must be at top level
   const [statusReason, setStatusReason] = useState("");
+  // State to track if a decision already exists
+  const [hasDecision, setHasDecision] = useState(false);
 
   // Create the back link URL - preserve userId if it exists
   const backToRequestsUrl = userId ? `/requests?userId=${userId}` : "/requests";
 
-  // Update statusReason when request changes
+  // Update statusReason and hasDecision when request changes
   useEffect(() => {
     if (request) {
       setStatusReason(request.statusReason || "");
+      // Check if decision exists based on decisionNumber presence
+      setHasDecision(!!request.decisionNumber);
     }
   }, [request]);
 
@@ -303,11 +315,7 @@ export const RequestDetail = (): React.ReactElement => {
       buttonClass += " button--pending";
     }
 
-    // Determine status number for API request
-    const statusNumber =
-      request.status === "Pending" ? 1 : request.status === "Approved" ? 2 : 3;
-
-    const updateRequest = async () => {
+    const updateRequest = async (statusId: number) => {
       const userInfo = getUserInfo();
       const computedDecisionNumber = generateRequestId(12);
       const response = await window.fetch("/api/decisions", {
@@ -319,7 +327,7 @@ export const RequestDetail = (): React.ReactElement => {
           decisionNumber: computedDecisionNumber,
           requestNumber: request.requestId,
           adjudicatorEmail: userInfo?.email,
-          statusId: statusNumber,
+          statusId: statusId,
           comments: request.statusReason,
           ticketType: "Request",
           asset: "",
@@ -348,7 +356,7 @@ export const RequestDetail = (): React.ReactElement => {
       request.status = "Approved";
       request.statusReason = statusReason || "Request accepted.";
       try {
-        await updateRequest();
+        await updateRequest(2); // Send statusId 2 for approved
         // Navigate to home page after successful approval
         navigate("/");
       } catch {
@@ -361,7 +369,7 @@ export const RequestDetail = (): React.ReactElement => {
       request.status = "Denied";
       request.statusReason = statusReason || "Request denied.";
       try {
-        await updateRequest();
+        await updateRequest(3); // Send statusId 3 for denied
         // Navigate to home page after successful rejection
         navigate("/");
       } catch {
@@ -372,7 +380,8 @@ export const RequestDetail = (): React.ReactElement => {
     // Render main layout with role-based approval section
     if (hasRole(AppRoles.APPROVER) || hasRole(AppRoles.REQUESTOR)) {
       const isApprover = hasRole(AppRoles.APPROVER);
-      const mode = isApprover ? "approve" : "view";
+      // If a decision exists, always use view mode; otherwise use approve mode for approvers
+      const mode = hasDecision ? "view" : isApprover ? "approve" : "view";
 
       return (
         <div className="request-detail-page cart-page marketplace-content">
@@ -392,7 +401,7 @@ export const RequestDetail = (): React.ReactElement => {
           <PageTitle title={`Request Detail - ${request.requestId}`} />
           <RequestDetailView
             request={request}
-            statusReason={isApprover ? statusReason : request.statusReason}
+            statusReason={statusReason}
             onReasoningChange={handleReasoningChange}
             onAccept={handleAccept}
             onReject={handleReject}

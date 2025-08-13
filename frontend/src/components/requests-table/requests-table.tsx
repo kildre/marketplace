@@ -146,24 +146,38 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
               }
             )
           : "N/A",
-        lastUpdated: apiRequest.updatedAt
-          ? new Date(apiRequest.updatedAt as string).toLocaleDateString(
-              "en-US",
-              {
+        lastUpdated: (() => {
+          // Check if decision exists and use its updatedAt, otherwise fall back to request's updatedAt
+          const decision = apiRequest.decision as Record<
+            string,
+            unknown
+          > | null;
+          const updatedAt = decision?.updatedAt || apiRequest.updatedAt;
+
+          return updatedAt
+            ? new Date(updatedAt as string).toLocaleDateString("en-US", {
                 day: "2-digit",
                 month: "short",
                 year: "2-digit",
-              }
-            )
-          : "N/A",
-        status:
-          (apiRequest.statusId as number) === 1
+              })
+            : "N/A";
+        })(),
+        status: (() => {
+          // Check if decision exists and is not null
+          const decision = apiRequest.decision as Record<
+            string,
+            unknown
+          > | null;
+          const statusId = decision?.statusId || apiRequest.statusId;
+
+          return (statusId as number) === 1
             ? "Pending"
-            : (apiRequest.statusId as number) === 2
+            : (statusId as number) === 2
             ? "Approved"
-            : (apiRequest.statusId as number) === 3
+            : (statusId as number) === 3
             ? "Denied"
-            : "Unknown",
+            : "Unknown";
+        })(),
       };
 
       return mappedData;
