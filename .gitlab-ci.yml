@@ -12,11 +12,11 @@ workflow:
      when: never
 
 variables:
-  #HELM_UPGRADE_EXTRA_ARGS: >-
+  HELM_UPGRADE_EXTRA_ARGS: >-
 
-    #--set image.tag=${UPSTREAM_COMMIT_SHA} #DELETE THIS
+    --set image.tag=${UPSTREAM_COMMIT_SHA}
     # --set image.pullPolicy=Always
-    #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)" #DELETE THIS
+    #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
   #IMAGE_TAG_FOR_HELM_ONLY:
   # description: "Image tag you want to use for only a helm config deploy (most likely your last commit sha on main)"
   # value: "caf5d3b37ab67a68b730ca16c5791e4bd662cce4"
