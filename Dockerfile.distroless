@@ -100,10 +100,10 @@ USER ${APP_UID}:${APP_GID}
 
 # Add healthcheck to address compliance requirements
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD nc -z localhost 8080 || exit 1
+    CMD nc -z localhost 7500 || exit 1
 
-# Expose port 8080
-EXPOSE 8080
+# Expose port 7500
+EXPOSE 7500
 
 # Start nginx with custom startup script
 CMD ["/usr/local/bin/start-nginx.sh"]

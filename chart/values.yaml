@@ -201,7 +201,7 @@ deployment:
           http:
             protocol: TCP
             port: 80 # k8s service port
-            targetPort: 8080 # internal container port
+            targetPort: 7500 # internal container port
 
 env:
   secret:
