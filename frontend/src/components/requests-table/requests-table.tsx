@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { RequestsTableProps } from "../../interfaces/interfaceStore";
 import { RequestsDebugPanel } from "../debug/RequestsDebugPanel";
+import { calculateEstimatedCost } from "../../utils/helper-functions";
+import { mockProducts } from "../../data/mock-productData";
 
 // Transform Product data to RequestData format
 const getStatusColor = (
@@ -123,9 +125,12 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         qtySize: Array.isArray(apiRequest.cartItems)
           ? (apiRequest.cartItems as Array<unknown>).length
           : 0,
-        estimatedPrice:
-          ((apiRequest.summary as Record<string, unknown>)
-            ?.estimatedROM as number) || 0,
+        estimatedPrice: Array.isArray(apiRequest.cartItems)
+          ? calculateEstimatedCost(
+              apiRequest.cartItems as Array<Record<string, unknown>>,
+              mockProducts
+            )
+          : "Free",
         dateCreated: apiRequest.createdAt
           ? new Date(apiRequest.createdAt as string).toLocaleDateString(
               "en-US",
@@ -166,7 +171,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         ticketType: "Error",
         asset: "Error processing request",
         qtySize: 0,
-        estimatedPrice: 0,
+        estimatedPrice: "Error",
         dateCreated: "Error",
         lastUpdated: "Error",
         status: "Error",
