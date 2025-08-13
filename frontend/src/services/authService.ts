@@ -87,13 +87,6 @@ export class AuthService {
       });
     }
 
-    // Debug log for marketplace roles specifically
-    const marketplaceRoles = tokenParsed.resource_access?.marketplace?.roles || [];
-    if (marketplaceRoles.length > 0) {
-      // eslint-disable-next-line no-console
-      console.log('🎯 Marketplace roles found:', marketplaceRoles);
-    }
-
     return roles;
   }
 
@@ -105,17 +98,6 @@ export class AuthService {
     if (!storage) return;
 
     try {
-      // eslint-disable-next-line no-console
-      console.log('💾 Storing Keycloak tokens to localStorage:', {
-        accessTokenLength: token.length,
-        hasRefreshToken: !!refreshToken,
-        refreshTokenLength: refreshToken?.length || 0,
-        storageKeys: {
-          accessToken: this.TOKEN_KEY,
-          refreshToken: this.REFRESH_TOKEN_KEY
-        }
-      });
-
       storage.setItem(this.TOKEN_KEY, token);
       if (refreshToken) {
         storage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
@@ -260,16 +242,6 @@ export class AuthService {
       keycloakRoles,
       tokenExpiry: tokenParsed.exp,
     };
-
-    // Debug log for user authentication
-    // eslint-disable-next-line no-console
-    console.log('👤 User authenticated:', {
-      username: userInfo.username,
-      email: userInfo.email,
-      keycloakRoles: userInfo.keycloakRoles,
-      mappedAppRoles: userInfo.roles,
-      marketplaceRoles: tokenParsed.resource_access?.marketplace?.roles || []
-    });
 
     return userInfo;
   }

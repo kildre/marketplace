@@ -8,14 +8,12 @@ import { Requests } from "./pages/requests/requests";
 import { RequestDetail } from "./pages/request-detail/request-detail";
 import { ApproverRedirectGuard } from "./components/auth/ApproverRedirectGuard";
 import { AuthStatusPage } from "./pages/auth-status/auth-status";
-import { RoleDebugInfo } from "./components/debug/RoleDebugInfo";
 import { useAuth } from "./hooks/useAuth";
 import { AppRoles } from "./types/auth";
 // @ts-ignore
 import AdvanaMenu from '@advana/platform-ui/dist/AdvanaMenu';
 import CustomMenuLogoSection from "./components/CustomMenuLogoSection";
 import "./styles/main.scss";
-// import { useEffect } from 'react';
 import CartOverlayButton from './components/CartOverlayButton';
 import Metrics from "./pages/metrics/metrics";
 import { RoleGuard } from "./components/auth/RoleGuard";
@@ -46,14 +44,15 @@ function App(): React.ReactElement {
 
   return (
     <div className="app-wrapper">
-      {/* CUI Banner */}
-      <div className="cui-banner">
-        <span className="cui-banner__text">CUI</span>
-      </div>
-      
       <GovernmentBanner />
       <div className="advana-menu-override advana-service-desk-style header-with-cart" style={{ position: 'static', marginTop: 0 }}>
-        <AdvanaMenu menuLogoSection={customLogoSection} />
+        {/* Provide local mega menu JSON and disable CRA env mode so props are used */}
+        <AdvanaMenu 
+          menuLogoSection={customLogoSection} 
+          megaMenuBaseDomain="/"
+          megaMenuEndpoint="/assets/advana-mega-menu.json"
+          isCRA={false}
+        />
         <CartOverlayButton />
       </div>
       <main className="main-content">
@@ -86,7 +85,7 @@ function App(): React.ReactElement {
         </Routes>
       </main>
       <Footer />
-      <RoleDebugInfo />
+      {/* <RoleDebugInfo /> */}
     </div>
   );
 }
