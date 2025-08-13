@@ -19,7 +19,7 @@ spec:
               service:
                 name: {{ .Release.Name }}-advana-marketplace-web-clusterip
                 port:
-                  number: 8080
+                  number: 7500
   # Uncomment below to enable TLS
   # tls:
   #   - hosts:
