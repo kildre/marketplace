@@ -14,7 +14,7 @@ workflow:
 variables:
   HELM_UPGRADE_EXTRA_ARGS: >-
 
-    --set image.tag=${UPSTREAM_COMMIT_SHA}
+    --set image.upstream=${UPSTREAM_COMMIT_SHA}
     # --set image.pullPolicy=Always
     #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
   #IMAGE_TAG_FOR_HELM_ONLY:
