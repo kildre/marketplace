@@ -19,7 +19,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: advana-marketplace-web
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+#          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .image.tag }}"
           imagePullPolicy: Always
           resources:
             requests:
