@@ -1,6 +1,7 @@
 import { useKeycloak } from "../hooks/useKeycloak";
 import { AppRoles, ROLE_PERMISSIONS, Resources, Actions } from "../types/auth";
 import { AuthService } from "../services/authService";
+import { useMemo } from "react";
 
 /**
  * Hook for role-based access control with enhanced authentication
@@ -8,24 +9,80 @@ import { AuthService } from "../services/authService";
 export const useAuth = () => {
   const { keycloak } = useKeycloak();
 
+  // Memoize user info to prevent recalculation on every render
+  const userInfo = useMemo(() => {
+    // First try to get from stored user info (for production)
+    const storedUserInfo = AuthService.getStoredUserInfo();
+    if (storedUserInfo) {
+      return {
+        id: storedUserInfo.id,
+        username: storedUserInfo.username,
+        email: storedUserInfo.email,
+        firstName: storedUserInfo.firstName,
+        lastName: storedUserInfo.lastName,
+        roles: storedUserInfo.roles,
+        designation: storedUserInfo.designation,
+        agency: storedUserInfo.agency,
+      };
+    }
+
+    // Fallback to direct token parsing (for development)
+    if (!keycloak.authenticated || !keycloak.tokenParsed) {
+      return null;
+    }
+
+    const tokenParsed = keycloak.tokenParsed as Record<string, unknown>;
+    const roles = Object.values(AppRoles).filter((role) => {
+      // Simplified role check without excessive logging
+      if (!keycloak.authenticated) return false;
+
+      const userRoles = AuthService.getStoredUserInfo()?.roles || [];
+      if (userRoles.includes(role)) return true;
+
+      const keycloakRoleMap = {
+        [AppRoles.APPROVER]: ["marketplace-approver", "APPROVER"],
+        [AppRoles.REQUESTOR]: ["marketplace-requestor", "REQUESTOR"],
+      };
+
+      const rolesToCheck = keycloakRoleMap[role] || [role];
+      return rolesToCheck.some(
+        (r) => keycloak.hasRealmRole(r) || keycloak.hasResourceRole(r)
+      );
+    });
+
+    return {
+      id: (tokenParsed.sub as string) || "unknown",
+      username: keycloak.tokenParsed.preferred_username,
+      email: keycloak.tokenParsed.email,
+      firstName: keycloak.tokenParsed.given_name,
+      lastName: keycloak.tokenParsed.family_name,
+      roles,
+      designation: keycloak.tokenParsed.designation,
+      agency: keycloak.tokenParsed.agency,
+    };
+  }, [keycloak.authenticated, keycloak.tokenParsed]);
+
+  // Memoize role checks
+  const roleChecks = useMemo(() => {
+    const isRequestor = userInfo?.roles?.includes(AppRoles.REQUESTOR) || false;
+    const isApprover = userInfo?.roles?.includes(AppRoles.APPROVER) || false;
+
+    return {
+      isRequestor,
+      isApprover,
+    };
+  }, [userInfo?.roles]);
+
   /**
    * Check if user has a specific role (supports both app roles and Keycloak roles)
    */
   const hasRole = (role: AppRoles): boolean => {
     if (!keycloak.authenticated) {
-      // eslint-disable-next-line no-console
-      console.log("🔍 hasRole: Not authenticated");
       return false;
     }
 
-    // Check against app roles first
-    const userInfo = AuthService.getStoredUserInfo();
-    // eslint-disable-next-line no-console
-    console.log("🔍 hasRole: Stored user info:", userInfo);
-
-    if (userInfo?.roles.includes(role)) {
-      // eslint-disable-next-line no-console
-      console.log("🔍 hasRole: Found role in stored user info:", role);
+    // Check against stored user info first (no logging in production)
+    if (userInfo?.roles?.includes(role)) {
       return true;
     }
 
@@ -36,22 +93,10 @@ export const useAuth = () => {
     };
 
     const rolesToCheck = keycloakRoleMap[role] || [role];
-    // eslint-disable-next-line no-console
-    console.log("🔍 hasRole: Checking roles:", rolesToCheck);
 
-    const hasKeycloakRole = rolesToCheck.some((r) => {
-      const hasRealm = keycloak.hasRealmRole(r);
-      const hasResource = keycloak.hasResourceRole(r);
-      // eslint-disable-next-line no-console
-      console.log(
-        `🔍 hasRole: ${r} - realm: ${hasRealm}, resource: ${hasResource}`
-      );
-      return hasRealm || hasResource;
+    return rolesToCheck.some((r) => {
+      return keycloak.hasRealmRole(r) || keycloak.hasResourceRole(r);
     });
-
-    // eslint-disable-next-line no-console
-    console.log("🔍 hasRole: Final result for", role, ":", hasKeycloakRole);
-    return hasKeycloakRole;
   };
 
   /**
@@ -106,68 +151,24 @@ export const useAuth = () => {
   };
 
   /**
-   * Get all user roles (prioritizes stored user info, falls back to Keycloak)
-   */
-  const getUserRoles = (): AppRoles[] => {
-    if (!keycloak.authenticated) return [];
-
-    // Get from stored user info first
-    const userInfo = AuthService.getStoredUserInfo();
-    if (userInfo?.roles) {
-      return userInfo.roles;
-    }
-
-    // Fallback to extracting from current token
-    return Object.values(AppRoles).filter((role) => hasRole(role));
-  };
-
-  /**
    * Get user information from token
    */
-  const getUserInfo = () => {
-    // First try to get from stored user info (for production)
-    const storedUserInfo = AuthService.getStoredUserInfo();
-    if (storedUserInfo) {
-      return {
-        id: storedUserInfo.id,
-        username: storedUserInfo.username,
-        email: storedUserInfo.email,
-        firstName: storedUserInfo.firstName,
-        lastName: storedUserInfo.lastName,
-        roles: storedUserInfo.roles,
-        designation: storedUserInfo.designation,
-        agency: storedUserInfo.agency,
-      };
-    }
+  const getUserInfo = () => userInfo;
 
-    // Fallback to direct token parsing (for development)
-    if (!keycloak.authenticated || !keycloak.tokenParsed) {
-      return null;
-    }
-
-    const tokenParsed = keycloak.tokenParsed as Record<string, unknown>;
-
-    return {
-      id: (tokenParsed.sub as string) || "unknown",
-      username: keycloak.tokenParsed.preferred_username,
-      email: keycloak.tokenParsed.email,
-      firstName: keycloak.tokenParsed.given_name,
-      lastName: keycloak.tokenParsed.family_name,
-      roles: getUserRoles(),
-      designation: keycloak.tokenParsed.designation,
-      agency: keycloak.tokenParsed.agency,
-    };
-  };
+  /**
+   * Get all user roles
+   */
+  const getUserRoles = (): AppRoles[] => userInfo?.roles || [];
 
   /**
    * Check if user is requestor
    */
-  const isRequestor = (): boolean => hasRole(AppRoles.REQUESTOR);
+  const isRequestor = (): boolean => roleChecks.isRequestor;
 
   /**
    * Check if user is approver
    */
-  const isApprover = (): boolean => hasRole(AppRoles.APPROVER);
+  const isApprover = (): boolean => roleChecks.isApprover;
 
   /**
    * Check if user can approve requests
