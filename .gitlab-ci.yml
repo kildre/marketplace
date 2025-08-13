@@ -12,9 +12,10 @@ workflow:
      when: never
 
 variables:
+  SET_CURRENT: $CI_COMMIT_SHA
   HELM_UPGRADE_EXTRA_ARGS: >-
 
-    --set image.upstream=${UPSTREAM_COMMIT_SHA}
+    --set image.upstream=${SET_CURRENT}
     # --set image.pullPolicy=Always
     #  --set deployment.web.podAnnotations.restartedAt="$(date +%s)"
   #IMAGE_TAG_FOR_HELM_ONLY:
