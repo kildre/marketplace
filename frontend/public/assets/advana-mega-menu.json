@@ -1,16 +1,1 @@
-{
-  "Home": {
-    "title": "Home",
-    "description": "Local development menu",
-    "link": "#/",
-    "newTab": false,
-    "links": []
-  },
-  "Products": {
-    "title": "Products",
-    "description": "",
-    "link": "#/products",
-    "newTab": false,
-    "links": []
-  }
-}
+{}

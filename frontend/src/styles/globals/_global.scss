@@ -35,10 +35,14 @@ div[style*="position: fixed"][style*="margin-top: 30px"] {
   position: static !important;
   margin-top: 0 !important;
   width: 100% !important;
+  height: auto !important; // remove inline height: 100px
 }
 
-// CUI Banner Styles (now hidden)
-.cui-banner { display: none !important; }
+// Ensure any AdvanaMenu root with inline height gets reset
+.advana-menu-override [data-testid="advana-menu"],
+div[style*="height: 100px"][data-testid="advana-menu"] {
+  height: auto !important;
+}
 
 // Alternative targeting
 .advana-menu-override {
@@ -46,8 +50,12 @@ div[style*="position: fixed"][style*="margin-top: 30px"] {
     position: static !important;
     margin-top: 0 !important;
     width: 100% !important;
+    height: auto !important; // remove inline height: 100px
   }
 }
+
+// CUI Banner Styles (now hidden)
+.cui-banner { display: none !important; }
 
 // Service Desk Style Overrides for AdvanaMenu
 .advana-service-desk-style {
@@ -357,11 +365,11 @@ div[style*="position: fixed"][style*="margin-top: 30px"] {
 .advana-service-desk-style > div {
   min-height: 180px !important; // increase header height
 }
-.advana-service-desk-style,
-.advana-service-desk-style > div,
-.advana-service-desk-style > div > div {
-  min-height: 180px !important; // ensure inner containers follow
-}
+// .advana-service-desk-style,
+// .advana-service-desk-style > div,
+// .advana-service-desk-style > div > div {
+//   // min-height: 180px !important; // ensure inner containers follow
+// }
 
 /* Position right-side icons at the very top-right (like Service Desk example) */
 .advana-service-desk-style > div > div {
@@ -407,4 +415,11 @@ div[style*="position: fixed"][style*="margin-top: 30px"] {
 .advana-service-desk-style [data-testid="advana-menu-logos"] > div > div {
   position: relative !important;
   right: 230px !important;
+}
+
+/* Hide megamenu pill and any nav link lists when using Service Desk header style */
+.advana-service-desk-style [data-testid="megamenu-pill"],
+.advana-service-desk-style nav,
+.advana-service-desk-style [role="navigation"] {
+  display: none !important;
 }
