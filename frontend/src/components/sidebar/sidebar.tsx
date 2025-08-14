@@ -81,7 +81,7 @@ export const Sidebar = (): React.ReactElement => {
               </Link>
             </li>
             {/* Development-only auth status link */}
-            {import.meta.env.DEV &&
+            {/* {import.meta.env.DEV &&
               import.meta.env.VITE_BYPASS_AUTH === "true" &&
               !import.meta.env.VITEST && (
                 <li
@@ -105,7 +105,7 @@ export const Sidebar = (): React.ReactElement => {
                     🔐 Auth Status (Dev)
                   </Link>
                 </li>
-              )}
+              )} */}
           </ul>
         </nav>
       </div>
@@ -162,7 +162,7 @@ export const Sidebar = (): React.ReactElement => {
               </Link>
             </li>
             {/* Development-only auth status link */}
-            {import.meta.env.DEV &&
+            {/* {import.meta.env.DEV &&
               import.meta.env.VITE_BYPASS_AUTH === "true" &&
               !import.meta.env.VITEST && (
                 <li
@@ -186,7 +186,7 @@ export const Sidebar = (): React.ReactElement => {
                     🔐 Auth Status (Dev)
                   </Link>
                 </li>
-              )}
+              )} */}
           </ul>
         </nav>
       </div>

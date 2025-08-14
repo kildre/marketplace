@@ -4,7 +4,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { RequestsTableProps } from "../../interfaces/interfaceStore";
-import { RequestsDebugPanel } from "../debug/RequestsDebugPanel";
+// import { RequestsDebugPanel } from "../debug/RequestsDebugPanel"; // Uncomment to use debug panel with userId and component
 import { calculateEstimatedCost } from "../../utils/helper-functions";
 import { mockProducts } from "../../data/mock-productData";
 
@@ -26,7 +26,7 @@ const getStatusColor = (
 
 export const RequestsTable: React.FC<RequestsTableProps> = ({
   data,
-  userId,
+  // userId,
   showUserColumn = true,
 }) => {
   const navigate = useNavigate();
@@ -329,11 +329,11 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           }}
         />
       </Paper>
-      <RequestsDebugPanel
+      {/* <RequestsDebugPanel
         userId={userId}
         effectiveUserId={userId} // Use userId prop directly since filtering is done by API
         filteredRequestsCount={safeRequests.length}
-      />
+      /> */}
     </div>
   );
 };

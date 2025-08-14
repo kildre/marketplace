@@ -1,42 +1,55 @@
-import React from 'react';
+import React from "react";
 // import { Link } from 'react-router-dom'; // removed with cart
 // import { useAuth } from '../hooks/useAuth'; // no longer needed
 // import { AppRoles } from '../types/auth'; // no longer needed
 
 // Import images statically - these will work with Vite
-import AdvanaDarkTheme from '/assets/images/AdvanaDarkTheme.png';
-import DODLogo from '/assets/images/DOD_color.png';
-import CDAOLogo from '/assets/images/cdao_Logo.png';
-import JupiterDONLogo from '/assets/images/Jupiter_DON_logo.png';
-import JupiterUSMCLogo from '/assets/images/Jupiter_USMC_logo.png';
-import JupiterUSNLogo from '/assets/images/Jupiter_USN_logo.png';
-import JupiterLogo from '/assets/images/Jupiter_logo.png';
+import AdvanaDarkTheme from "/assets/images/AdvanaDarkTheme.png";
+import DODLogo from "/assets/images/DOD_color.png";
+import CDAOLogo from "/assets/images/cdao_Logo.png";
+import JupiterDONLogo from "/assets/images/Jupiter_DON_logo.png";
+import JupiterUSMCLogo from "/assets/images/Jupiter_USMC_logo.png";
+import JupiterUSNLogo from "/assets/images/Jupiter_USN_logo.png";
+import JupiterLogo from "/assets/images/Jupiter_logo.png";
 
 const styles = {
   logo: {
-    width: '40px',
-    height: '40px',
-    position: 'relative' as const,
-    left: '1%',
-    marginRight: '12px'
+    width: "40px",
+    height: "40px",
+    position: "relative" as const,
+    left: "1%",
+    marginRight: "12px",
   },
   advanaLogo: {
-    maxWidth: '180px',
-    height: '42px',
-    cursor: 'pointer'
+    maxWidth: "180px",
+    height: "42px",
+    cursor: "pointer",
   },
   logoContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    flex: 1
+    display: "flex",
+    alignItems: "flex-start",
+    flexDirection: "column" as const,
+    gap: "6px",
+    flex: 1,
+  },
+  logoRow: {
+    display: "flex",
+    alignItems: "center",
+  },
+  title: {
+    color: "#fff",
+    fontWeight: 800,
+    fontSize: "2.75rem", // 44px
+    lineHeight: 1.1 as const,
+    margin: 0,
   },
   mainContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-    position: 'relative' as const,
-    height: '100%'
-  }
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+    position: "relative" as const,
+    height: "100%",
+  },
 };
 
 interface CustomMenuLogoSectionProps {
@@ -46,18 +59,23 @@ interface CustomMenuLogoSectionProps {
   isCRA?: boolean;
 }
 
-const CustomMenuLogoSection: React.FC<CustomMenuLogoSectionProps> = ({ 
-  enclave = 'advana', 
-  alternateLogo, 
+const CustomMenuLogoSection: React.FC<CustomMenuLogoSectionProps> = ({
+  enclave = "advana",
+  alternateLogo,
   megaMenuBaseDomain,
-  isCRA = true 
+  isCRA = true,
 }) => {
   // const { hasRole } = useAuth(); // removed
-  
+
   // Function to handle page changes (copied from original AdvanaMenu logic)
-  const changePage = (path: string, domain?: string, newTab = false, isCRAMode = true) => {
+  const changePage = (
+    path: string,
+    domain?: string,
+    newTab = false,
+    isCRAMode = true
+  ) => {
     if (newTab) {
-      window.open(isCRAMode ? path : `${domain}${path}`, '_blank');
+      window.open(isCRAMode ? path : `${domain}${path}`, "_blank");
     } else {
       if (isCRAMode) {
         window.location.hash = path;
@@ -67,34 +85,37 @@ const CustomMenuLogoSection: React.FC<CustomMenuLogoSectionProps> = ({
     }
   };
 
-  if (enclave === 'jupiter') {
+  if (enclave === "jupiter") {
     return (
       <div style={styles.mainContainer}>
         <div style={styles.logoContainer}>
-          <img
-            alt="_navydeptlogo"
-            onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-            src={JupiterDONLogo}
-            style={styles.logo}
-          />
-          <img
-            alt="_marineslogo"
-            onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-            src={JupiterUSMCLogo}
-            style={styles.logo}
-          />
-          <img
-            alt="_navylogo"
-            onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-            src={JupiterUSNLogo}
-            style={styles.logo}
-          />
-          <img
-            alt="jupiter_logo"
-            onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-            src={JupiterLogo}
-            style={styles.advanaLogo}
-          />
+          <div style={styles.logoRow as React.CSSProperties}>
+            <img
+              alt="_navydeptlogo"
+              onClick={() => changePage("#/", megaMenuBaseDomain, false, isCRA)}
+              src={JupiterDONLogo}
+              style={styles.logo}
+            />
+            <img
+              alt="_marineslogo"
+              onClick={() => changePage("#/", megaMenuBaseDomain, false, isCRA)}
+              src={JupiterUSMCLogo}
+              style={styles.logo}
+            />
+            <img
+              alt="_navylogo"
+              onClick={() => changePage("#/", megaMenuBaseDomain, false, isCRA)}
+              src={JupiterUSNLogo}
+              style={styles.logo}
+            />
+            <img
+              alt="jupiter_logo"
+              onClick={() => changePage("#/", megaMenuBaseDomain, false, isCRA)}
+              src={JupiterLogo}
+              style={styles.advanaLogo}
+            />
+          </div>
+          {/* Optional: If needed, show a Jupiter title here */}
         </div>
         {/* Cart moved to overlay component */}
       </div>
@@ -104,30 +125,27 @@ const CustomMenuLogoSection: React.FC<CustomMenuLogoSectionProps> = ({
     return (
       <div style={styles.mainContainer}>
         <div style={styles.logoContainer}>
-          <img
-            alt="dod_logo"
-            src={DODLogo}
-            style={styles.logo}
-          />
-          <img
-            alt="cdao_logo"
-            src={CDAOLogo}
-            style={styles.logo}
-          />
-          {alternateLogo ? (
-            <img
-              alt="alternate_logo"
-              src={alternateLogo}
-              style={styles.logo}
-            />
-          ) : (
-            <img
-              alt="advana_logo"
-              onClick={() => changePage('#/', megaMenuBaseDomain, false, isCRA)}
-              src={AdvanaDarkTheme}
-              style={styles.advanaLogo}
-            />
-          )}
+          <div style={styles.logoRow as React.CSSProperties}>
+            <img alt="dod_logo" src={DODLogo} style={styles.logo} />
+            <img alt="cdao_logo" src={CDAOLogo} style={styles.logo} />
+            {alternateLogo ? (
+              <img
+                alt="alternate_logo"
+                src={alternateLogo}
+                style={styles.logo}
+              />
+            ) : (
+              <img
+                alt="advana_logo"
+                onClick={() =>
+                  changePage("#/", megaMenuBaseDomain, false, isCRA)
+                }
+                src={AdvanaDarkTheme}
+                style={styles.advanaLogo}
+              />
+            )}
+          </div>
+          <p style={styles.title as React.CSSProperties}>Advana Marketplace</p>
         </div>
         {/* Cart moved to overlay component */}
       </div>

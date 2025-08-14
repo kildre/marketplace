@@ -26,7 +26,7 @@ const transformApiRequestToRequestData = (
   return {
     requestId: apiRequest.requestNumber,
     personalData: {
-      name: apiRequest.pointOfContact,
+      name: apiRequest.requestorUsername,
       email: apiRequest.requestorEmail,
       designation: apiRequest.designation,
       agency: apiRequest.agency,

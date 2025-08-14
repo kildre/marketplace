@@ -1,14 +1,8 @@
 import Keycloak, { KeycloakConfig } from "keycloak-js";
 
-// Debug environment variables in development
+// Debug environment variables in development (logging removed)
 if (import.meta.env.DEV) {
-  // eslint-disable-next-line no-console
-  console.log('Keycloak Environment Variables:', {
-    url: import.meta.env.VITE_KEYCLOAK_URL,
-    realm: import.meta.env.VITE_KEYCLOAK_REALM,
-    clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
-    bypassAuth: import.meta.env.VITE_BYPASS_AUTH
-  });
+  // no-op
 }
 
 const keycloakConfig: KeycloakConfig = {
@@ -19,15 +13,27 @@ const keycloakConfig: KeycloakConfig = {
 
 // Validate required configuration
 if (!keycloakConfig.url) {
-  throw new Error(`Keycloak configuration missing 'url'. Check VITE_KEYCLOAK_URL environment variable. Current value: ${import.meta.env.VITE_KEYCLOAK_URL}`);
+  throw new Error(
+    `Keycloak configuration missing 'url'. Check VITE_KEYCLOAK_URL environment variable. Current value: ${
+      import.meta.env.VITE_KEYCLOAK_URL
+    }`
+  );
 }
 
 if (!keycloakConfig.realm) {
-  throw new Error(`Keycloak configuration missing 'realm'. Check VITE_KEYCLOAK_REALM environment variable. Current value: ${import.meta.env.VITE_KEYCLOAK_REALM}`);
+  throw new Error(
+    `Keycloak configuration missing 'realm'. Check VITE_KEYCLOAK_REALM environment variable. Current value: ${
+      import.meta.env.VITE_KEYCLOAK_REALM
+    }`
+  );
 }
 
 if (!keycloakConfig.clientId) {
-  throw new Error(`Keycloak configuration missing 'clientId'. Check VITE_KEYCLOAK_CLIENT_ID environment variable. Current value: ${import.meta.env.VITE_KEYCLOAK_CLIENT_ID}`);
+  throw new Error(
+    `Keycloak configuration missing 'clientId'. Check VITE_KEYCLOAK_CLIENT_ID environment variable. Current value: ${
+      import.meta.env.VITE_KEYCLOAK_CLIENT_ID
+    }`
+  );
 }
 
 const keycloak = new Keycloak(keycloakConfig);

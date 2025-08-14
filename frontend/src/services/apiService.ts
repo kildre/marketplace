@@ -43,6 +43,7 @@ export interface UseCaseRequestApiDto {
   requestNumber: string;
   statusId: number;
   requestorEmail: string;
+  requestorUsername: string;
   designation: string;
   agency: string;
   organization: string;

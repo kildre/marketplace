@@ -1,3 +1,5 @@
+import { mockUserConfigurations } from "@/contexts/EnhancedMockKeycloakProvider";
+
 export const formatPrice = (price: number | null, rom?: string) => {
   if (rom) return rom;
   if (price === 0) return "Free";
@@ -121,6 +123,20 @@ export const getIconPath = (type: string) => {
 export const getValue = (name: string): string => {
   const element = document.querySelector(`[name="${name}"]`);
   return (element as { value?: string })?.value || "";
+};
+
+// Helper function to get user name from email using mockUserConfigurations
+export const getUserNameFromEmail = (email: string): string => {
+  // Find user by email in mockUserConfigurations
+  const user = Object.values(mockUserConfigurations).find(
+    (user) => user.email === email
+  );
+
+  if (user && user.firstName && user.lastName) {
+    return `${user.firstName} ${user.lastName}`;
+  }
+
+  return "not provided";
 };
 
 // Function to generate a unique request ID of 24 characters

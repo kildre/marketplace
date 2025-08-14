@@ -23,11 +23,15 @@ export default defineConfig({
   build: {
     outDir: "dist",
     assetsDir: "assets",
+    sourcemap: true, // Enable source maps in production builds (optional)
+  },
+  css: {
+    devSourcemap: true, // Enable CSS source maps in development
   },
   resolve: {
     alias: {
       // Try to alias the entire images directory
-      '@advana/platform-ui/dist/images': '/assets/images',
+      "@advana/platform-ui/dist/images": "/assets/images",
     },
   },
   test: {

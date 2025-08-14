@@ -10,6 +10,7 @@ import { RequestData, CartItemData } from "@/interfaces/interfaceStore";
 import {
   generateRequestId,
   calculateEstimatedCost,
+  getUserNameFromEmail,
 } from "@/utils/helper-functions";
 import { mockProducts } from "@/data/mock-productData";
 
@@ -65,10 +66,7 @@ const transformApiRequestToRequestData = (
   return {
     requestId: (apiRequest.requestNumber as string) || "",
     personalData: {
-      name:
-        (apiRequest.pointOfContact as string) ||
-        (apiRequest.designation as string) ||
-        "N/A",
+      name: getUserNameFromEmail((apiRequest.requestorEmail as string) || ""),
       email: (apiRequest.requestorEmail as string) || "N/A",
       designation: (apiRequest.designation as string) || "N/A",
       agency: (apiRequest.agency as string) || "N/A",
@@ -76,13 +74,10 @@ const transformApiRequestToRequestData = (
     requestDetails: {
       organization: (apiRequest.organization as string) || "N/A",
       organizationOther: (apiRequest.otherOrganization as string) || "",
-      pocName: (apiRequest.pointOfContact as string) || "N/A",
-      pocPhone: (apiRequest.phoneNumber as string) || "N/A",
-      pocEmail:
-        (apiRequest.email as string) ||
-        (apiRequest.requestorEmail as string) ||
-        "N/A",
-      useCaseDescription: (apiRequest.description as string) || "N/A",
+      pocName: (apiRequest.pointOfContact as string) || "",
+      pocPhone: (apiRequest.phoneNumber as string) || "",
+      pocEmail: (apiRequest.email as string) || "",
+      useCaseDescription: (apiRequest.description as string) || "",
     },
     cartItems: transformCartItems((apiRequest.cartItems as unknown[]) || []),
     summary: {
