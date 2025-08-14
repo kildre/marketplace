@@ -20,7 +20,7 @@ spec:
       containers:
         - name: advana-marketplace-web
 #          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          image: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .image.tag }}"
+          image: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:${{ CI_COMMIT_SHA }}"
           imagePullPolicy: Always
           resources:
             requests:
