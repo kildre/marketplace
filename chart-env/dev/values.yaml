@@ -17,8 +17,8 @@ global:
 
 image:
   repository: tenant/images/advana-marketplace
-  pullPolicy: IfNotPresent
-  # tag: ""
+  pullPolicy: Always
+  tag: "33073b997d56c8c8d90df8f3236f4169a6ccfefa"
 
 serviceAccount:
   annotations:
@@ -28,24 +28,24 @@ ingress:
   gateways:  # set to use gateways instead of ingress
     - istio-system/public
 
-crossplane: 
-  postgres: 
-    enabled: true
+# crossplane: 
+#   postgres: 
+#     enabled: true
 
-#deployment:
-#  web:
-#    replicaCount: 1 # unused if autoscaling is enabled
-#    podAnnotations:
-#      iam.amazonaws.com/role: arn:aws:iam::231134345536:role/advana/k8s/s3.wildcard
-#    container:
-#      web:
-#        resources: # only set values in environment-specific overrides
-#          limits:
-#            cpu: 4
-#            memory: 2Gi
-#          requests:
-#            cpu: 2
-#            memory: 500Mi
+deployment:
+ web:
+   replicaCount: 1 # unused if autoscaling is enabled
+   podAnnotations:
+     iam.amazonaws.com/role: arn:aws:iam::231134345536:role/advana/k8s/s3.wildcard
+   container:
+     web:
+       resources: # only set values in environment-specific overrides
+         limits:
+           cpu: 4
+           memory: 2Gi
+         requests:
+           cpu: 2
+           memory: 500Mi
 
 # public values that are stored as a secret object for convenience, remove if using values from vault
 secret:

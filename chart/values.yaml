@@ -2,7 +2,7 @@
 ## Global Values                                                             ##
 ###############################################################################
 
-namespace: advana-marketplace
+#namespace: advana-marketplace # could have been breakpoint
 global:
   awsRegion: us-gov-west-1
   appName: advana-marketplace
@@ -17,7 +17,6 @@ global:
 image:
   repository: tenant/images/advana-marketplace
   pullPolicy: Always
-  tag: "${{ CI_COMMIT_SHA }}" 
 
 serviceAccount:
   name: "{{ $.Release.Name }}"
@@ -28,15 +27,6 @@ serviceAccount:
 ingress:
   enabled: true
   tls: false
-  # gateways:  # set to use gateways instead of ingress
-  #   - istio-system/public
-  # className: nginx  # set if default IngressClass is not configured
-  # annotations:
-  #   ingress.kubernetes.io/ssl-redirect: 'true'
-  #   ingress.kubernetes.io/proxy-body-size: '0'
-  #   nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-  #   nginx.ingress.kubernetes.io/backend-protocol: 'HTTPS'
-  #   nginx.ingress.kubernetes.io/proxy-body-size: '0'
   domain: "{{ $.Values.global.appName }}.{{ $.Values.global.baseDomain }}"
   hosts:
     "{{ $.Values.ingress.domain }}":
@@ -47,27 +37,27 @@ ingress:
           serviceType: ClusterIP
           serviceName: http
 
-crossplane: 
-  postgres:
-    enabled: false
-    apiVersion: database.advana.cdao.us/v1alpha1
-    kind: Postgres
-    metadata:
-      name: "{{ $.Release.Name }}"
-      namespace: "{{ $.Release.Name }}"
-    spec:
-      region: "{{ $.Values.global.awsRegion }}"
-      dbName: "marketplace"
-      allocatedStorage: 40  # units: GiB
-      # deletionPolicy: Delete
-      deletionPolicy: Orphan
-      tags:
-        application: "{{ $.Release.Name }}"
-        description: "RDS Postgres for {{ $.Release.Name }}"
-        poc: "yolo@foo.bar"
-        pocTeam: "{{ $.Release.Name }} team"
-      writeConnectionSecretToRef:
-        name: secret-env-crossplane
+# crossplane: 
+#   postgres:
+#     enabled: false
+#     apiVersion: database.advana.cdao.us/v1alpha1
+#     kind: Postgres
+#     metadata:
+#       name: "{{ $.Release.Name }}"
+#       namespace: "{{ $.Release.Name }}"
+#     spec:
+#       region: "{{ $.Values.global.awsRegion }}"
+#       dbName: "marketplace"
+#       allocatedStorage: 40  # units: GiB
+#       # deletionPolicy: Delete
+#       deletionPolicy: Orphan
+#       tags:
+#         application: "{{ $.Release.Name }}"
+#         description: "RDS Postgres for {{ $.Release.Name }}"
+#         poc: "yolo@foo.bar"
+#         pocTeam: "{{ $.Release.Name }} team"
+#       writeConnectionSecretToRef:
+#         name: secret-env-crossplane
 
 securityContext:
   allowPrivilegeEscalation: false
@@ -202,11 +192,11 @@ deployment:
           http:
             protocol: TCP
             port: 80 # k8s service port
-            targetPort: 7500 # internal container port
+            targetPort: 8080 # internal container port
 
 env:
   secret:
-    "public-env-platform-ui":
+    'public-env-platform-ui':
       secretName: public-env-platform-ui
 
 volume:
@@ -264,95 +254,95 @@ secret:
 ## Dependency Values                                                         ##
 ###############################################################################
 
-postgresql:
-  enabled: false
-  image:
-    registry: docker.io
-    repository: bitnami/postgresql
-    tag: 15.0.0-debian-11-r3
-    pullPolicy: IfNotPresent
-  auth:
-    database: "application-data-db"
-  tls:
-    certificatesSecret: "existing-tls-secret"
-  primary:
-    resources:
-      limits:
-        memory: 0Mi
-        cpu: 0m
-      requests:
-        memory: 0Mi
-        cpu: 0m
-  readReplicas:
-    replicaCount: 1
-    resources:
-      limits:
-        memory: 0Mi
-        cpu: 0m
-      requests:
-        memory: 0Mi
-        cpu: 0m
-  volumePermissions:
-    image:
-      registry: docker.io
-      repository: bitnami/bitnami-shell
-      tag: 11-debian-11-r47
-      pullPolicy: IfNotPresent
-  metrics:
-    image:
-      registry: docker.io
-      repository: bitnami/postgres-exporter
-      tag: 0.11.1-debian-11-r24
-      pullPolicy: IfNotPresent
+# postgresql:
+#   enabled: false
+#   image:
+#     registry: docker.io
+#     repository: bitnami/postgresql
+#     tag: 15.0.0-debian-11-r3
+#     pullPolicy: IfNotPresent
+#   auth:
+#     database: "application-data-db"
+#   tls:
+#     certificatesSecret: "existing-tls-secret"
+#   primary:
+#     resources:
+#       limits:
+#         memory: 0Mi
+#         cpu: 0m
+#       requests:
+#         memory: 0Mi
+#         cpu: 0m
+#   readReplicas:
+#     replicaCount: 1
+#     resources:
+#       limits:
+#         memory: 0Mi
+#         cpu: 0m
+#       requests:
+#         memory: 0Mi
+#         cpu: 0m
+#   volumePermissions:
+#     image:
+#       registry: docker.io
+#       repository: bitnami/bitnami-shell
+#       tag: 11-debian-11-r47
+#       pullPolicy: IfNotPresent
+#   metrics:
+#     image:
+#       registry: docker.io
+#       repository: bitnami/postgres-exporter
+#       tag: 0.11.1-debian-11-r24
+#       pullPolicy: IfNotPresent
 
-redis:
-  enabled: false
-  image:
-    registry: docker.io
-    repository: bitnami/redis
-    tag: 7.0.5-debian-11-r15
-    pullPolicy: IfNotPresent
-  master:
-    count: 1
-    resources:
-      limits:
-        memory: 0Mi
-        cpu: 0m
-      requests:
-        memory: 0Mi
-        cpu: 0m
-  replica:
-    replicaCount: 1
-    resources:
-      limits:
-        memory: 0Mi
-        cpu: 0m
-      requests:
-        memory: 0Mi
-        cpu: 0m
-  sentinel:
-    image:
-      registry: docker.io
-      repository: bitnami/redis-sentinel
-      tag: 7.0.5-debian-11-r14
-      pullPolicy: IfNotPresent
-  tls:
-    existingSecret: "existing-tls-secret"
-  metrics:
-    image:
-      registry: docker.io
-      repository: bitnami/redis-exporter
-      tag: 1.45.0-debian-11-r1
-      pullPolicy: IfNotPresent
-  volumePermissions:
-    image:
-      registry: docker.io
-      repository: bitnami/bitnami-shell
-      tag: 11-debian-11-r48
-      pullPolicy: IfNotPresent
-  sysctl:
-    image:
-      registry: docker.io
-      repository: bitnami/bitnami-shell
-      tag: 11-debian-11-r48
-      pullPolicy: IfNotPresent
+# redis:
+#   enabled: false
+#   image:
+#     registry: docker.io
+#     repository: bitnami/redis
+#     tag: 7.0.5-debian-11-r15
+#     pullPolicy: IfNotPresent
+#   master:
+#     count: 1
+#     resources:
+#       limits:
+#         memory: 0Mi
+#         cpu: 0m
+#       requests:
+#         memory: 0Mi
+#         cpu: 0m
+#   replica:
+#     replicaCount: 1
+#     resources:
+#       limits:
+#         memory: 0Mi
+#         cpu: 0m
+#       requests:
+#         memory: 0Mi
+#         cpu: 0m
+#   sentinel:
+#     image:
+#       registry: docker.io
+#       repository: bitnami/redis-sentinel
+#       tag: 7.0.5-debian-11-r14
+#       pullPolicy: IfNotPresent
+#   tls:
+#     existingSecret: "existing-tls-secret"
+#   metrics:
+#     image:
+#       registry: docker.io
+#       repository: bitnami/redis-exporter
+#       tag: 1.45.0-debian-11-r1
+#       pullPolicy: IfNotPresent
+#   volumePermissions:
+#     image:
+#       registry: docker.io
+#       repository: bitnami/bitnami-shell
+#       tag: 11-debian-11-r48
+#       pullPolicy: IfNotPresent
+#   sysctl:
+#     image:
+#       registry: docker.io
+#       repository: bitnami/bitnami-shell
+#       tag: 11-debian-11-r48
+#       pullPolicy: IfNotPresent
