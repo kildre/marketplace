@@ -125,18 +125,14 @@ export const FormSelectedApplications = ({
     }
   };
 
-  const getButtonText = (productId: number, currentQuantity: number) => {
+  const getButtonText = (productId: number, _currentQuantity: number) => {
     const inputQuantity = inputQuantities[productId] || 0;
 
     if (inputQuantity === 0) {
       return "Remove";
     }
 
-    if (inputQuantity !== currentQuantity) {
-      return "Update";
-    }
-
-    return "Current";
+    return "Update";
   };
 
   const isButtonDisabled = (productId: number, currentQuantity: number) => {
@@ -172,7 +168,7 @@ export const FormSelectedApplications = ({
                       Description: <span>{item.description}</span>
                     </p>
                     <p>
-                      Qty requested: <span>{item.quantity}</span>
+                      Currently in cart: <span>{item.quantity}</span>
                     </p>
                   </div>
                   <div className="cart-item-card__price">
@@ -264,21 +260,22 @@ export const FormSelectedApplications = ({
                       </span>
 
                       <div className="cart-item-card__actions">
-                        {inputQuantities[product.id] === 0 ? null : (
-                          <Button
-                            variant="text"
-                            onClick={() => handleUpdateQuantity(product.id)}
-                            disabled={isButtonDisabled(product.id, quantity)}
-                            className="update-quantity-button"
-                            aria-label={`${getButtonText(
-                              product.id,
-                              quantity
-                            )} ${product.name}`}
-                            size="medium"
-                          >
-                            {getButtonText(product.id, quantity)}
-                          </Button>
-                        )}
+                        {inputQuantities[product.id] !== 0 &&
+                          inputQuantities[product.id] !== quantity && (
+                            <Button
+                              variant="text"
+                              onClick={() => handleUpdateQuantity(product.id)}
+                              disabled={isButtonDisabled(product.id, quantity)}
+                              className="update-quantity-button"
+                              aria-label={`${getButtonText(
+                                product.id,
+                                quantity
+                              )} ${product.name}`}
+                              size="medium"
+                            >
+                              {getButtonText(product.id, quantity)}
+                            </Button>
+                          )}
 
                         <Button
                           variant="text"

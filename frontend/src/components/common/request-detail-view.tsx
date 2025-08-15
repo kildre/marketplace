@@ -4,7 +4,24 @@ import { FormSelectedApplications } from "../form-selected-applications/form-sel
 import { FormPersonalInformation } from "../form-personal-information/form-personal-information";
 import { FormCostDetails } from "../form-cost-details/form-cost-details";
 import TextField from "@mui/material/TextField";
+import Chip from "@mui/material/Chip";
 import { RequestDetailViewProps } from "../../interfaces";
+
+// Get status color for the chip
+const getStatusColor = (
+  status: string
+): "warning" | "success" | "error" | "default" => {
+  switch (status) {
+    case "Pending":
+      return "warning";
+    case "Approved":
+      return "success";
+    case "Denied":
+      return "error";
+    default:
+      return "default";
+  }
+};
 
 export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
   request,
@@ -12,7 +29,7 @@ export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
   onReasoningChange,
   onAccept,
   onReject,
-  buttonClass,
+  buttonClass: _buttonClass,
   mode,
 }) => {
   const isReadOnly = mode === "view";
@@ -47,7 +64,14 @@ export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
 
         {/* Approval Section */}
         <div className="form-personal-information approval-section">
-          <p className="approval-status__title">Approval Status</p>
+          <div className="approval-status__header">
+            <p className="approval-status__title">Approval Status</p>
+            <Chip
+              label={request.status}
+              color={getStatusColor(request.status)}
+              size="small"
+            />
+          </div>
           <label htmlFor="reasoning">Reasoning</label>
           <TextField
             multiline
@@ -61,9 +85,6 @@ export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
             value={statusReason}
             onChange={isReadOnly ? undefined : onReasoningChange}
           />
-          <button disabled className={buttonClass}>
-            {request.status}
-          </button>
           {showActionButtons && (
             <>
               <button
