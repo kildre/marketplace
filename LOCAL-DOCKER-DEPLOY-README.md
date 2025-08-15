@@ -50,7 +50,7 @@ $ docker compose -f docker-compose.yml up
 
 The container will:
 - Build the React app.
-- Serve static files via Nginx on port **7500**.
+- Serve static files via Nginx on port **8080**.
 - Run a healthcheck to ensure the service is up.
 
 ### 3. Access the Frontend
@@ -58,7 +58,7 @@ The container will:
 Open your browser and go to:
 
 ```
-http://localhost:7500
+http://localhost:8080
 ```
 
 You should see the Advana Marketplace frontend running locally.
@@ -68,7 +68,7 @@ You should see the Advana Marketplace frontend running locally.
 ## Troubleshooting
 
 - **Build errors**: Check the terminal output for missing dependencies or permission issues.
-- **Port conflicts**: Ensure port 7500 is not in use by another process.
+- **Port conflicts**: Ensure port 8080 is not in use by another process.
 - **Kubernetes not running**: Make sure Kubernetes is enabled and running in Docker Desktop.
 - **Healthcheck failures**: The container uses `nc` to check port 7500. If the healthcheck fails, check Nginx logs inside the container.
 - **Docker build cache errors:** If you see errors about missing image layers, run `docker system prune -a` and follow the steps above to rebuild and recompose.
