@@ -41,7 +41,7 @@ $ docker build -f Dockerfile.local --no-cache -t advana-marketplace-frontend:loc
 ### 2. Start the Frontend Container
 
 ```powershell
-# Start the container and expose port 7500
+# Start the container and expose port 8080
 $ docker compose -f docker-compose.yml up
 ```
 
