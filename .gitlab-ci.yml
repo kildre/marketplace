@@ -2,9 +2,15 @@ include:
   - project: promotion/tekton-promotion-gitlab
     file: routes/dragon-full.yml
 
+workflow:
+  rules:
+   - if: $CI_PIPELINE_SOURCE == "push"
+     when: always
+   - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+     when: never
 
 variables:
   UPSTREAM_PROJECT_DIR: "."
   HELM_RELEASE_NAME: "advana-marketplace"
   HELM_CHART_DIR: "./chart"
-  DOCKERFILE_PATH: "./Dockerfile.distroless"  # Use distroless Dockerfile for build
+  DOCKERFILE_PATH: "./Dockerfile.distroless"
