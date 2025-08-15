@@ -32,7 +32,7 @@ http {
     types_hash_max_size 2048;
 
     server {
-        listen 7500;
+        listen 8080;
         server_name localhost;
         root /usr/share/nginx/html;
         index index.html;
@@ -48,7 +48,7 @@ http {
 
         # Health check endpoint for container orchestration
         location /health {
-            access_log on;
+            access_log off;
             return 200 "healthy\n";
             add_header Content-Type text/plain;
         }
