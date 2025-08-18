@@ -1,13 +1,43 @@
 import { render, screen } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
+import { vi } from "vitest";
 import { FormPersonalInformation } from "./form-personal-information";
 
 // Extend Jest matchers for accessibility testing
 expect.extend(toHaveNoViolations);
 
+// Mock the useAuth hook
+const mockUseAuth = vi.fn();
+vi.mock("../../hooks/useAuth", () => ({
+  useAuth: () => mockUseAuth(),
+}));
+
 describe("FormPersonalInformation", () => {
-  const renderFormPersonalInformation = () => {
-    return render(<FormPersonalInformation />);
+  const renderFormPersonalInformation = (props = {}) => {
+    // Mock the useAuth hook with test user data
+    mockUseAuth.mockReturnValue({
+      userInfo: {
+        id: "test-user-123",
+        username: "joe.snuffy",
+        email: "Joe.Snuffy.mil@army.mil",
+        firstName: "Joe",
+        lastName: "Snuffy",
+        designation: "Military",
+        agency: "III Corps",
+      },
+      getUserInfo: () => ({
+        id: "test-user-123",
+        username: "joe.snuffy",
+        email: "Joe.Snuffy.mil@army.mil",
+        firstName: "Joe",
+        lastName: "Snuffy",
+        designation: "Military",
+        agency: "III Corps",
+      }),
+      isAuthenticated: true,
+    });
+
+    return render(<FormPersonalInformation {...props} />);
   };
 
   describe("Basic Rendering", () => {

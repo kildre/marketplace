@@ -15,6 +15,12 @@ vi.mock("../../hooks/useAuth", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+// Mock the useRequests hook
+const mockUseRequests = vi.fn();
+vi.mock("../../hooks/useRequests", () => ({
+  useRequests: () => mockUseRequests(),
+}));
+
 describe("Sidebar", () => {
   const renderSidebarWithRouter = (
     initialRoute = "/",
@@ -47,6 +53,14 @@ describe("Sidebar", () => {
       hasPermission: () => true,
       logout: vi.fn(),
       login: vi.fn(),
+    });
+
+    // Mock the useRequests hook - different counts based on role
+    mockUseRequests.mockReturnValue({
+      requestsCount: userRole === AppRoles.APPROVER ? 34 : 0,
+      requests: [],
+      userId: "test@advana.mil",
+      refetch: vi.fn(),
     });
 
     return render(
@@ -86,6 +100,14 @@ describe("Sidebar", () => {
       hasPermission: () => true,
       logout: vi.fn(),
       login: vi.fn(),
+    });
+
+    // Mock the useRequests hook - different counts based on role
+    mockUseRequests.mockReturnValue({
+      requestsCount: userRole === AppRoles.APPROVER ? 34 : 0,
+      requests: [],
+      userId: "test@advana.mil",
+      refetch: vi.fn(),
     });
 
     return render(
@@ -138,7 +160,9 @@ describe("Sidebar", () => {
     expect(homeLink).toBeInTheDocument();
     expect(homeLink).toHaveTextContent("Requests");
 
-    const metricsLink = screen.getByRole("link", { name: /go to metrics page/i });
+    const metricsLink = screen.getByRole("link", {
+      name: /go to metrics page/i,
+    });
     expect(metricsLink).toBeInTheDocument();
     expect(metricsLink).toHaveTextContent("Metrics");
 
@@ -175,7 +199,9 @@ describe("Sidebar", () => {
     });
     expect(homeLink).toHaveAttribute("href", "/");
 
-    const metricsLink = screen.getByRole("link", { name: /go to metrics page/i });
+    const metricsLink = screen.getByRole("link", {
+      name: /go to metrics page/i,
+    });
     expect(metricsLink).toHaveAttribute("href", "/metrics");
   });
 
@@ -329,9 +355,14 @@ describe("Sidebar", () => {
 
   // New: verify active state on /metrics for APPROVER
   test("should apply active class correctly for APPROVER on metrics page", () => {
-    const { container } = renderSidebarWithRouter("/metrics", AppRoles.APPROVER);
+    const { container } = renderSidebarWithRouter(
+      "/metrics",
+      AppRoles.APPROVER
+    );
 
-    const metricsLink = screen.getByRole("link", { name: /go to metrics page/i });
+    const metricsLink = screen.getByRole("link", {
+      name: /go to metrics page/i,
+    });
     expect(metricsLink).toHaveAttribute("aria-current", "page");
 
     const listItems = container.querySelectorAll(".sidebar-nav__item");

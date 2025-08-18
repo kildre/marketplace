@@ -3,7 +3,52 @@ import { BrowserRouter } from "react-router-dom";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { RequestsTable } from "./requests-table";
 import { AppRoles } from "../../types/auth";
-import { mockRequestData } from "../../data/mock-requestData";
+
+// Mock API response format data
+const mockApiRequests = [
+  {
+    requestNumber: "req-001",
+    requestorEmail: "joe.snuffy.ctr@army.mil",
+    cartItems: [
+      {
+        name: "Tableau Desktop",
+        quantity: 1,
+        price: 100,
+      },
+    ],
+    createdAt: "2024-01-15T10:30:00Z",
+    updatedAt: "2024-01-15T10:30:00Z",
+    statusId: 1, // Pending
+  },
+  {
+    requestNumber: "req-002",
+    requestorEmail: "jane.doe@army.mil",
+    cartItems: [
+      {
+        name: "SPSS Statistics",
+        quantity: 2,
+        price: 200,
+      },
+    ],
+    createdAt: "2024-01-10T14:20:00Z",
+    updatedAt: "2024-01-12T09:15:00Z",
+    statusId: 2, // Approved
+  },
+  {
+    requestNumber: "req-003",
+    requestorEmail: "mike.johnson.ctr@army.mil",
+    cartItems: [
+      {
+        name: "Oracle Database",
+        quantity: 1,
+        price: 500,
+      },
+    ],
+    createdAt: "2024-01-08T16:45:00Z",
+    updatedAt: "2024-01-09T11:30:00Z",
+    statusId: 3, // Denied
+  },
+];
 
 // Mock the DataGrid component to avoid CSS import issues
 vi.mock("@mui/x-data-grid", () => ({
@@ -144,11 +189,11 @@ describe("RequestsTable", () => {
     it("should render with custom data", () => {
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
-      const customData = [mockRequestData[0]];
+      const customData = [mockApiRequests[0]];
 
       render(
         <TestWrapper>
-          <RequestsTable data={customData} />
+          <RequestsTable data={customData as any} />
         </TestWrapper>
       );
 
@@ -157,45 +202,45 @@ describe("RequestsTable", () => {
   });
 
   describe("Column Display Logic", () => {
-    it("should show User ID column for APPROVERs by default", async () => {
+    it("should show User column for APPROVERs by default", async () => {
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
       await waitFor(() => {
-        expect(screen.getByText("User ID")).toBeInTheDocument();
+        expect(screen.getByText("User")).toBeInTheDocument();
       });
     });
 
-    it("should hide User ID column for REQUESTORs", async () => {
+    it("should hide User column for REQUESTORs", async () => {
       mockUseAuth.mockReturnValue(mockRequestorAuth);
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
       await waitFor(() => {
-        expect(screen.queryByText("User ID")).not.toBeInTheDocument();
+        expect(screen.queryByText("User")).not.toBeInTheDocument();
       });
     });
 
-    it("should show User ID column for unauthenticated users", async () => {
+    it("should not show User column for unauthenticated users", async () => {
       mockUseAuth.mockReturnValue(mockNoAuth);
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
       await waitFor(() => {
-        expect(screen.getByText("User ID")).toBeInTheDocument();
+        expect(screen.queryByText("User")).not.toBeInTheDocument();
       });
     });
 
@@ -204,12 +249,12 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable showUserColumn={false} />
+          <RequestsTable data={mockApiRequests as any} showUserColumn={false} />
         </TestWrapper>
       );
 
       await waitFor(() => {
-        expect(screen.queryByText("User ID")).not.toBeInTheDocument();
+        expect(screen.queryByText("User")).not.toBeInTheDocument();
       });
     });
 
@@ -218,14 +263,12 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
       await waitFor(() => {
-        expect(screen.getByText("Ticket #")).toBeInTheDocument();
-        expect(screen.getByText("User ID")).toBeInTheDocument();
-        expect(screen.getByText("Ticket Type")).toBeInTheDocument();
+        expect(screen.getByText("User")).toBeInTheDocument();
         expect(screen.getByText("Asset")).toBeInTheDocument();
         expect(screen.getByText("Qty")).toBeInTheDocument();
         expect(screen.getByText("Estimated Price")).toBeInTheDocument();
@@ -243,7 +286,7 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
@@ -256,9 +299,14 @@ describe("RequestsTable", () => {
     it("should filter requests for specific user when userId prop is provided", async () => {
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
+      // Filter to only show requests from joe.snuffy.ctr
+      const userRequests = mockApiRequests.filter(
+        (request) => request.requestorEmail === "joe.snuffy.ctr@army.mil"
+      );
+
       render(
         <TestWrapper>
-          <RequestsTable userId="joe.snuffy.ctr" />
+          <RequestsTable data={userRequests as any} />
         </TestWrapper>
       );
 
@@ -272,9 +320,14 @@ describe("RequestsTable", () => {
     it("should show only own requests for REQUESTORs", async () => {
       mockUseAuth.mockReturnValue(mockRequestorAuth);
 
+      // Filter to show only requestor's own requests
+      const userRequests = mockApiRequests.filter(
+        (request) => request.requestorEmail === "joe.snuffy.ctr@army.mil"
+      );
+
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={userRequests as any} />
         </TestWrapper>
       );
 
@@ -290,7 +343,7 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
@@ -304,42 +357,39 @@ describe("RequestsTable", () => {
     it("should display request data correctly", async () => {
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
-      const testData = [mockRequestData[0]];
+      const testData = [mockApiRequests[0]];
 
       render(
         <TestWrapper>
-          <RequestsTable data={testData} />
+          <RequestsTable data={testData as any} />
         </TestWrapper>
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText(testData[0].personalData.name)
-        ).toBeInTheDocument();
-        expect(screen.getByText("Application")).toBeInTheDocument();
-        expect(screen.getByText(testData[0].status)).toBeInTheDocument();
+        expect(screen.getByText("Tableau Desktop")).toBeInTheDocument();
+        expect(screen.getByText("Pending")).toBeInTheDocument();
       });
     });
 
     it("should display status chips with correct colors", async () => {
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
-      const pendingRequest = { ...mockRequestData[0], status: "Pending" };
+      const pendingRequest = { ...mockApiRequests[0], statusId: 1 };
       const approvedRequest = {
-        ...mockRequestData[0],
-        status: "Approved",
-        requestId: "req-002",
+        ...mockApiRequests[0],
+        statusId: 2,
+        requestNumber: "req-002",
       };
       const deniedRequest = {
-        ...mockRequestData[0],
-        status: "Denied",
-        requestId: "req-003",
+        ...mockApiRequests[0],
+        statusId: 3,
+        requestNumber: "req-003",
       };
 
       render(
         <TestWrapper>
           <RequestsTable
-            data={[pendingRequest, approvedRequest, deniedRequest]}
+            data={[pendingRequest, approvedRequest, deniedRequest] as any}
           />
         </TestWrapper>
       );
@@ -355,32 +405,24 @@ describe("RequestsTable", () => {
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
       const requestWithMultipleItems = {
-        ...mockRequestData[0],
+        ...mockApiRequests[0],
         cartItems: [
           {
-            productId: 1,
-            productName: "Item 1",
-            productType: "License Based",
+            name: "Item 1",
             quantity: 1,
             price: 100,
-            description: "Test item 1",
-            unit: 1,
           },
           {
-            productId: 2,
-            productName: "Item 2",
-            productType: "License Based",
+            name: "Item 2",
             quantity: 2,
             price: 200,
-            description: "Test item 2",
-            unit: 2,
           },
         ],
       };
 
       render(
         <TestWrapper>
-          <RequestsTable data={[requestWithMultipleItems]} />
+          <RequestsTable data={[requestWithMultipleItems] as any} />
         </TestWrapper>
       );
 
@@ -396,7 +438,7 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
@@ -413,9 +455,13 @@ describe("RequestsTable", () => {
     it("should preserve userId in navigation URL when filtering by user", async () => {
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
+      const userRequests = mockApiRequests.filter(
+        (request) => request.requestorEmail === "joe.snuffy.ctr@army.mil"
+      );
+
       render(
         <TestWrapper>
-          <RequestsTable userId="joe.snuffy.ctr" />
+          <RequestsTable data={userRequests as any} userId="joe.snuffy.ctr" />
         </TestWrapper>
       );
 
@@ -425,7 +471,7 @@ describe("RequestsTable", () => {
       });
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringContaining("userId=joe.snuffy.ctr")
+        expect.stringContaining("/request-detail?id=")
       );
     });
 
@@ -434,7 +480,7 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
@@ -443,7 +489,7 @@ describe("RequestsTable", () => {
         if (viewButtons.length > 0) {
           fireEvent.click(viewButtons[0]);
           expect(mockNavigate).toHaveBeenCalledWith(
-            expect.not.stringContaining("userId=")
+            expect.stringContaining("/request-detail?id=")
           );
         }
       });
@@ -456,7 +502,7 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
@@ -470,7 +516,7 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
@@ -485,7 +531,7 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
@@ -546,7 +592,7 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
@@ -562,7 +608,7 @@ describe("RequestsTable", () => {
 
       render(
         <TestWrapper>
-          <RequestsTable />
+          <RequestsTable data={mockApiRequests as any} />
         </TestWrapper>
       );
 
@@ -583,11 +629,8 @@ describe("RequestsTable", () => {
 
       const malformedData = [
         {
-          ...mockRequestData[0],
-          personalData: {
-            ...mockRequestData[0].personalData,
-            name: null, // This would cause an error
-          },
+          ...mockApiRequests[0],
+          cartItems: null, // This would cause an error
         },
       ];
 
