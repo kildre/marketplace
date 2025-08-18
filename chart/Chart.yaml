@@ -2,8 +2,8 @@ apiVersion: v2
 name: advana-marketplace
 description: Template helm chart for a basic webapp
 type: application
-version: 1.0.0
-appVersion: 1.0.0
+version: 1.0.4
+appVersion: 1.0.4
 
 dependencies:
   - name: advana-library
