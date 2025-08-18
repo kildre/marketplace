@@ -116,6 +116,12 @@ export const useSubmitRequest = () => {
   return useMutation({
     mutationFn: async (submissionData: SubmissionData) => {
       // Simulate API call - replace with actual API endpoint
+      // eslint-disable-next-line no-console
+      console.log("=== FORM SUBMISSION DATA ===");
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(submissionData, null, 2));
+      // eslint-disable-next-line no-console
+      console.log("=============================");
 
       // Here you would make the actual API call
       // const response = await fetch('/api/requests', {

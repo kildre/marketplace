@@ -148,6 +148,13 @@ export const EnhancedMockKeycloakProvider: React.FC<MockKeycloakProviderProps> =
     AuthService.storeTokens(mockJwtToken, 'mock-refresh-token');
     const userInfo = AuthService.createUserInfoFromToken(mockTokenData);
     AuthService.storeUserInfo(userInfo);
+
+    // eslint-disable-next-line no-console
+    console.log(`🎭 Mock user switched to: ${userType}`, {
+      user: userData,
+      appRoles: userInfo.roles,
+      keycloakRoles: userInfo.keycloakRoles,
+    });
   };
 
   // Initialize mock data on mount
@@ -165,12 +172,17 @@ export const EnhancedMockKeycloakProvider: React.FC<MockKeycloakProviderProps> =
     tokenParsed: mockTokenData,
     refreshToken: 'mock-refresh-token',
     login: async () => {
-      // no-op in mock
+      // eslint-disable-next-line no-console
+      console.log('🎭 Mock login called');
     },
     logout: async () => {
+      // eslint-disable-next-line no-console
+      console.log('🎭 Mock logout called');
       AuthService.clearStoredAuth();
     },
     updateToken: async () => {
+      // eslint-disable-next-line no-console
+      console.log('🎭 Mock token update called');
       switchMockUser(currentUser); // Refresh the mock data
       return true;
     },
@@ -297,7 +309,7 @@ export const MockUserSwitcher: React.FC = () => {
         <select 
           value={currentMockUser} 
           onChange={(e) => switchMockUser(e.target.value as keyof typeof mockUserConfigurations)}
-          style={{ marginLeft: '8px', fontSize: '12px', width: '200px' }}
+          style={{ marginLeft: '8px', fontSize: '12px', width: '100px' }}
         >
           {availableUsers.map(user => (
             <option key={user} value={user}>

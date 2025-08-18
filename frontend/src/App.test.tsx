@@ -38,7 +38,7 @@ vi.mock("./pages/cart/cart", () => ({
 }));
 
 vi.mock("./pages/requests/requests", () => ({
-  Requests: () => <div data-testid="requests">Requests</div>
+  Requests: () => <div data-testid="requests">Requests</div>,
 }));
 
 vi.mock("./pages/request-detail/request-detail", () => ({
@@ -81,7 +81,7 @@ vi.mock("./services/keycloakService", () => ({
 // Mock the AdvanaMenu component from @advana/platform-ui
 vi.mock("@advana/platform-ui/dist/AdvanaMenu", () => ({
   default: ({ menuLogoSection }: { menuLogoSection: React.ReactNode }) => (
-    <div data-testid="advana-menu" style={{ height: '180px' }}>
+    <div data-testid="advana-menu">
       <div data-testid="menu-logo-section">{menuLogoSection}</div>
     </div>
   ),
@@ -153,7 +153,18 @@ describe("App", () => {
     expect(screen.getByTestId("custom-menu-logo-section")).toBeInTheDocument();
     expect(screen.getByTestId("sidebar")).toBeInTheDocument();
     expect(screen.getByTestId("footer")).toBeInTheDocument();
-    // RoleDebugInfo is not rendered in the current App implementation
+    expect(screen.getByTestId("role-debug-info")).toBeInTheDocument();
+  });
+
+  test("should render CUI banner", () => {
+    const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
+    
+    const cuiBanner = container.querySelector(".cui-banner");
+    expect(cuiBanner).toBeInTheDocument();
+    
+    const cuiText = container.querySelector(".cui-banner__text");
+    expect(cuiText).toBeInTheDocument();
+    expect(cuiText).toHaveTextContent("CUI");
   });
 
   test("should render AdvanaMenu with Service Desk styling", () => {
@@ -430,9 +441,9 @@ describe("App", () => {
     vi.unstubAllEnvs();
   });
 
-  test("should not render role debug info component when disabled", () => {
+  test("should render role debug info component", () => {
     renderAppWithRouter("/", AppRoles.REQUESTOR);
 
-    expect(screen.queryByTestId("role-debug-info")).not.toBeInTheDocument();
+    expect(screen.getByTestId("role-debug-info")).toBeInTheDocument();
   });
 });

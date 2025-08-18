@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { mockRequestData } from "../../data/mock-requestData";
 import { useAuth } from "../../hooks/useAuth";
 import { RequestsTableProps } from "../../interfaces/interfaceStore";
+import { RequestsDebugPanel } from "../debug/RequestsDebugPanel";
 
 // Transform Product data to RequestData format
 const getStatusColor = (
@@ -253,11 +254,11 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           }}
         />
       </Paper>
-      {/* <RequestsDebugPanel 
+      <RequestsDebugPanel 
         userId={userId}
         effectiveUserId={effectiveUserId}
         filteredRequestsCount={requests.length}
-      /> */}
+      />
     </div>
   );
 };

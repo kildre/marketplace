@@ -3,7 +3,13 @@ import { AuthService } from "./authService";
 
 // Debug environment variables in development
 if (import.meta.env.DEV) {
-  // removed console.log to reduce noise
+  // eslint-disable-next-line no-console
+  console.log('Keycloak Environment Variables:', {
+    url: import.meta.env.VITE_KEYCLOAK_URL,
+    realm: import.meta.env.VITE_KEYCLOAK_REALM,
+    clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
+    bypassAuth: import.meta.env.VITE_BYPASS_AUTH
+  });
 }
 
 const keycloakConfig: KeycloakConfig = {
@@ -72,11 +78,15 @@ export class KeycloakService {
   private setupEventListeners(): void {
     // Listen for successful authentication
     this.keycloak.onAuthSuccess = () => {
+      // eslint-disable-next-line no-console
+      console.log('Keycloak authentication successful');
       this.handleTokenUpdate();
     };
 
     // Listen for token refresh
     this.keycloak.onAuthRefreshSuccess = () => {
+      // eslint-disable-next-line no-console
+      console.log('Keycloak token refreshed successfully');
       this.handleTokenUpdate();
     };
 
@@ -89,12 +99,16 @@ export class KeycloakService {
 
     // Listen for logout
     this.keycloak.onAuthLogout = () => {
+      // eslint-disable-next-line no-console
+      console.log('Keycloak logout detected');
       AuthService.clearStoredAuth();
       this.clearRefreshTimer();
     };
 
     // Listen for token expiration
     this.keycloak.onTokenExpired = () => {
+      // eslint-disable-next-line no-console
+      console.log('Keycloak token expired, attempting refresh');
       this.refreshToken();
     };
   }
@@ -104,6 +118,20 @@ export class KeycloakService {
    */
   private handleTokenUpdate(): void {
     if (this.keycloak.token && this.keycloak.tokenParsed) {
+      // Log token information for debugging (production-safe)
+      // eslint-disable-next-line no-console
+      console.log('🔐 Keycloak JWT Token Captured:', {
+        token: this.keycloak.token,
+        tokenLength: this.keycloak.token.length,
+        expiresIn: this.keycloak.tokenParsed.exp ? 
+          new Date(this.keycloak.tokenParsed.exp * 1000).toISOString() : 'Unknown',
+        user: this.keycloak.tokenParsed.preferred_username,
+        email: this.keycloak.tokenParsed.email,
+        realmRoles: this.keycloak.tokenParsed.realm_access?.roles || [],
+        resourceAccess: this.keycloak.tokenParsed.resource_access || {},
+        marketplaceRoles: this.keycloak.tokenParsed.resource_access?.marketplace?.roles || []
+      });
+
       // Store tokens
       AuthService.storeTokens(this.keycloak.token, this.keycloak.refreshToken);
 
@@ -113,6 +141,9 @@ export class KeycloakService {
 
       // Set up automatic token refresh
       this.setupTokenRefresh();
+
+      // eslint-disable-next-line no-console
+      console.log('User authenticated with roles:', userInfo.roles);
     }
   }
 
