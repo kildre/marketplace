@@ -7,6 +7,7 @@ import { RequestsTableProps } from "../../interfaces/interfaceStore";
 // import { RequestsDebugPanel } from "../debug/RequestsDebugPanel"; // Uncomment to use debug panel with userId and component
 import { calculateEstimatedCost } from "../../utils/helper-functions";
 import { mockProducts } from "../../data/mock-productData";
+import { getApiUrl } from "@/utils/api-config";
 
 // Transform Product data to RequestData format
 const getStatusColor = (
@@ -49,7 +50,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
       if (currentIsApprover) {
         // Approvers can see all requests, pass their email
-        response = await window.fetch("/api/requests/viewAll", {
+        response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -60,15 +61,18 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         });
       } else {
         // Requestors see only their own requests
-        response = await window.fetch("/api/requests/viewForRequestor", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userEmail: currentUserInfo.email,
-          }),
-        });
+        response = await window.fetch(
+          getApiUrl("/api/requests/viewForRequestor"),
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userEmail: currentUserInfo.email,
+            }),
+          }
+        );
       }
 
       if (response.ok) {

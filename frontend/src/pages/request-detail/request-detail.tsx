@@ -13,6 +13,7 @@ import {
   getUserNameFromEmail,
 } from "@/utils/helper-functions";
 import { mockProducts } from "@/data/mock-productData";
+import { getApiUrl } from "@/utils/api-config";
 
 // Transform API response to RequestData format (similar to useRequestsData)
 const transformApiRequestToRequestData = (
@@ -172,7 +173,7 @@ export const RequestDetail = (): React.ReactElement => {
 
         if (hasRole(AppRoles.APPROVER)) {
           // Approvers can see all requests
-          response = await window.fetch("/api/requests/viewAll", {
+          response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -183,15 +184,18 @@ export const RequestDetail = (): React.ReactElement => {
           });
         } else {
           // Requestors see only their own requests
-          response = await window.fetch("/api/requests/viewForRequestor", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userEmail: userInfo.email,
-            }),
-          });
+          response = await window.fetch(
+            getApiUrl("/api/requests/viewForRequestor"),
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                userEmail: userInfo.email,
+              }),
+            }
+          );
         }
 
         if (response.ok) {
@@ -313,7 +317,7 @@ export const RequestDetail = (): React.ReactElement => {
     const updateRequest = async (statusId: number) => {
       const userInfo = getUserInfo();
       const computedDecisionNumber = generateRequestId(12);
-      const response = await window.fetch("/api/decisions", {
+      const response = await window.fetch(getApiUrl("/api/decisions"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

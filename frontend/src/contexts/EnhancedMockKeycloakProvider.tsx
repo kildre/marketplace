@@ -387,8 +387,8 @@ export const MockUserSwitcher: React.FC = () => {
               .value as keyof typeof mockUserConfigurations;
             switchMockUser(newUserType);
 
-            // Navigate to home page when user switches (in development mode)
-            if (import.meta.env.DEV) {
+            // Navigate to home page when user switches (in bypass auth mode)
+            if (import.meta.env.VITE_BYPASS_AUTH === "true") {
               // eslint-disable-next-line no-console
               console.log(
                 `🎭 User switched to: ${newUserType}, navigating to home page`

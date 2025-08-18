@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PageTitle } from "../../components/page-title/page-title";
 import { useAuth } from "@/hooks/useAuth";
+import { getApiUrl } from "@/utils/api-config";
 
 interface MetricsSummaryResponse {
   totalUsers: number;
@@ -16,9 +17,7 @@ interface PendingRequestsResponse {
 }
 
 const fetchMetricsSummary = async (): Promise<MetricsSummaryResponse> => {
-  const base = (import.meta.env.VITE_API_BASE_URL || "").toString().trim();
-  const prefix = base ? base.replace(/\/+$/, "") : ""; // strip trailing slashes
-  const endpoint = `${prefix}/api/report/summary`;
+  const endpoint = getApiUrl("/api/report/summary");
   const res = await globalThis.fetch(endpoint, {
     headers: { Accept: "application/json" },
     credentials: "include",
@@ -32,9 +31,7 @@ const fetchMetricsSummary = async (): Promise<MetricsSummaryResponse> => {
 const fetchPendingRequestsCount = async (
   userEmail: string
 ): Promise<number> => {
-  const base = (import.meta.env.VITE_API_BASE_URL || "").toString().trim();
-  const prefix = base ? base.replace(/\/+$/, "") : ""; // strip trailing slashes
-  const endpoint = `${prefix}/api/requests/viewPending`;
+  const endpoint = getApiUrl("/api/requests/viewPending");
   const res = await globalThis.fetch(endpoint, {
     method: "POST",
     headers: {

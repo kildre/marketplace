@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { useRequestsRefresh } from "./useRequestsRefresh";
+import { getApiUrl } from "@/utils/api-config";
 
 export const useRequests = (
   overrideUserId?: string,
@@ -71,7 +72,7 @@ export const useRequests = (
 
       if (currentIsApprover) {
         // Approvers can see all requests
-        response = await window.fetch("/api/requests/viewAll", {
+        response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -82,15 +83,18 @@ export const useRequests = (
         });
       } else if (currentIsRequestor) {
         // Requestors see only their own requests
-        response = await window.fetch("/api/requests/viewForRequestor", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userEmail: actualUserId || userInfo.email, // Use actualUserId if available
-          }),
-        });
+        response = await window.fetch(
+          getApiUrl("/api/requests/viewForRequestor"),
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userEmail: actualUserId || userInfo.email, // Use actualUserId if available
+            }),
+          }
+        );
       } else {
         setAllRequests([]);
         return;

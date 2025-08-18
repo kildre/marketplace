@@ -1,7 +1,5 @@
 import { AuthService } from "./authService";
-
-// Base configuration for API calls
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+import { getApiUrl } from "../utils/api-config";
 
 // Interface definitions for API requests and responses
 export interface SubmitRequestApiRequest {
@@ -122,13 +120,13 @@ export class ApiService {
       const headers = this.getAuthHeaders();
 
       // eslint-disable-next-line no-console
-      console.log("Submitting request to:", `${API_BASE_URL}/api/requests`);
+      console.log("Submitting request to:", getApiUrl("/api/requests"));
       // eslint-disable-next-line no-console
       console.log("Request data:", requestData);
       // eslint-disable-next-line no-console
       console.log("Headers:", headers);
 
-      const response = await window.fetch(`${API_BASE_URL}/api/requests`, {
+      const response = await window.fetch(getApiUrl("/api/requests"), {
         method: "POST",
         headers: headers,
         body: JSON.stringify(requestData),
@@ -167,7 +165,7 @@ export class ApiService {
       const requestData: ViewRequestsApiRequest = { userEmail };
 
       const response = await window.fetch(
-        `${API_BASE_URL}/api/requests/viewForRequestor`,
+        getApiUrl("/api/requests/viewForRequestor"),
         {
           method: "POST",
           headers: this.getAuthHeaders(),
@@ -193,7 +191,7 @@ export class ApiService {
       const requestData: ViewRequestsApiRequest = { userEmail };
 
       const response = await window.fetch(
-        `${API_BASE_URL}/api/requests/viewPending`,
+        getApiUrl("/api/requests/viewPending"),
         {
           method: "POST",
           headers: this.getAuthHeaders(),
@@ -218,14 +216,11 @@ export class ApiService {
     try {
       const requestData: ViewRequestsApiRequest = { userEmail };
 
-      const response = await window.fetch(
-        `${API_BASE_URL}/api/requests/viewAll`,
-        {
-          method: "POST",
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify(requestData),
-        }
-      );
+      const response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(requestData),
+      });
 
       return this.handleResponse<ViewRequestsApiResponse>(response);
     } catch (error) {
