@@ -75,10 +75,16 @@ const mockSubmitMutation = {
 
 const mockUseFormData = vi.fn();
 const mockUseSubmitRequest = vi.fn();
+const mockMarkSubmissionAttempt = vi.fn();
 
 vi.mock("../../hooks/useFormQueries", () => ({
   useFormData: () => mockUseFormData(),
   useSubmitRequest: () => mockUseSubmitRequest(),
+  useSubmissionAttempts: () => ({
+    hasAttemptedSubmission: false,
+    markSubmissionAttempt: mockMarkSubmissionAttempt,
+    resetSubmissionAttempts: vi.fn(),
+  }),
 }));
 
 describe("FormSubmitRequest", () => {
@@ -437,6 +443,20 @@ describe("FormSubmitRequest", () => {
       expect(typeof secondCall.requestId).toBe("string");
       expect(firstCall.requestId).toMatch(/^[A-Za-z0-9]+-[0-9a-f]+$/);
       expect(secondCall.requestId).toMatch(/^[A-Za-z0-9]+-[0-9a-f]+$/);
+    });
+
+    test("should mark submission attempt when form is submitted", async () => {
+      renderFormSubmitRequest({ organization: "Army" });
+
+      const checkbox = screen.getByRole("checkbox");
+      await user.click(checkbox);
+
+      const submitButton = screen.getByRole("button", {
+        name: /submit request/i,
+      });
+      await user.click(submitButton);
+
+      expect(mockMarkSubmissionAttempt).toHaveBeenCalled();
     });
   });
 

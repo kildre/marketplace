@@ -11,6 +11,7 @@ import {
 export const formKeys = {
   organization: ["form", "organization"] as const,
   requestDetails: ["form", "requestDetails"] as const,
+  submissionAttempts: ["form", "submissionAttempts"] as const,
   all: ["form"] as const,
 };
 
@@ -188,5 +189,38 @@ export const useFormData = () => {
   return {
     ...organizationData,
     ...requestDetailsData,
+  };
+};
+
+// Hook for tracking submission attempts
+export const useSubmissionAttempts = () => {
+  const queryClient = useQueryClient();
+
+  const {
+    data: submissionData = { hasAttempted: false },
+  } = useQuery({
+    queryKey: formKeys.submissionAttempts,
+    queryFn: () => ({ hasAttempted: false }),
+    staleTime: Infinity,
+  });
+
+  const markSubmissionAttempt = useMutation({
+    mutationFn: async () => ({ hasAttempted: true }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(formKeys.submissionAttempts, data);
+    },
+  });
+
+  const resetSubmissionAttempts = useMutation({
+    mutationFn: async () => ({ hasAttempted: false }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(formKeys.submissionAttempts, data);
+    },
+  });
+
+  return {
+    hasAttemptedSubmission: submissionData.hasAttempted,
+    markSubmissionAttempt: markSubmissionAttempt.mutate,
+    resetSubmissionAttempts: resetSubmissionAttempts.mutate,
   };
 };

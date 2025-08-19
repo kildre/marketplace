@@ -12,6 +12,7 @@ import { organizationOptions } from "../../data/organizationOptionsData";
 import {
   useOrganizationForm,
   useRequestDetailsForm,
+  useSubmissionAttempts,
 } from "../../hooks/useFormQueries";
 import { FormRequestDetailsProps } from "../../interfaces";
 
@@ -29,6 +30,8 @@ export const FormRequestDetails = ({
     useCaseDescription,
     updateRequestDetails,
   } = useRequestDetailsForm();
+
+  const { hasAttemptedSubmission } = useSubmissionAttempts();
 
   // Use viewData for view mode, form data for edit mode
   const data =
@@ -83,10 +86,11 @@ export const FormRequestDetails = ({
           Please select an organization that this request is on behalf of.
         </Alert>
       )}
-      {/* Display warning if "Other" is selected but no organization input - only in edit mode */}
+      {/* Display warning if "Other" is selected but no organization input - only in edit mode and after submission attempt */}
       {!isViewMode &&
         data.organization === "Other" &&
-        data.organizationOther === "" && (
+        data.organizationOther === "" &&
+        hasAttemptedSubmission && (
           <Alert severity="warning">
             Please specify the organization you are requesting on behalf of.
           </Alert>
@@ -96,6 +100,7 @@ export const FormRequestDetails = ({
           expandIcon={<ExpandMoreIcon />}
           aria-controls="request-details-content"
           id="request-details-header"
+          component="h2"
         >
           <span>Request Details</span>
         </AccordionSummary>
@@ -137,8 +142,8 @@ export const FormRequestDetails = ({
               <label htmlFor="organization-other">
                 {isViewMode
                   ? "Other Organization"
-                  : "Please specify the organization you are requesting on behalf of"}
-                <span style={{ color: "red" }}> *</span>
+                  : "Please specify the organization you are requesting on behalf of."}
+                {!isViewMode && <span style={{ color: 'red' }}>*</span>}
               </label>
               <TextField
                 required={!isViewMode}
@@ -150,6 +155,12 @@ export const FormRequestDetails = ({
                 size="small"
                 className="form-request-details__organization-other"
                 value={data.organizationOther}
+                error={!isViewMode && data.organization === "Other" && data.organizationOther === "" && hasAttemptedSubmission}
+                helperText={
+                  !isViewMode && data.organization === "Other" && data.organizationOther === "" && hasAttemptedSubmission
+                    ? "This field is required when 'Other' is selected"
+                    : ""
+                }
                 onChange={
                   isViewMode ? undefined : handleOrganizationOtherChange
                 }
