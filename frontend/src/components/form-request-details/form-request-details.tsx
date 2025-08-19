@@ -142,7 +142,7 @@ export const FormRequestDetails = ({
               <label htmlFor="organization-other">
                 {isViewMode
                   ? "Other Organization"
-                  : "Please specify the organization you are requesting on behalf of."}
+                  : "Please specify the organization you are requesting on behalf of"}
                 {!isViewMode && <span style={{ color: 'red' }}>*</span>}
               </label>
               <TextField
