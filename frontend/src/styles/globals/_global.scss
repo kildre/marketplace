@@ -30,6 +30,15 @@ body {
   color: $primary-color;
 }
 
+// Ensure all Material-UI input fields have white backgrounds
+.MuiInputBase-root {
+  background-color: white !important;
+}
+
+.MuiTextField-root .MuiInputBase-root {
+  background-color: white !important;
+}
+
 // Override AdvanaMenu styles to remove fixed positioning and margin-top
 // Target the pageTitleRow style that AdvanaMenu uses internally
 div[style*="position: fixed"][style*="margin-top: 30px"] {

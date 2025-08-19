@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Checkbox from "@mui/material/Checkbox";
 import { useCart } from "../../contexts/CartContext";
-import { useFormData, useSubmitRequest } from "../../hooks/useFormQueries";
+import { useFormData, useSubmitRequest, useSubmissionAttempts } from "../../hooks/useFormQueries";
 import { SubmissionData } from "../../interfaces";
 import { generateRequestId } from "../../utils/helper-functions";
 
@@ -12,6 +12,7 @@ export const FormSubmitRequest = (): React.ReactElement => {
   const { cartItems, clearCart } = useCart();
   const formData = useFormData();
   const submitMutation = useSubmitRequest();
+  const { markSubmissionAttempt } = useSubmissionAttempts();
 
   // Check if form is valid for submission
   const isFormValid = React.useMemo(() => {
@@ -46,6 +47,9 @@ export const FormSubmitRequest = (): React.ReactElement => {
 
   const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
+
+    // Mark that a submission attempt has been made
+    markSubmissionAttempt();
 
     if (!isFormValid) return;
 

@@ -536,23 +536,44 @@ describe("FormSelectedApplications", () => {
       expect(updateButton).not.toBeInTheDocument();
     });
 
-    test("should show Current button when quantity unchanged", () => {
+    test("should show Remove button by default when quantity unchanged", () => {
       renderFormSelectedApplications();
 
-      // Look for any button that contains "Current" text instead of specific aria-label
-      const currentButton = screen.queryByText("Current");
-      if (currentButton) {
-        expect(currentButton).toBeInTheDocument();
-        expect(currentButton).toHaveTextContent("Current");
-        expect(currentButton).toBeDisabled();
-      } else {
-        // If no Current button exists, verify that quantities match cart quantities
-        // This indicates the component is working correctly even without explicit Current button
-        const quantityInput1 = screen.getByDisplayValue("2");
-        const quantityInput2 = screen.getByDisplayValue("1");
-        expect(quantityInput1).toBeInTheDocument();
-        expect(quantityInput2).toBeInTheDocument();
-      }
+      const removeButton = screen.getByRole("button", {
+        name: "Remove Test Product 1 from cart",
+      });
+      expect(removeButton).toBeInTheDocument();
+      expect(removeButton).toHaveTextContent("Remove");
+      expect(removeButton).not.toBeDisabled();
+      
+      // Update button should not be visible when quantity hasn't changed
+      const updateButton = screen.queryByRole("button", {
+        name: "Update Test Product 1",
+      });
+      expect(updateButton).not.toBeInTheDocument();
+    });
+
+    test("should show both Update and Remove buttons when quantity changes", () => {
+      renderFormSelectedApplications();
+
+      const quantityInput = screen.getByDisplayValue("2");
+
+      act(() => {
+        fireEvent.change(quantityInput, { target: { value: "5" } });
+      });
+
+      // Both buttons should be present
+      const updateButton = screen.getByRole("button", {
+        name: "Update Test Product 1",
+      });
+      const removeButton = screen.getByRole("button", {
+        name: "Remove Test Product 1 from cart",
+      });
+
+      expect(updateButton).toBeInTheDocument();
+      expect(removeButton).toBeInTheDocument();
+      expect(updateButton).toHaveTextContent("Update");
+      expect(removeButton).toHaveTextContent("Remove");
     });
 
     test("should call updateCartQuantity when Update button is clicked", () => {

@@ -12,6 +12,7 @@ import { organizationOptions } from "../../data/organizationOptionsData";
 import {
   useOrganizationForm,
   useRequestDetailsForm,
+  useSubmissionAttempts,
 } from "../../hooks/useFormQueries";
 import { FormRequestDetailsProps } from "../../interfaces";
 
@@ -29,6 +30,8 @@ export const FormRequestDetails = ({
     useCaseDescription,
     updateRequestDetails,
   } = useRequestDetailsForm();
+
+  const { hasAttemptedSubmission } = useSubmissionAttempts();
 
   // Use viewData for view mode, form data for edit mode
   const data =
@@ -80,15 +83,16 @@ export const FormRequestDetails = ({
       {/* Display warning if organization is not selected - only in edit mode */}
       {!isViewMode && data.organization === "" && (
         <Alert severity="warning">
-          Please select an organization that this request is on behalf of.
+          Please select an organization that this request is on behalf of
         </Alert>
       )}
-      {/* Display warning if "Other" is selected but no organization input - only in edit mode */}
+      {/* Display warning if "Other" is selected but no organization input - only in edit mode and after submission attempt */}
       {!isViewMode &&
         data.organization === "Other" &&
-        data.organizationOther === "" && (
+        data.organizationOther === "" &&
+        hasAttemptedSubmission && (
           <Alert severity="warning">
-            Please specify the organization you are requesting on behalf of.
+            Please specify the organization you are requesting on behalf of
           </Alert>
         )}
       <Accordion defaultExpanded>
@@ -96,6 +100,7 @@ export const FormRequestDetails = ({
           expandIcon={<ExpandMoreIcon />}
           aria-controls="request-details-content"
           id="request-details-header"
+          component="h2"
         >
           <span>Request Details</span>
         </AccordionSummary>
@@ -105,7 +110,7 @@ export const FormRequestDetails = ({
               Organization{!isViewMode && <span>*</span>}
             </label>
             {!isViewMode && (
-              <p>Select the organization that this request is on behalf of.</p>
+              <p>Select the organization that this request is on behalf of</p>
             )}
             <Select
               displayEmpty
@@ -138,7 +143,7 @@ export const FormRequestDetails = ({
                 {isViewMode
                   ? "Other Organization"
                   : "Please specify the organization you are requesting on behalf of"}
-                <span style={{ color: "red" }}> *</span>
+                {!isViewMode && <span style={{ color: 'red' }}>*</span>}
               </label>
               <TextField
                 required={!isViewMode}
@@ -150,6 +155,12 @@ export const FormRequestDetails = ({
                 size="small"
                 className="form-request-details__organization-other"
                 value={data.organizationOther}
+                error={!isViewMode && data.organization === "Other" && data.organizationOther === "" && hasAttemptedSubmission}
+                helperText={
+                  !isViewMode && data.organization === "Other" && data.organizationOther === "" && hasAttemptedSubmission
+                    ? "This field is required when 'Other' is selected"
+                    : ""
+                }
                 onChange={
                   isViewMode ? undefined : handleOrganizationOtherChange
                 }
