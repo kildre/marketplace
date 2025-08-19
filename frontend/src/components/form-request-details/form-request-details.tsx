@@ -92,7 +92,7 @@ export const FormRequestDetails = ({
         data.organizationOther === "" &&
         hasAttemptedSubmission && (
           <Alert severity="warning">
-            Please specify the organization you are requesting on behalf of.
+            Please specify the organization you are requesting on behalf of
           </Alert>
         )}
       <Accordion defaultExpanded>
@@ -110,7 +110,7 @@ export const FormRequestDetails = ({
               Organization{!isViewMode && <span>*</span>}
             </label>
             {!isViewMode && (
-              <p>Select the organization that this request is on behalf of.</p>
+              <p>Select the organization that this request is on behalf of</p>
             )}
             <Select
               displayEmpty
