@@ -83,7 +83,7 @@ export const FormRequestDetails = ({
       {/* Display warning if organization is not selected - only in edit mode */}
       {!isViewMode && data.organization === "" && (
         <Alert severity="warning">
-          Please select an organization that this request is on behalf of.
+          Please select an organization that this request is on behalf of
         </Alert>
       )}
       {/* Display warning if "Other" is selected but no organization input - only in edit mode and after submission attempt */}
