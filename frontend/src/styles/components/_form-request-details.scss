@@ -40,15 +40,10 @@
   .MuiSelect-root,
   .MuiInputBase-root {
     border-radius: 8px;
-    background-color: white;
   }
 
   .MuiTextField-root {
     width: 100%;
-
-    .MuiInputBase-root {
-      background-color: white;
-    }
   }
 
   .MuiPaper-root {
@@ -80,4 +75,5 @@
   .form-request-details__poc-detail-item {
     width: calc(1 / 3 * 100% - 0.5rem);
   }
+
 }
