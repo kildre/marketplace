@@ -91,6 +91,8 @@ describe("RequestDetailView", () => {
     },
     submittedAt: "2024-01-15T10:30:00Z",
     statusReason: "Initial submission for review",
+    createdAt: "2024-01-15T09:00:00Z",
+    updatedAt: "2024-01-15T10:30:00Z",
   };
 
   // Mock event handlers
@@ -165,9 +167,7 @@ describe("RequestDetailView", () => {
 
       expect(screen.getByText("Approval Status")).toBeInTheDocument();
       expect(screen.getByLabelText("Reasoning")).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: mockRequest.status })
-      ).toBeInTheDocument();
+      expect(screen.getByText(mockRequest.status)).toBeInTheDocument();
     });
   });
 
@@ -292,25 +292,21 @@ describe("RequestDetailView", () => {
     });
   });
 
-  describe("Status Button", () => {
+  describe("Status Display", () => {
     test("should display the correct status", () => {
       renderRequestDetailView();
 
-      const statusButton = screen.getByRole("button", {
-        name: mockRequest.status,
-      });
-      expect(statusButton).toBeInTheDocument();
-      expect(statusButton).toBeDisabled();
+      const statusText = screen.getByText(mockRequest.status);
+      expect(statusText).toBeInTheDocument();
     });
 
-    test("should apply the correct CSS class", () => {
-      const customClass = "button--approved";
-      renderRequestDetailView({ buttonClass: customClass });
+    test("should apply the correct chip color", () => {
+      renderRequestDetailView();
 
-      const statusButton = screen.getByRole("button", {
-        name: mockRequest.status,
-      });
-      expect(statusButton).toHaveClass(customClass);
+      const statusText = screen.getByText(mockRequest.status);
+      expect(statusText).toBeInTheDocument();
+      // The chip should be present in the DOM with the status text
+      expect(statusText.closest(".MuiChip-root")).toBeInTheDocument();
     });
 
     test("should handle different status values", () => {
@@ -322,9 +318,7 @@ describe("RequestDetailView", () => {
           request: requestWithStatus,
         });
 
-        expect(
-          screen.getByRole("button", { name: status })
-        ).toBeInTheDocument();
+        expect(screen.getByText(status)).toBeInTheDocument();
         unmount();
       });
     });
@@ -496,6 +490,8 @@ describe("RequestDetailView", () => {
         },
         submittedAt: "2024-01-01T00:00:00Z",
         statusReason: "",
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
       };
 
       expect(() =>
@@ -566,13 +562,11 @@ describe("RequestDetailView", () => {
 
       const acceptButton = screen.getByRole("button", { name: "Accept" });
       const rejectButton = screen.getByRole("button", { name: "Reject" });
-      const statusButton = screen.getByRole("button", {
-        name: mockRequest.status,
-      });
+      const statusText = screen.getByText(mockRequest.status);
 
       expect(acceptButton).toBeInTheDocument();
       expect(rejectButton).toBeInTheDocument();
-      expect(statusButton).toBeInTheDocument();
+      expect(statusText).toBeInTheDocument();
     });
 
     test("should be accessible in view mode", async () => {

@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiService } from "../services/apiService";
+import { useRequestsRefresh } from "./useRequestsRefresh";
 import {
   OrganizationFormData,
   RequestDetailsFormData,
@@ -112,26 +114,33 @@ export const useRequestDetailsForm = () => {
 // Hook for form submission
 export const useSubmitRequest = () => {
   const queryClient = useQueryClient();
+  const { triggerRefresh } = useRequestsRefresh();
 
   return useMutation({
     mutationFn: async (submissionData: SubmissionData) => {
-      // Simulate API call - replace with actual API endpoint
-      // eslint-disable-next-line no-console
-      console.log("=== FORM SUBMISSION DATA ===");
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(submissionData, null, 2));
-      // eslint-disable-next-line no-console
-      console.log("=============================");
+      // Transform frontend data to backend format
+      const apiRequest = {
+        requestNumber: submissionData.requestId,
+        requestorEmail: submissionData.personalData.email,
+        designation: submissionData.personalData.designation,
+        agency: submissionData.personalData.agency,
+        organization: submissionData.requestDetails.organization,
+        otherOrganization:
+          submissionData.requestDetails.organizationOther || "",
+        pointOfContact: submissionData.requestDetails.pocName,
+        email: submissionData.requestDetails.pocEmail,
+        phoneNumber: submissionData.requestDetails.pocPhone,
+        estimatedRom: submissionData.summary.estimatedROM || "",
+        requestedToolName: "", // This might need to be computed from cart items
+        description: submissionData.requestDetails.useCaseDescription,
+        cartItems: submissionData.cartItems.map((item) => ({
+          name: item.product.name,
+          quantity: item.quantity,
+        })),
+      };
 
-      // Here you would make the actual API call
-      // const response = await fetch('/api/requests', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(submissionData),
-      // });
-      // return response.json();
-
-      return submissionData;
+      // Submit to backend API
+      return await ApiService.submitRequest(apiRequest);
     },
     onSuccess: () => {
       // Clear form data after successful submission
@@ -145,6 +154,9 @@ export const useSubmitRequest = () => {
         pocEmail: "",
         useCaseDescription: "",
       });
+
+      // Trigger global refresh to update sidebar counter
+      triggerRefresh();
     },
   });
 };

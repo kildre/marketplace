@@ -1,6 +1,8 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PageTitle } from "../../components/page-title/page-title";
+import { useAuth } from "@/hooks/useAuth";
+import { getApiUrl } from "@/utils/api-config";
 
 interface MetricsSummaryResponse {
   totalUsers: number;
@@ -9,10 +11,13 @@ interface MetricsSummaryResponse {
   errMsg?: string | null;
 }
 
+interface PendingRequestsResponse {
+  requests: Array<Record<string, unknown>>;
+  errMsg?: string | null;
+}
+
 const fetchMetricsSummary = async (): Promise<MetricsSummaryResponse> => {
-  const base = (import.meta.env.VITE_API_BASE_URL || "").toString().trim();
-  const prefix = base ? base.replace(/\/+$/, "") : ""; // strip trailing slashes
-  const endpoint = `${prefix}/api/report/summary`;
+  const endpoint = getApiUrl("/api/report/summary");
   const res = await globalThis.fetch(endpoint, {
     headers: { Accept: "application/json" },
     credentials: "include",
@@ -23,45 +28,114 @@ const fetchMetricsSummary = async (): Promise<MetricsSummaryResponse> => {
   return res.json();
 };
 
+const fetchPendingRequestsCount = async (
+  userEmail: string
+): Promise<number> => {
+  const endpoint = getApiUrl("/api/requests/viewPending");
+  const res = await globalThis.fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({ userEmail }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch pending requests: ${res.status}`);
+  }
+  const data: PendingRequestsResponse = await res.json();
+  return Array.isArray(data.requests) ? data.requests.length : 0;
+};
+
 export const Metrics: React.FC = () => {
+  const { getUserInfo } = useAuth();
+  const userInfo = getUserInfo();
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["metrics", "summary"],
     queryFn: fetchMetricsSummary,
     staleTime: 1000 * 60, // 1 minute
   });
 
+  const {
+    data: pendingRequestsCount,
+    isLoading: isPendingLoading,
+    isError: isPendingError,
+    error: pendingError,
+  } = useQuery({
+    queryKey: ["metrics", "pendingRequests", userInfo?.email],
+    queryFn: () => fetchPendingRequestsCount(userInfo?.email || ""),
+    staleTime: 1000 * 60, // 1 minute
+    enabled: !!userInfo?.email, // Only run if we have a user email
+  });
+
   return (
     <div className="metrics-page marketplace-content">
       <PageTitle title="Metrics" />
 
-      {isLoading && <div>Loading metrics…</div>}
-      {isError && (
+      {(isLoading || isPendingLoading) && <div>Loading metrics…</div>}
+      {(isError || isPendingError) && (
         <div role="alert" style={{ color: "#b91c1c" }}>
-          {(error as Error)?.message || "Error loading metrics"}
+          {(error as Error)?.message ||
+            (pendingError as Error)?.message ||
+            "Error loading metrics"}
         </div>
       )}
 
       {data && (
         <section aria-labelledby="metrics-chart-heading">
-          <h2 id="metrics-chart-heading" className="sr-only">Summary</h2>
+          <h2 id="metrics-chart-heading" className="sr-only">
+            Summary
+          </h2>
           {(() => {
             const items = [
-              { label: "Users", value: data.totalUsers, color: "#4f46e5" },
-              { label: "Use Cases", value: data.totalUseCases, color: "#10b981" },
-              { label: "Orders", value: data.totalOrders, color: "#f59e0b" },
+              {
+                label: "Unique users",
+                value: data.totalUsers,
+              },
+              {
+                label: "Total requests",
+                value: data.totalUseCases,
+              },
+              {
+                label: "Pending requests",
+                value: pendingRequestsCount ?? 0,
+              },
+              // { label: "Orders", value: data.totalOrders, color: "#f59e0b" },
             ];
-            const max = Math.max(...items.map(i => i.value), 1);
             return (
-              <ul role="list" style={{ padding: 0, margin: 0, listStyle: "none", maxWidth: 520 }}>
+              <ul
+                role="list"
+                style={{
+                  padding: 0,
+                  margin: 0,
+                  listStyle: "none",
+                  maxWidth: 420,
+                }}
+              >
                 {items.map((item) => {
-                  const pct = Math.round((item.value / max) * 100);
                   return (
-                    <li key={item.label} style={{ display: "grid", gridTemplateColumns: "110px 1fr 50px", alignItems: "center", gap: 12, margin: "12px 0" }} aria-label={`${item.label}: ${item.value}`}>
+                    <li
+                      key={item.label}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "200px 1fr 50px",
+                        alignItems: "center",
+                        gap: 12,
+                        margin: "12px 0",
+                      }}
+                      aria-label={`${item.label}: ${item.value}`}
+                    >
                       <div style={{ fontWeight: 600 }}>{item.label}</div>
-                      <div style={{ height: 12, background: "#e5e7eb", borderRadius: 6, overflow: "hidden" }} aria-hidden>
-                        <div style={{ height: "100%", width: `${pct}%`, background: item.color, transition: "width .3s ease" }} />
+                      <div
+                        style={{
+                          textAlign: "right",
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
+                        {item.value}
                       </div>
-                      <div style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{item.value}</div>
                     </li>
                   );
                 })}

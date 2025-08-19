@@ -18,6 +18,7 @@ ARG VITE_KEYCLOAK_REALM="baby-yoda"
 ARG VITE_KEYCLOAK_CLIENT_ID="marketplace"
 ARG VITE_KEYCLOAK_CHECK_LOGIN_IFRAME="false"
 ARG VITE_BYPASS_AUTH="true"
+ARG VITE_API_BASE_URL=""
 
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
@@ -28,6 +29,7 @@ RUN cd "${APP_FRONTEND_DIR}" \
     VITE_KEYCLOAK_CLIENT_ID="${VITE_KEYCLOAK_CLIENT_ID}" \
     VITE_KEYCLOAK_CHECK_LOGIN_IFRAME="${VITE_KEYCLOAK_CHECK_LOGIN_IFRAME}" \
     VITE_BYPASS_AUTH="${VITE_BYPASS_AUTH}" \
+    VITE_API_BASE_URL="${VITE_API_BASE_URL}" \
     npm run build
 
 # Use nginx for serving static files - using latest version to avoid tiff vulnerability in alpine-minirootfs-3.22.0
@@ -73,7 +75,7 @@ RUN apk update && \
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 
 # Copy complete nginx configuration (eliminates user directive warning)
-COPY nginx.conf.full /etc/nginx/nginx.conf
+COPY nginx.conf.local /etc/nginx/nginx.conf
 
 # Copy startup script
 COPY start-nginx.sh /usr/local/bin/start-nginx.sh
@@ -102,7 +104,7 @@ USER ${APP_UID}:${APP_GID}
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD nc -z localhost 8080 || exit 1
 
-# Expose port 7500
+# Expose port 8080
 EXPOSE 8080
 
 # Start nginx with custom startup script

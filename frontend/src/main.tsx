@@ -5,7 +5,10 @@ import { ReactKeycloakProvider } from "@react-keycloak/web";
 import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import { CartProvider } from "./contexts/CartContext";
-import { EnhancedMockKeycloakProvider, MockUserSwitcher } from "./contexts/EnhancedMockKeycloakProvider";
+import {
+  EnhancedMockKeycloakProvider,
+  MockUserSwitcher,
+} from "./contexts/EnhancedMockKeycloakProvider";
 import { queryClient } from "./lib/queryClient";
 import "./styles/main.scss";
 
@@ -36,27 +39,27 @@ const LoadingComponent = () => (
 );
 
 // Development banner component
-const DevBanner = () => (
-  <div
-    style={{
-      backgroundColor: "#ff9800",
-      color: "white",
-      padding: "8px",
-      textAlign: "center",
-      fontWeight: "bold",
-      fontSize: "14px",
-    }}
-  >
-    🚧 DEVELOPMENT MODE - Authentication Bypassed 🚧
-  </div>
-);
+// const DevBanner = () => (
+//   <div
+//     style={{
+//       backgroundColor: "#ff9800",
+//       color: "white",
+//       padding: "8px",
+//       textAlign: "center",
+//       fontWeight: "bold",
+//       fontSize: "14px",
+//     }}
+//   >
+//     🚧 DEVELOPMENT MODE - Authentication Bypassed 🚧
+//   </div>
+// );
 
 // Choose rendering approach based on environment
 if (bypassAuth) {
   // Development mode with enhanced mock authentication
   root.render(
     <React.StrictMode>
-      <DevBanner />
+      {/* <DevBanner /> */}
       <QueryClientProvider client={queryClient}>
         <EnhancedMockKeycloakProvider>
           <BrowserRouter>

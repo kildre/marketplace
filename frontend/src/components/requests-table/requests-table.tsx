@@ -2,10 +2,12 @@ import * as React from "react";
 import { Chip, Button, Paper } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
-import { mockRequestData } from "../../data/mock-requestData";
 import { useAuth } from "../../hooks/useAuth";
 import { RequestsTableProps } from "../../interfaces/interfaceStore";
-import { RequestsDebugPanel } from "../debug/RequestsDebugPanel";
+// import { RequestsDebugPanel } from "../debug/RequestsDebugPanel"; // Uncomment to use debug panel with userId and component
+import { calculateEstimatedCost } from "../../utils/helper-functions";
+import { mockProducts } from "../../data/mock-productData";
+import { getApiUrl } from "@/utils/api-config";
 
 // Transform Product data to RequestData format
 const getStatusColor = (
@@ -25,117 +27,195 @@ const getStatusColor = (
 
 export const RequestsTable: React.FC<RequestsTableProps> = ({
   data,
-  userId,
+  // userId,
   showUserColumn = true,
 }) => {
   const navigate = useNavigate();
-  const { isApprover, isRequestor, getUserInfo } = useAuth();
-  const userInfo = getUserInfo();
+  const { isApprover, getUserInfo } = useAuth();
+  const [allRequests, setAllRequests] = React.useState(data || []);
 
-  // Determine which user's requests to show based on role
-  const effectiveUserId = React.useMemo(() => {
-    // If userId is provided (from URL), use it regardless of auth status for development
-    if (userId) {
-      return userId;
+  // Fetch requests from API - memoized to prevent infinite loops
+  const fetchRequests = React.useCallback(async () => {
+    // Get fresh user info inside the function to avoid dependencies
+    const currentUserInfo = getUserInfo();
+    const currentIsApprover = isApprover();
+
+    if (!currentUserInfo?.email) {
+      setAllRequests(data || []);
+      return;
     }
 
-    // If no authentication is available, show all requests
-    if (!userInfo) {
-      return undefined; // Show all requests
+    try {
+      let response;
+
+      if (currentIsApprover) {
+        // Approvers can see all requests, pass their email
+        response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userEmail: currentUserInfo.email,
+          }),
+        });
+      } else {
+        // Requestors see only their own requests
+        response = await window.fetch(
+          getApiUrl("/api/requests/viewForRequestor"),
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userEmail: currentUserInfo.email,
+            }),
+          }
+        );
+      }
+
+      if (response.ok) {
+        const requestsData = await response.json();
+
+        // Handle API response format: { requests: [...], errMsg: "..." }
+        let dataToSet = [];
+        if (requestsData && Array.isArray(requestsData.requests)) {
+          dataToSet = requestsData.requests;
+        } else if (Array.isArray(requestsData)) {
+          dataToSet = requestsData;
+        } else {
+          dataToSet = [];
+        }
+
+        setAllRequests(dataToSet);
+      } else {
+        // Fallback to empty array if API fails
+        setAllRequests(data || []);
+      }
+    } catch {
+      // Fallback to empty array if API fails
+      setAllRequests(data || []);
     }
+  }, []); // No dependencies - get fresh values inside the function
 
-    // Special handling for kberres user - always show their requests
-    const username = userInfo?.username?.toLowerCase();
-    const email = userInfo?.email?.toLowerCase();
-    if (username?.includes('kberres') || email?.includes('kberres')) {
-      return 'kberres'; // Force to kberres to match mock data
+  React.useEffect(() => {
+    // Only fetch requests if no data is provided
+    if (!data) {
+      fetchRequests();
     }
+  }, [fetchRequests, data]);
 
-    // If user is a requestor (and not an approver viewing all), show their own requests
-    if (isRequestor() && !isApprover()) {
-      return userInfo?.username; // Use their actual username
+  // Convert to format expected by DataGrid - ensure allRequests is always an array
+  const safeRequests = Array.isArray(allRequests) ? allRequests : [];
+
+  const tableData = safeRequests.map((request, index) => {
+    try {
+      // Handle actual API response structure vs expected RequestData interface
+      const apiRequest = request as unknown as Record<string, unknown>;
+
+      // Handle asset field - filter out empty values
+      let assetText = "N/A";
+      if (apiRequest.cartItems && Array.isArray(apiRequest.cartItems)) {
+        const productNames = (
+          apiRequest.cartItems as Array<Record<string, unknown>>
+        )
+          .map((item) => item.name as string)
+          .filter((name) => name && name.trim() !== "");
+        assetText = productNames.length > 0 ? productNames.join(", ") : "N/A";
+      }
+
+      const mappedData = {
+        id: (apiRequest.requestNumber as string) || `request-${index}`,
+        userId: (apiRequest.requestorEmail as string) || "N/A",
+        userEmail: (apiRequest.requestorEmail as string) || "N/A",
+        ticketType: "Application", // Default since this isn't in the new structure
+        asset: assetText,
+        qtySize: Array.isArray(apiRequest.cartItems)
+          ? (apiRequest.cartItems as Array<unknown>).length
+          : 0,
+        estimatedPrice: Array.isArray(apiRequest.cartItems)
+          ? calculateEstimatedCost(
+              apiRequest.cartItems as Array<Record<string, unknown>>,
+              mockProducts
+            )
+          : "Free",
+        dateCreated: apiRequest.createdAt
+          ? new Date(apiRequest.createdAt as string).toLocaleDateString(
+              "en-US",
+              {
+                day: "2-digit",
+                month: "short",
+                year: "2-digit",
+              }
+            )
+          : "N/A",
+        lastUpdated: (() => {
+          // Check if decision exists and use its updatedAt, otherwise fall back to request's updatedAt
+          const decision = apiRequest.decision as Record<
+            string,
+            unknown
+          > | null;
+          const updatedAt = decision?.updatedAt || apiRequest.updatedAt;
+
+          return updatedAt
+            ? new Date(updatedAt as string).toLocaleDateString("en-US", {
+                day: "2-digit",
+                month: "short",
+                year: "2-digit",
+              })
+            : "N/A";
+        })(),
+        status: (() => {
+          // Check if decision exists and is not null
+          const decision = apiRequest.decision as Record<
+            string,
+            unknown
+          > | null;
+          const statusId = decision?.statusId || apiRequest.statusId;
+
+          return (statusId as number) === 1
+            ? "Pending"
+            : (statusId as number) === 2
+            ? "Approved"
+            : (statusId as number) === 3
+            ? "Denied"
+            : "Unknown";
+        })(),
+      };
+
+      return mappedData;
+    } catch {
+      return {
+        id: `error-${index}`,
+        userId: "Error",
+        userEmail: "Error",
+        ticketType: "Error",
+        asset: "Error processing request",
+        qtySize: 0,
+        estimatedPrice: "Error",
+        dateCreated: "Error",
+        lastUpdated: "Error",
+        status: "Error",
+      };
     }
-
-    // If user is an approver, they can see all requests by default
-    if (isApprover()) {
-      return undefined; // undefined = all requests
-    }
-
-    // Default fallback - show all requests (for debugging)
-    return undefined;
-  }, [userId, isApprover, isRequestor, userInfo]);
-
-  // Use provided data or default mock data, filtered by effectiveUserId if specified
-  const allRequests = data || mockRequestData;
-  
-  const requests = effectiveUserId
-    ? allRequests.filter((request) => {
-        // Extract the user ID part from the email (before the @)
-        const emailUserId = request.personalData.email.split("@")[0];
-        const normalizedEffectiveUserId = effectiveUserId.toLowerCase();
-        const normalizedEmailUserId = emailUserId.toLowerCase();
-        
-        // Multiple matching strategies for robust filtering
-        const exactMatch = normalizedEmailUserId === normalizedEffectiveUserId;
-        const containsMatch = 
-          normalizedEmailUserId.includes(normalizedEffectiveUserId) ||
-          normalizedEffectiveUserId.includes(normalizedEmailUserId);
-        const kberresMatch = 
-          (normalizedEffectiveUserId.includes('kberres') && normalizedEmailUserId.includes('kberres'));
-        
-        const matches = exactMatch || containsMatch || kberresMatch;
-        
-        return matches;
-      })
-    : allRequests;
-
-  // Convert to format expected by DataGrid
-  const tableData = requests.map((request) => ({
-    id: request.requestId,
-    ticketNumber: request.ticketNumber,
-    userId: request.personalData.name,
-    userEmail: request.personalData.email,
-    ticketType: "Application", // Default since this isn't in the new structure
-    asset: request.cartItems.map((item) => item.productName).join(", "),
-    qtySize: request.summary.totalQuantity,
-    estimatedPrice: request.summary.estimatedROM,
-    dateCreated: new Date(request.submittedAt).toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "2-digit",
-    }),
-    lastUpdated: new Date(request.submittedAt).toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "2-digit",
-    }),
-    status: request.status,
-  }));
+  });
 
   const handleViewClick = (requestId: string): void => {
-    // Preserve the userId in the URL when navigating to request detail
-    const url = effectiveUserId
-      ? `/request-detail?id=${requestId}&userId=${effectiveUserId}`
-      : `/request-detail?id=${requestId}`;
+    // Navigate to request detail without userId filtering since API handles it
+    const url = `/request-detail?id=${requestId}`;
     navigate(url);
   };
 
   // Define columns for DataGrid with basic filtering
   const getColumns = (): GridColDef[] => {
-    const baseColumns: GridColDef[] = [
-      {
-        field: "ticketNumber",
-        headerName: "Ticket #",
-        width: 90,
-        filterable: true,
-      },
-    ];
+    const baseColumns: GridColDef[] = [];
 
     // Conditionally add User ID column - only for APPROVERs
-    if (showUserColumn && (isApprover() || !userInfo)) {
+    if (showUserColumn && isApprover()) {
       baseColumns.push({
         field: "userId",
-        headerName: "User ID",
+        headerName: "User",
         width: 120,
         filterable: true,
       });
@@ -143,14 +223,14 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
     // Add remaining columns
     baseColumns.push(
-      {
-        field: "ticketType",
-        headerName: "Ticket Type",
-        width: 90,
-        filterable: true,
-        type: "singleSelect",
-        valueOptions: ["Application", "Hardware", "Software", "Access"],
-      },
+      // {
+      //   field: "ticketType",
+      //   headerName: "Ticket Type",
+      //   width: 90,
+      //   filterable: true,
+      //   type: "singleSelect",
+      //   valueOptions: ["Application", "Hardware", "Software", "Access"],
+      // },
       {
         field: "asset",
         headerName: "Asset",
@@ -241,7 +321,6 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           disableRowSelectionOnClick
           hideFooterSelectedRowCount
           disableColumnResize={false}
-          autoHeight={false}
           sx={{
             "& .MuiDataGrid-footerContainer": {
               marginTop: 0,
@@ -254,11 +333,11 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           }}
         />
       </Paper>
-      <RequestsDebugPanel 
+      {/* <RequestsDebugPanel
         userId={userId}
-        effectiveUserId={effectiveUserId}
-        filteredRequestsCount={requests.length}
-      />
+        effectiveUserId={userId} // Use userId prop directly since filtering is done by API
+        filteredRequestsCount={safeRequests.length}
+      /> */}
     </div>
   );
 };

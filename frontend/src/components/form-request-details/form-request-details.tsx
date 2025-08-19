@@ -91,7 +91,7 @@ export const FormRequestDetails = ({
             Please specify the organization you are requesting on behalf of.
           </Alert>
         )}
-      <Accordion defaultExpanded slotProps={{ heading: { component: "h2" } }}>
+      <Accordion defaultExpanded>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="request-details-content"
@@ -137,7 +137,8 @@ export const FormRequestDetails = ({
               <label htmlFor="organization-other">
                 {isViewMode
                   ? "Other Organization"
-                  : "Please specify the organization you are requesting on behalf of."}
+                  : "Please specify the organization you are requesting on behalf of"}
+                <span style={{ color: "red" }}> *</span>
               </label>
               <TextField
                 required={!isViewMode}

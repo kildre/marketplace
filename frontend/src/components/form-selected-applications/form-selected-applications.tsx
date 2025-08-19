@@ -125,18 +125,14 @@ export const FormSelectedApplications = ({
     }
   };
 
-  const getButtonText = (productId: number, currentQuantity: number) => {
+  const getButtonText = (productId: number, _currentQuantity: number) => {
     const inputQuantity = inputQuantities[productId] || 0;
 
     if (inputQuantity === 0) {
       return "Remove";
     }
 
-    if (inputQuantity !== currentQuantity) {
-      return "Update";
-    }
-
-    return "Current";
+    return "Update";
   };
 
   const isButtonDisabled = (productId: number, currentQuantity: number) => {
@@ -146,11 +142,12 @@ export const FormSelectedApplications = ({
 
   return (
     <div className="form-selected-applications__container">
-      <Accordion defaultExpanded slotProps={{ heading: { component: "h2" } }}>
+      <Accordion defaultExpanded>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="selected-applications-content"
           id="selected-applications-header"
+          component="h2"
         >
           Selected Applications ({displayCount}{" "}
           {displayCount === 1 ? "product" : "products"})
@@ -171,13 +168,20 @@ export const FormSelectedApplications = ({
                       Description: <span>{item.description}</span>
                     </p>
                     <p>
-                      Qty requested: <span>{item.quantity}</span>
+                      Currently in cart: <span>{item.quantity}</span>
                     </p>
                   </div>
                   <div className="cart-item-card__price">
                     <p>
                       Cost:{" "}
-                      <span>{item.price ? `$${item.price}` : "Pending"}</span>
+                      <span>
+                        {item.price === null
+                          ? formatPrice(null, item.rom)
+                          : formatPrice(
+                              (item.price ?? 0) * item.quantity,
+                              item.rom
+                            )}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -225,11 +229,9 @@ export const FormSelectedApplications = ({
                           onChange={(e) =>
                             handleQuantityChange(product.id, e.target.value)
                           }
-                          slotProps={{
-                            input: {
-                              style: { textAlign: "center" },
-                              "aria-label": `Quantity for ${product.name}`,
-                            },
+                          InputProps={{
+                            style: { textAlign: "center" },
+                            "aria-label": `Quantity for ${product.name}`,
                           }}
                           className="quantity-input quantity-input-clean"
                           size="small"
@@ -258,21 +260,22 @@ export const FormSelectedApplications = ({
                       </span>
 
                       <div className="cart-item-card__actions">
-                        {inputQuantities[product.id] === 0 ? null : (
-                          <Button
-                            variant="text"
-                            onClick={() => handleUpdateQuantity(product.id)}
-                            disabled={isButtonDisabled(product.id, quantity)}
-                            className="update-quantity-button"
-                            aria-label={`${getButtonText(
-                              product.id,
-                              quantity
-                            )} ${product.name}`}
-                            size="medium"
-                          >
-                            {getButtonText(product.id, quantity)}
-                          </Button>
-                        )}
+                        {inputQuantities[product.id] !== 0 &&
+                          inputQuantities[product.id] !== quantity && (
+                            <Button
+                              variant="text"
+                              onClick={() => handleUpdateQuantity(product.id)}
+                              disabled={isButtonDisabled(product.id, quantity)}
+                              className="update-quantity-button"
+                              aria-label={`${getButtonText(
+                                product.id,
+                                quantity
+                              )} ${product.name}`}
+                              size="medium"
+                            >
+                              {getButtonText(product.id, quantity)}
+                            </Button>
+                          )}
 
                         <Button
                           variant="text"
@@ -292,7 +295,7 @@ export const FormSelectedApplications = ({
                       Cost:{" "}
                       <span>
                         {product.price === null
-                          ? formatPrice(quantity * 0, product.rom)
+                          ? formatPrice(null, product.rom)
                           : formatPrice(quantity * product.price, product.rom)}
                       </span>
                     </p>

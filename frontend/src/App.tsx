@@ -8,15 +8,13 @@ import { Requests } from "./pages/requests/requests";
 import { RequestDetail } from "./pages/request-detail/request-detail";
 import { ApproverRedirectGuard } from "./components/auth/ApproverRedirectGuard";
 import { AuthStatusPage } from "./pages/auth-status/auth-status";
-import { RoleDebugInfo } from "./components/debug/RoleDebugInfo";
 import { useAuth } from "./hooks/useAuth";
 import { AppRoles } from "./types/auth";
 // @ts-ignore
-import AdvanaMenu from '@advana/platform-ui/dist/AdvanaMenu';
+import AdvanaMenu from "@advana/platform-ui/dist/AdvanaMenu";
 import CustomMenuLogoSection from "./components/CustomMenuLogoSection";
 import "./styles/main.scss";
-// import { useEffect } from 'react';
-import CartOverlayButton from './components/CartOverlayButton';
+import CartOverlayButton from "./components/CartOverlayButton";
 import Metrics from "./pages/metrics/metrics";
 import { RoleGuard } from "./components/auth/RoleGuard";
 
@@ -37,8 +35,8 @@ function App(): React.ReactElement {
 
   // Create custom logo section for AdvanaMenu
   const customLogoSection = (
-    <CustomMenuLogoSection 
-      enclave="advana" 
+    <CustomMenuLogoSection
+      enclave="advana"
       megaMenuBaseDomain="/"
       isCRA={true}
     />
@@ -46,27 +44,27 @@ function App(): React.ReactElement {
 
   return (
     <div className="app-wrapper">
-      {/* CUI Banner */}
-      <div className="cui-banner">
-        <span className="cui-banner__text">CUI</span>
-      </div>
-      
       <GovernmentBanner />
-      <div className="advana-menu-override advana-service-desk-style header-with-cart" style={{ position: 'static', marginTop: 0 }}>
-        <AdvanaMenu menuLogoSection={customLogoSection} />
+      <div className="advana-menu-override advana-service-desk-style header-with-cart">
+        {/* Provide local mega menu JSON and disable CRA env mode so props are used */}
+        <AdvanaMenu
+          menuLogoSection={customLogoSection}
+          megaMenuBaseDomain="/"
+          isCRA={false}
+        />
         <CartOverlayButton />
       </div>
       <main className="main-content">
         <Sidebar />
         <Routes>
           <Route path="/" element={getHomeComponent()} />
-          <Route 
-            path="/cart" 
+          <Route
+            path="/cart"
             element={
               <ApproverRedirectGuard>
                 <Cart />
               </ApproverRedirectGuard>
-            } 
+            }
           />
           <Route path="/requests" element={<Requests />} />
           <Route path="/requests/:userId" element={<Requests />} />
@@ -86,7 +84,7 @@ function App(): React.ReactElement {
         </Routes>
       </main>
       <Footer />
-      <RoleDebugInfo />
+      {/* <RoleDebugInfo /> */}
     </div>
   );
 }

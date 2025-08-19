@@ -1,16 +1,15 @@
 import Keycloak, { KeycloakConfig, KeycloakInitOptions } from "keycloak-js";
 import { AuthService } from "./authService";
 
-// Debug environment variables in development
-if (import.meta.env.DEV) {
-  // eslint-disable-next-line no-console
-  console.log('Keycloak Environment Variables:', {
-    url: import.meta.env.VITE_KEYCLOAK_URL,
-    realm: import.meta.env.VITE_KEYCLOAK_REALM,
-    clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
-    bypassAuth: import.meta.env.VITE_BYPASS_AUTH
-  });
-}
+// Debug environment variables in development - uncomment for debugging
+// if (import.meta.env.DEV) {
+// console.log('Keycloak Environment Variables:', {
+//   url: import.meta.env.VITE_KEYCLOAK_URL,
+//   realm: import.meta.env.VITE_KEYCLOAK_REALM,
+//   clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
+//   bypassAuth: import.meta.env.VITE_BYPASS_AUTH
+// });
+// }
 
 const keycloakConfig: KeycloakConfig = {
   url: import.meta.env.VITE_KEYCLOAK_URL, // e.g., https://keycloak.example.com/auth
@@ -20,15 +19,27 @@ const keycloakConfig: KeycloakConfig = {
 
 // Validate required configuration
 if (!keycloakConfig.url) {
-  throw new Error(`Keycloak configuration missing 'url'. Check VITE_KEYCLOAK_URL environment variable. Current value: ${import.meta.env.VITE_KEYCLOAK_URL}`);
+  throw new Error(
+    `Keycloak configuration missing 'url'. Check VITE_KEYCLOAK_URL environment variable. Current value: ${
+      import.meta.env.VITE_KEYCLOAK_URL
+    }`
+  );
 }
 
 if (!keycloakConfig.realm) {
-  throw new Error(`Keycloak configuration missing 'realm'. Check VITE_KEYCLOAK_REALM environment variable. Current value: ${import.meta.env.VITE_KEYCLOAK_REALM}`);
+  throw new Error(
+    `Keycloak configuration missing 'realm'. Check VITE_KEYCLOAK_REALM environment variable. Current value: ${
+      import.meta.env.VITE_KEYCLOAK_REALM
+    }`
+  );
 }
 
 if (!keycloakConfig.clientId) {
-  throw new Error(`Keycloak configuration missing 'clientId'. Check VITE_KEYCLOAK_CLIENT_ID environment variable. Current value: ${import.meta.env.VITE_KEYCLOAK_CLIENT_ID}`);
+  throw new Error(
+    `Keycloak configuration missing 'clientId'. Check VITE_KEYCLOAK_CLIENT_ID environment variable. Current value: ${
+      import.meta.env.VITE_KEYCLOAK_CLIENT_ID
+    }`
+  );
 }
 
 const keycloak = new Keycloak(keycloakConfig);
@@ -36,7 +47,8 @@ const keycloak = new Keycloak(keycloakConfig);
 // Enhanced initialization options with token capture
 export const keycloakInitOptions: KeycloakInitOptions = {
   onLoad: "login-required", // Forces login on app load
-  checkLoginIframe: import.meta.env.VITE_KEYCLOAK_CHECK_LOGIN_IFRAME !== 'false',
+  checkLoginIframe:
+    import.meta.env.VITE_KEYCLOAK_CHECK_LOGIN_IFRAME !== "false",
   pkceMethod: "S256", // Use PKCE for enhanced security
   // Additional security options
   scope: "openid profile email", // Request specific scopes
@@ -78,37 +90,29 @@ export class KeycloakService {
   private setupEventListeners(): void {
     // Listen for successful authentication
     this.keycloak.onAuthSuccess = () => {
-      // eslint-disable-next-line no-console
-      console.log('Keycloak authentication successful');
       this.handleTokenUpdate();
     };
 
     // Listen for token refresh
     this.keycloak.onAuthRefreshSuccess = () => {
-      // eslint-disable-next-line no-console
-      console.log('Keycloak token refreshed successfully');
       this.handleTokenUpdate();
     };
 
     // Listen for authentication errors
     this.keycloak.onAuthError = (error) => {
       // eslint-disable-next-line no-console
-      console.error('Keycloak authentication error:', error);
+      console.error("Keycloak authentication error:", error);
       AuthService.clearStoredAuth();
     };
 
     // Listen for logout
     this.keycloak.onAuthLogout = () => {
-      // eslint-disable-next-line no-console
-      console.log('Keycloak logout detected');
       AuthService.clearStoredAuth();
       this.clearRefreshTimer();
     };
 
     // Listen for token expiration
     this.keycloak.onTokenExpired = () => {
-      // eslint-disable-next-line no-console
-      console.log('Keycloak token expired, attempting refresh');
       this.refreshToken();
     };
   }
@@ -118,32 +122,17 @@ export class KeycloakService {
    */
   private handleTokenUpdate(): void {
     if (this.keycloak.token && this.keycloak.tokenParsed) {
-      // Log token information for debugging (production-safe)
-      // eslint-disable-next-line no-console
-      console.log('🔐 Keycloak JWT Token Captured:', {
-        token: this.keycloak.token,
-        tokenLength: this.keycloak.token.length,
-        expiresIn: this.keycloak.tokenParsed.exp ? 
-          new Date(this.keycloak.tokenParsed.exp * 1000).toISOString() : 'Unknown',
-        user: this.keycloak.tokenParsed.preferred_username,
-        email: this.keycloak.tokenParsed.email,
-        realmRoles: this.keycloak.tokenParsed.realm_access?.roles || [],
-        resourceAccess: this.keycloak.tokenParsed.resource_access || {},
-        marketplaceRoles: this.keycloak.tokenParsed.resource_access?.marketplace?.roles || []
-      });
-
       // Store tokens
       AuthService.storeTokens(this.keycloak.token, this.keycloak.refreshToken);
 
       // Extract and store user information
-      const userInfo = AuthService.createUserInfoFromToken(this.keycloak.tokenParsed);
+      const userInfo = AuthService.createUserInfoFromToken(
+        this.keycloak.tokenParsed
+      );
       AuthService.storeUserInfo(userInfo);
 
       // Set up automatic token refresh
       this.setupTokenRefresh();
-
-      // eslint-disable-next-line no-console
-      console.log('User authenticated with roles:', userInfo.roles);
     }
   }
 
@@ -189,7 +178,7 @@ export class KeycloakService {
       return false;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Failed to refresh token:', error);
+      console.error("Failed to refresh token:", error);
       AuthService.clearStoredAuth();
       return false;
     }
@@ -198,10 +187,12 @@ export class KeycloakService {
   /**
    * Initialize Keycloak with enhanced token handling
    */
-  async initialize(initOptions: KeycloakInitOptions = keycloakInitOptions): Promise<boolean> {
+  async initialize(
+    initOptions: KeycloakInitOptions = keycloakInitOptions
+  ): Promise<boolean> {
     try {
       const authenticated = await this.keycloak.init(initOptions);
-      
+
       if (authenticated) {
         this.handleTokenUpdate();
       }
@@ -209,7 +200,7 @@ export class KeycloakService {
       return authenticated;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Keycloak initialization failed:', error);
+      console.error("Keycloak initialization failed:", error);
       throw error;
     }
   }
@@ -222,7 +213,7 @@ export class KeycloakService {
       await this.keycloak.login();
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Keycloak login failed:', error);
+      console.error("Keycloak login failed:", error);
       throw error;
     }
   }
@@ -237,7 +228,7 @@ export class KeycloakService {
       await this.keycloak.logout();
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Keycloak logout failed:', error);
+      console.error("Keycloak logout failed:", error);
       throw error;
     }
   }
@@ -253,17 +244,17 @@ export class KeycloakService {
    * Check if user has specific roles (checks both realm and resource roles)
    */
   hasRoles(roles: string[]): boolean {
-    return roles.some(role => {
+    return roles.some((role) => {
       // Check realm roles
       if (this.keycloak.hasRealmRole(role)) {
         return true;
       }
-      
+
       // Check resource roles for marketplace
-      if (this.keycloak.hasResourceRole(role, 'marketplace')) {
+      if (this.keycloak.hasResourceRole(role, "marketplace")) {
         return true;
       }
-      
+
       // Check other resource roles
       return this.keycloak.hasResourceRole(role);
     });

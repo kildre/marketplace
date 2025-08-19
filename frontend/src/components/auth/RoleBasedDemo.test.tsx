@@ -347,6 +347,9 @@ describe("RoleBasedDemo", () => {
     });
 
     test("should show environment variables in debug section", () => {
+      // Use Vitest's environment variable mocking
+      vi.stubEnv("VITE_MOCK_USER_ROLES", "marketplace-requestor");
+
       mockUseAuth.mockReturnValue({
         getUserInfo: () => mockUserInfo,
         getUserRoles: () => [],
@@ -363,6 +366,9 @@ describe("RoleBasedDemo", () => {
       expect(
         screen.getByText("VITE_MOCK_USER_ROLES: marketplace-requestor")
       ).toBeInTheDocument();
+
+      // Clean up the environment variable mock
+      vi.unstubAllEnvs();
     });
 
     test("should not show debug information in production mode", () => {

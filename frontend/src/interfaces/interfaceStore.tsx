@@ -202,7 +202,6 @@ export interface SubmissionData {
 
 export interface RequestData {
   requestId: string;
-  ticketNumber: string;
   personalData: PersonalData;
   requestDetails: RequestDetails;
   cartItems: CartItemData[];
@@ -211,6 +210,8 @@ export interface RequestData {
   status: string;
   decisionNumber?: string;
   submittedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================================
