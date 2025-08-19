@@ -75,7 +75,7 @@ RUN apk update && \
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 
 # Copy complete nginx configuration (eliminates user directive warning)
-COPY nginx.conf.full /etc/nginx/nginx.conf
+COPY nginx.conf.local /etc/nginx/nginx.conf
 
 # Copy startup script
 COPY start-nginx.sh /usr/local/bin/start-nginx.sh
