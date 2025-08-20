@@ -143,7 +143,7 @@ export const FormRequestDetails = ({
                 {isViewMode
                   ? "Other Organization"
                   : "Please specify the organization you are requesting on behalf of"}
-                {!isViewMode && <span style={{ color: 'red' }}>*</span>}
+                {!isViewMode && <span style={{ color: 'red', paddingLeft: '2px' }}>*</span>}
               </label>
               <TextField
                 required={!isViewMode}
