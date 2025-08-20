@@ -147,8 +147,13 @@ export const generateRequestId = (number: number): string => {
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
   const charactersLength = characters.length;
+  
+  // Use Web Crypto API for cryptographically secure random numbers
+  const randomBytes = new Uint8Array(number);
+  window.crypto.getRandomValues(randomBytes);
+  
   for (let i = 0; i < number; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    result += characters.charAt(randomBytes[i] % charactersLength);
   }
   return (
     result + "-" + hexTimestamp // Combine random string with timestamp
