@@ -2,12 +2,18 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Checkbox from "@mui/material/Checkbox";
 import { useCart } from "../../contexts/CartContext";
-import { useFormData, useSubmitRequest, useSubmissionAttempts } from "../../hooks/useFormQueries";
+import {
+  useFormData,
+  useSubmitRequest,
+  useSubmissionAttempts,
+} from "../../hooks/useFormQueries";
 import { SubmissionData } from "../../interfaces";
 import { generateRequestId } from "../../utils/helper-functions";
 
 export const FormSubmitRequest = (): React.ReactElement => {
   const [checked, setChecked] = React.useState(false);
+  const [submittedRequestId, setSubmittedRequestId] =
+    React.useState<string>("");
   const navigate = useNavigate();
   const { cartItems, clearCart } = useCart();
   const formData = useFormData();
@@ -39,11 +45,17 @@ export const FormSubmitRequest = (): React.ReactElement => {
 
   // Navigate to requests page on successful submission
   React.useEffect(() => {
-    if (submitMutation.isSuccess) {
+    if (submitMutation.isSuccess && submittedRequestId) {
       clearCart(); // Clear the cart items
-      navigate("/requests"); // Then redirect to requests page
+      // Navigate to requests page with success state and request ID for toast notification
+      navigate("/requests", {
+        state: {
+          showSuccessToast: true,
+          requestId: submittedRequestId,
+        },
+      });
     }
-  }, [submitMutation.isSuccess, navigate, clearCart]);
+  }, [submitMutation.isSuccess, submittedRequestId, navigate, clearCart]);
 
   const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
@@ -80,6 +92,9 @@ export const FormSubmitRequest = (): React.ReactElement => {
 
     // Generate a unique request ID
     const requestId = generateRequestId(7);
+
+    // Store the request ID for the toast message
+    setSubmittedRequestId(requestId);
 
     // Combine form data and cart data
     const submitData: SubmissionData = {

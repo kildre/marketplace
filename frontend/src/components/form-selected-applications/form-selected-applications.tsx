@@ -72,10 +72,10 @@ export const FormSelectedApplications = ({
   const handleUpdateQuantity = (productId: number) => {
     const cartItem = cartItems.find((item) => item.product.id === productId);
     const product = cartItem?.product;
-    
+
     if (product) {
       const newQuantity = inputQuantities[productId] || 0;
-      
+
       if (newQuantity === 0) {
         removeFromCart(productId);
       } else {
@@ -186,7 +186,7 @@ export const FormSelectedApplications = ({
                       Description: <span>{product.description}</span>
                     </p>
                     <p>
-                      Qty requested: <span>{quantity}</span>
+                      Currently in cart: <span>{quantity}</span>
                     </p>
                     <Box className="quantity-selector-container">
                       <Box
@@ -247,17 +247,18 @@ export const FormSelectedApplications = ({
 
                       <div className="cart-item-card__actions">
                         {/* Show Update button only when quantity has changed */}
-                        {inputQuantities[product.id] !== quantity && inputQuantities[product.id] !== 0 && (
-                          <Button
-                            variant="text"
-                            onClick={() => handleUpdateQuantity(product.id)}
-                            className="update-quantity-button"
-                            aria-label={`Update ${product.name}`}
-                            size="medium"
-                          >
-                            Update
-                          </Button>
-                        )}
+                        {inputQuantities[product.id] !== quantity &&
+                          inputQuantities[product.id] !== 0 && (
+                            <Button
+                              variant="text"
+                              onClick={() => handleUpdateQuantity(product.id)}
+                              className="update-quantity-button"
+                              aria-label={`Update ${product.name}`}
+                              size="medium"
+                            >
+                              Update
+                            </Button>
+                          )}
 
                         {/* Always show Remove button */}
                         <Button
