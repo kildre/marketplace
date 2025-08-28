@@ -1,6 +1,6 @@
 include:
   - project: promotion/tekton-promotion-gitlab
-    file: routes/dragon-full.yml 
+    file: routes/dragon-full.yml
 
 variables:
   UPSTREAM_PROJECT_DIR: "."
