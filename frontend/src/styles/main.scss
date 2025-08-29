@@ -15,11 +15,24 @@
 @use "components/form-personal-information";
 @use "components/form-selected-applications";
 @use "components/form-submit-request";
+@use "components/toast-notification";
 
 // Use page styles
 @use "pages/cart";
 @use "pages/request-detail";
 
 /* Metrics page lightweight styles */
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-.metrics-page { padding-right: 24px; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.metrics-page {
+  padding-right: 24px;
+}

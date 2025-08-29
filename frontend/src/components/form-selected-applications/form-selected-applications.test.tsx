@@ -217,8 +217,8 @@ describe("FormSelectedApplications", () => {
         screen.getByText("This is test product 1 description")
       ).toBeInTheDocument();
 
-      // Check quantities - use getAllByText since there are multiple "Qty requested:" elements
-      const qtyLabels = screen.getAllByText("Qty requested:");
+      // Check quantities - use getAllByText since there are multiple "Currently in cart:" elements
+      const qtyLabels = screen.getAllByText("Currently in cart:");
       expect(qtyLabels).toHaveLength(2);
       expect(screen.getByText("2")).toBeInTheDocument();
 
@@ -545,7 +545,7 @@ describe("FormSelectedApplications", () => {
       expect(removeButton).toBeInTheDocument();
       expect(removeButton).toHaveTextContent("Remove");
       expect(removeButton).not.toBeDisabled();
-      
+
       // Update button should not be visible when quantity hasn't changed
       const updateButton = screen.queryByRole("button", {
         name: "Update Test Product 1",

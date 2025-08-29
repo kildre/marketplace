@@ -346,17 +346,21 @@ describe("FormRequestDetails", () => {
       renderFormRequestDetails({ organization: "Other" });
 
       // Check that the label element exists and contains the red asterisk
-      const labelElement = document.querySelector('label[for="organization-other"]');
+      const labelElement = document.querySelector(
+        'label[for="organization-other"]'
+      );
       expect(labelElement).toBeInTheDocument();
-      
-      const redAsterisk = labelElement?.querySelector('span[style*="color: red"]');
+
+      const redAsterisk = labelElement?.querySelector(
+        'span[style*="color: red"]'
+      );
       expect(redAsterisk).toBeInTheDocument();
-      expect(redAsterisk).toHaveTextContent('*');
+      expect(redAsterisk).toHaveTextContent("*");
     });
 
     test("should show error state when Other is selected but field is empty and submission attempted", () => {
-      renderFormRequestDetails({ 
-        organization: "Other", 
+      renderFormRequestDetails({
+        organization: "Other",
         organizationOther: "",
         hasAttemptedSubmission: true,
       });
@@ -364,17 +368,19 @@ describe("FormRequestDetails", () => {
       const orgOtherField = screen.getByLabelText(
         /please specify the organization/i
       );
-      
+
       // Check for error styling (MUI adds aria-invalid when error is true)
-      expect(orgOtherField).toHaveAttribute('aria-invalid', 'true');
-      
+      expect(orgOtherField).toHaveAttribute("aria-invalid", "true");
+
       // Check for error helper text
-      expect(screen.getByText("This field is required when 'Other' is selected")).toBeInTheDocument();
+      expect(
+        screen.getByText("This field is required when 'Other' is selected")
+      ).toBeInTheDocument();
     });
 
     test("should NOT show error state when Other is selected but submission hasn't been attempted", () => {
-      renderFormRequestDetails({ 
-        organization: "Other", 
+      renderFormRequestDetails({
+        organization: "Other",
         organizationOther: "",
         hasAttemptedSubmission: false,
       });
@@ -382,29 +388,33 @@ describe("FormRequestDetails", () => {
       const orgOtherField = screen.getByLabelText(
         /please specify the organization/i
       );
-      
+
       // Should not have error state
-      expect(orgOtherField).toHaveAttribute('aria-invalid', 'false');
-      
+      expect(orgOtherField).toHaveAttribute("aria-invalid", "false");
+
       // Should not show error helper text
-      expect(screen.queryByText("This field is required when 'Other' is selected")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("This field is required when 'Other' is selected")
+      ).not.toBeInTheDocument();
     });
 
     test("should not show error state when Other is selected and field is filled", () => {
-      renderFormRequestDetails({ 
-        organization: "Other", 
-        organizationOther: "Custom Organization" 
+      renderFormRequestDetails({
+        organization: "Other",
+        organizationOther: "Custom Organization",
       });
 
       const orgOtherField = screen.getByLabelText(
         /please specify the organization/i
       );
-      
+
       // Should not have error state
-      expect(orgOtherField).toHaveAttribute('aria-invalid', 'false');
-      
+      expect(orgOtherField).toHaveAttribute("aria-invalid", "false");
+
       // Should not show error helper text
-      expect(screen.queryByText("This field is required when 'Other' is selected")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("This field is required when 'Other' is selected")
+      ).not.toBeInTheDocument();
     });
 
     test("should have correct CSS class", () => {
@@ -502,9 +512,11 @@ describe("FormRequestDetails", () => {
       const organizationField = screen.getByRole("combobox", {
         name: /organization/i,
       });
-      
+
       // Check for the required attribute on the MUI Select component
-      expect(organizationField.parentElement?.querySelector('input')).toHaveAttribute('required');
+      expect(
+        organizationField.parentElement?.querySelector("input")
+      ).toHaveAttribute("required");
     });
 
     test("should have correct labels with required indicators", () => {
@@ -605,7 +617,7 @@ describe("FormRequestDetails", () => {
       ).toBeInTheDocument();
     });
 
-    test.skip("should apply correct CSS classes to POC detail items", () => {
+    test("should apply correct CSS classes to POC detail items", () => {
       const { container } = renderFormRequestDetails();
 
       const pocDetailItems = container.querySelectorAll(

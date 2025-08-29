@@ -63,12 +63,15 @@ export default defineConfig({
         // Add more patterns as needed
         "**/src/components/RoleGuard.tsx", // Exclude RoleGuard component
         "**/src/components/debug/**", // Exclude debug-related components
+        "**/src/components/ImageTest.tsx", // Exclude image test component
         "**/src/contexts/**", // Exclude context files
         "**/src/examples/**", // Exclude example files
         "**/src/hooks/**", // Exclude custom hooks
         "**/src/lib/**", // Exclude query library files
         "**/src/services/**", // Exclude service files
         "**/src/pages/auth-status/**", // Exclude auth status pages
+        "**/src/utils/api-config.ts", // Exclude API config
+        "**/src/data/**", // Exclude data files
       ],
       include: ["src/**/*.{js,ts,tsx}"],
     },

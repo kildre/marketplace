@@ -521,15 +521,54 @@ describe("FormSubmitRequest", () => {
 
   describe("Navigation on Success", () => {
     test("should navigate to requests page on successful submission", async () => {
-      renderFormSubmitRequest({ organization: "Army" }, { isSuccess: true });
+      const { rerender } = renderFormSubmitRequest({ organization: "Army" });
+
+      // Check checkbox and submit form first to set requestId
+      const checkbox = screen.getByRole("checkbox");
+      await user.click(checkbox);
+
+      const submitButton = screen.getByRole("button", {
+        name: /submit request/i,
+      });
+      await user.click(submitButton);
+
+      // Now mock success state and rerender
+      mockUseSubmitRequest.mockReturnValue({
+        ...mockSubmitMutation,
+        isSuccess: true,
+      });
+
+      rerender(<FormSubmitRequest />);
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith("/requests");
+        expect(mockNavigate).toHaveBeenCalledWith("/requests", {
+          state: {
+            showSuccessToast: true,
+            requestId: expect.any(String),
+          },
+        });
       });
     });
 
     test("should clear cart on successful submission", async () => {
-      renderFormSubmitRequest({ organization: "Army" }, { isSuccess: true });
+      const { rerender } = renderFormSubmitRequest({ organization: "Army" });
+
+      // Check checkbox and submit form first to set requestId
+      const checkbox = screen.getByRole("checkbox");
+      await user.click(checkbox);
+
+      const submitButton = screen.getByRole("button", {
+        name: /submit request/i,
+      });
+      await user.click(submitButton);
+
+      // Now mock success state and rerender
+      mockUseSubmitRequest.mockReturnValue({
+        ...mockSubmitMutation,
+        isSuccess: true,
+      });
+
+      rerender(<FormSubmitRequest />);
 
       await waitFor(() => {
         expect(mockClearCart).toHaveBeenCalled();
@@ -537,11 +576,33 @@ describe("FormSubmitRequest", () => {
     });
 
     test("should clear cart before navigating", async () => {
-      renderFormSubmitRequest({ organization: "Army" }, { isSuccess: true });
+      const { rerender } = renderFormSubmitRequest({ organization: "Army" });
+
+      // Check checkbox and submit form first to set requestId
+      const checkbox = screen.getByRole("checkbox");
+      await user.click(checkbox);
+
+      const submitButton = screen.getByRole("button", {
+        name: /submit request/i,
+      });
+      await user.click(submitButton);
+
+      // Now mock success state and rerender
+      mockUseSubmitRequest.mockReturnValue({
+        ...mockSubmitMutation,
+        isSuccess: true,
+      });
+
+      rerender(<FormSubmitRequest />);
 
       await waitFor(() => {
         expect(mockClearCart).toHaveBeenCalled();
-        expect(mockNavigate).toHaveBeenCalledWith("/requests");
+        expect(mockNavigate).toHaveBeenCalledWith("/requests", {
+          state: {
+            showSuccessToast: true,
+            requestId: expect.any(String),
+          },
+        });
       });
 
       // Verify both functions were called
