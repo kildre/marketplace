@@ -3,7 +3,7 @@ FROM "${BASE_IMAGE}" AS builder
 USER root
 ENV APP_UID=65532
 ENV APP_GID=65532
-# key dirs & globally usable binaries/packages
+# key dirs & globally usable binaries/packages 
 ENV APP_ROOT="/app"
 ENV APP_FRONTEND_DIR="${APP_ROOT}/frontend"
 RUN mkdir -p "${APP_FRONTEND_DIR}"
