@@ -7,7 +7,7 @@ keycloakIssuer: https://keycloak.cdao.us/auth/realms/baby-yoda
 global:
   awsRegion: us-gov-west-1
   appName: advana-marketplace
-  baseDomain: app.advana.cdao.us
+  baseDomain: dev.mtt.cdao.us
   registry: 231388672283.dkr.ecr.us-gov-west-1.amazonaws.com
   vaultPrefix: aws/csn/dev/advana-marketplace
 
