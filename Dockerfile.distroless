@@ -21,6 +21,8 @@ ARG VITE_KEYCLOAK_CLIENT_ID="marketplace"
 ARG VITE_KEYCLOAK_CHECK_LOGIN_IFRAME="false"
 ARG VITE_BYPASS_AUTH="false"
 
+ARG VITE_API_BASE_URL="https://advana-marketplace-monolith-node.dev.mtt.cdao.us"
+
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
 RUN cd "${APP_FRONTEND_DIR}" \
@@ -30,6 +32,7 @@ RUN cd "${APP_FRONTEND_DIR}" \
     VITE_KEYCLOAK_CLIENT_ID="${VITE_KEYCLOAK_CLIENT_ID}" \
     VITE_KEYCLOAK_CHECK_LOGIN_IFRAME="${VITE_KEYCLOAK_CHECK_LOGIN_IFRAME}" \
     VITE_BYPASS_AUTH="${VITE_BYPASS_AUTH}" \
+    VITE_API_BASE_URL="${VITE_API_BASE_URL}" \
     npm run build
 
 FROM 231388672283.dkr.ecr.us-gov-west-1.amazonaws.com/cgr.dev/odcfo-advana-bah/nginx-fips:latest AS server
