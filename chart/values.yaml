@@ -236,7 +236,7 @@ secret:
           REACT_APP_CMS_ENDPOINT: "https://{{ $.Values.ingress.domain }}/api"
           REACT_APP_USER_TOKEN_ENDPOINT: "https://{{ $.Values.ingress.domain }}/api/auth/token"
 
-          REACT_APP_API_ENDPOINT: "https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api"
+          VITE_API_BASE_URL: "https://advana-marketplace-monolith-node.dev.mtt.cdao.us" # backend API URL
 
           REACT_APP_BANNERS_ENDPOINT: "https://admin.{{ $.Values.global.baseDomain }}/api/banners"
           REACT_APP_MEGA_MENU_ENDPOINT: "https://admin.{{ $.Values.global.baseDomain }}/api/menu/links"
