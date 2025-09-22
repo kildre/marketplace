@@ -163,7 +163,7 @@ div[style*="position: fixed"][style*="margin-top: 30px"] {
   transform: translateY(-50%);
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.08);
+  background: transparent;
   color: #fff;
   border: none; /* border removed */
   padding: 6px 12px;
@@ -176,6 +176,8 @@ div[style*="position: fixed"][style*="margin-top: 30px"] {
 }
 .header-with-cart .cart-overlay-btn:hover {
   background: rgba(255, 255, 255, 0.15);
+  outline: 2px solid rgba(255, 255, 255, 0.15);;
+  outline-offset: 2px;
 }
 .header-with-cart .cart-overlay-btn:focus {
   outline: 2px solid #fff;
