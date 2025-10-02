@@ -76,24 +76,33 @@ export const useRequests = (
         // Approvers can see all requests
         // Refresh token before making API call to ensure it's valid
         try {
-          const refreshed = await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-          // eslint-disable-next-line no-console
-          console.log('[useRequests] Token refresh check:', refreshed ? 'Token was refreshed' : 'Token still valid');
+          await keycloak.updateToken(30); // Refresh if expires within 30 seconds
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error("Failed to refresh token:", error);
+          console.error("[useRequests] Failed to refresh token:", error);
+          // Token refresh failed - user might need to re-authenticate
           setAllRequests([]);
           return;
         }
         
+        // Get the fresh token from Keycloak (after potential refresh)
         const token = keycloak.token;
+        
+        if (!token) {
+          // eslint-disable-next-line no-console
+          console.error("[useRequests] No token available after refresh attempt");
+          setAllRequests([]);
+          return;
+        }
+        
         // eslint-disable-next-line no-console
-        console.log('[useRequests] Using token for API call (first 20 chars):', token?.substring(0, 20) + '...');
+        console.log('[useRequests] Making API call with valid token');
+        
         response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
             userEmail: userInfo.email,
@@ -103,26 +112,35 @@ export const useRequests = (
         // Requestors see only their own requests
         // Refresh token before making API call to ensure it's valid
         try {
-          const refreshed = await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-          // eslint-disable-next-line no-console
-          console.log('[useRequests] Token refresh check:', refreshed ? 'Token was refreshed' : 'Token still valid');
+          await keycloak.updateToken(30); // Refresh if expires within 30 seconds
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error("Failed to refresh token:", error);
+          console.error("[useRequests] Failed to refresh token:", error);
+          // Token refresh failed - user might need to re-authenticate
           setAllRequests([]);
           return;
         }
         
+        // Get the fresh token from Keycloak (after potential refresh)
         const token = keycloak.token;
+        
+        if (!token) {
+          // eslint-disable-next-line no-console
+          console.error("[useRequests] No token available after refresh attempt");
+          setAllRequests([]);
+          return;
+        }
+        
         // eslint-disable-next-line no-console
-        console.log('[useRequests] Using token for API call (first 20 chars):', token?.substring(0, 20) + '...');
+        console.log('[useRequests] Making API call with valid token');
+        
         response = await window.fetch(
           getApiUrl("/api/requests/viewForRequestor"),
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+              "Authorization": `Bearer ${token}`,
             },
             body: JSON.stringify({
               userEmail: actualUserId || userInfo.email, // Use actualUserId if available
@@ -163,7 +181,7 @@ export const useRequests = (
       console.error("Error fetching requests:", error);
       setAllRequests([]);
     }
-  }, [actualUserId, keycloak]); // Include keycloak to ensure we have the token
+  }, [actualUserId, keycloak, getUserInfo, isApprover, isRequestor]); // Include all dependencies
 
   useEffect(() => {
     if (enabled) {
