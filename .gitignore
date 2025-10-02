@@ -33,4 +33,5 @@ coverage/
 .eslintcache
 
 # DO NOT ignore if you're using npm
-# package-lock.json
+# package-lock.jsonfrontend/*_FIX.md
+frontend/KEYCLOAK_TOKEN_USAGE.md

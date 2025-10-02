@@ -3,12 +3,12 @@ import { Chip, Button, Paper } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useKeycloak } from "../../hooks/useKeycloak";
 import { RequestsTableProps } from "../../interfaces/interfaceStore";
 // import { RequestsDebugPanel } from "../debug/RequestsDebugPanel"; // Uncomment to use debug panel with userId and component
 import { calculateEstimatedCost } from "../../utils/helper-functions";
 import { mockProducts } from "../../data/mock-productData";
 import { getApiUrl } from "@/utils/api-config";
-import { AuthService } from "@/services/authService";
 
 // Transform Product data to RequestData format
 const getStatusColor = (
@@ -33,6 +33,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 }) => {
   const navigate = useNavigate();
   const { isApprover, getUserInfo } = useAuth();
+  const { keycloak } = useKeycloak();
   const [allRequests, setAllRequests] = React.useState(data || []);
 
   // Fetch requests from API - memoized to prevent infinite loops
@@ -51,7 +52,8 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
       if (currentIsApprover) {
         // Approvers can see all requests, pass their email
-        const token = AuthService.getStoredToken();
+        // Get token directly from keycloak instance (not from localStorage)
+        const token = keycloak.token;
         response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
           headers: {
@@ -64,7 +66,8 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         });
       } else {
         // Requestors see only their own requests
-        const token = AuthService.getStoredToken();
+        // Get token directly from keycloak instance (not from localStorage)
+        const token = keycloak.token;
         response = await window.fetch(
           getApiUrl("/api/requests/viewForRequestor"),
           {
@@ -110,7 +113,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       // Fallback to empty array if API fails
       setAllRequests(data || []);
     }
-  }, []); // No dependencies - get fresh values inside the function
+  }, [keycloak]); // Include keycloak to ensure we have the token
 
   React.useEffect(() => {
     // Only fetch requests if no data is provided
