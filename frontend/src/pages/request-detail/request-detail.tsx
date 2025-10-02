@@ -204,28 +204,36 @@ export const RequestDetail = (): React.ReactElement => {
         }
 
         if (response.ok) {
-          const requestsData = await response.json();
+          try {
+            const requestsData = await response.json();
 
-          // Handle API response format: { requests: [...], errMsg: "..." }
-          let allRequests = [];
-          if (requestsData && Array.isArray(requestsData.requests)) {
-            allRequests = requestsData.requests;
-          } else if (Array.isArray(requestsData)) {
-            allRequests = requestsData;
-          }
+            // Handle API response format: { requests: [...], errMsg: "..." }
+            let allRequests = [];
+            if (requestsData && Array.isArray(requestsData.requests)) {
+              allRequests = requestsData.requests;
+            } else if (Array.isArray(requestsData)) {
+              allRequests = requestsData;
+            }
 
-          // Find the specific request by requestNumber (from API) matching requestId (from URL)
-          const foundRequest = allRequests.find(
-            (req: Record<string, unknown>) =>
-              (req.requestNumber as string) === requestId
-          );
+            // Find the specific request by requestNumber (from API) matching requestId (from URL)
+            const foundRequest = allRequests.find(
+              (req: Record<string, unknown>) =>
+                (req.requestNumber as string) === requestId
+            );
 
-          if (foundRequest) {
-            setRequest(transformApiRequestToRequestData(foundRequest));
-          } else {
-            setRequest(null);
+            if (foundRequest) {
+              setRequest(transformApiRequestToRequestData(foundRequest));
+            } else {
+              setRequest(null);
+            }
+          } catch (jsonError) {
+            // eslint-disable-next-line no-console
+            console.error("Failed to parse response as JSON:", jsonError);
+            setError("Failed to parse request data");
           }
         } else {
+          // eslint-disable-next-line no-console
+          console.error(`API request failed with status ${response.status}: ${response.statusText}`);
           setError("Failed to fetch request data");
         }
       } catch (err) {
@@ -344,9 +352,14 @@ export const RequestDetail = (): React.ReactElement => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.json();
-
-      return result;
+      try {
+        const result = await response.json();
+        return result;
+      } catch (jsonError) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to parse response as JSON:", jsonError);
+        throw new Error("Failed to parse server response");
+      }
     };
 
     const handleReasoningChange = (

@@ -81,21 +81,29 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       }
 
       if (response.ok) {
-        const requestsData = await response.json();
+        try {
+          const requestsData = await response.json();
 
-        // Handle API response format: { requests: [...], errMsg: "..." }
-        let dataToSet = [];
-        if (requestsData && Array.isArray(requestsData.requests)) {
-          dataToSet = requestsData.requests;
-        } else if (Array.isArray(requestsData)) {
-          dataToSet = requestsData;
-        } else {
-          dataToSet = [];
+          // Handle API response format: { requests: [...], errMsg: "..." }
+          let dataToSet = [];
+          if (requestsData && Array.isArray(requestsData.requests)) {
+            dataToSet = requestsData.requests;
+          } else if (Array.isArray(requestsData)) {
+            dataToSet = requestsData;
+          } else {
+            dataToSet = [];
+          }
+
+          setAllRequests(dataToSet);
+        } catch (jsonError) {
+          // eslint-disable-next-line no-console
+          console.error("Failed to parse response as JSON:", jsonError);
+          setAllRequests(data || []);
         }
-
-        setAllRequests(dataToSet);
       } else {
-        // Fallback to empty array if API fails
+        // Handle error responses (403, 401, etc.)
+        // eslint-disable-next-line no-console
+        console.error(`API request failed with status ${response.status}: ${response.statusText}`);
         setAllRequests(data || []);
       }
     } catch {

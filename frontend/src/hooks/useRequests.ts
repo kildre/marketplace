@@ -106,19 +106,27 @@ export const useRequests = (
       }
 
       if (response.ok) {
-        const requestsData = await response.json();
+        try {
+          const requestsData = await response.json();
 
-        // Handle API response format: { requests: [...], errMsg: "..." }
-        let apiRequests = [];
-        if (requestsData && Array.isArray(requestsData.requests)) {
-          apiRequests = requestsData.requests;
-        } else if (Array.isArray(requestsData)) {
-          apiRequests = requestsData;
+          // Handle API response format: { requests: [...], errMsg: "..." }
+          let apiRequests = [];
+          if (requestsData && Array.isArray(requestsData.requests)) {
+            apiRequests = requestsData.requests;
+          } else if (Array.isArray(requestsData)) {
+            apiRequests = requestsData;
+          }
+
+          setAllRequests(apiRequests);
+        } catch (jsonError) {
+          // eslint-disable-next-line no-console
+          console.error("Failed to parse response as JSON:", jsonError);
+          setAllRequests([]);
         }
-
-        setAllRequests(apiRequests);
       } else {
-        // Handle error responses
+        // Handle error responses (403, 401, etc.)
+        // eslint-disable-next-line no-console
+        console.error(`API request failed with status ${response.status}: ${response.statusText}`);
         setAllRequests([]);
       }
     } catch (error) {
