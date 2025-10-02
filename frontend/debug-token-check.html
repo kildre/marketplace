@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Debug Check</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .section {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        h2 {
+            color: #4ec9b0;
+            margin-top: 0;
+        }
+        pre {
+            background: #1e1e1e;
+            border: 1px solid #3e3e42;
+            padding: 10px;
+            overflow-x: auto;
+            border-radius: 4px;
+        }
+        .success { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .warning { color: #dcdcaa; }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Token Debug Tool</h1>
+    
+    <div class="section">
+        <h2>📦 LocalStorage Contents</h2>
+        <button onclick="checkLocalStorage()">Check Storage</button>
+        <button onclick="clearTokens()">Clear Tokens</button>
+        <pre id="storage-content">Click "Check Storage" to see what's stored...</pre>
+    </div>
+
+    <div class="section">
+        <h2>🔑 Token Details</h2>
+        <pre id="token-details">Waiting for token check...</pre>
+    </div>
+
+    <div class="section">
+        <h2>👤 Decoded Token (if valid JWT)</h2>
+        <pre id="decoded-token">Waiting for token check...</pre>
+    </div>
+
+    <div class="section">
+        <h2>🧪 Test API Call</h2>
+        <button onclick="testApiCall()">Test /api/requests/viewAll</button>
+        <pre id="api-result">Click button to test...</pre>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const storageContent = document.getElementById('storage-content');
+            const tokenDetails = document.getElementById('token-details');
+            const decodedToken = document.getElementById('decoded-token');
+            
+            try {
+                // Get all localStorage items
+                const allItems = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key) {
+                        const value = localStorage.getItem(key);
+                        allItems[key] = value?.substring(0, 100) + (value && value.length > 100 ? '...' : '');
+                    }
+                }
+                
+                storageContent.innerHTML = JSON.stringify(allItems, null, 2);
+                
+                // Check specific token keys
+                const token = localStorage.getItem('marketplace_auth_token');
+                const refreshToken = localStorage.getItem('marketplace_refresh_token');
+                const userInfo = localStorage.getItem('marketplace_user_info');
+                
+                let details = '';
+                if (token) {
+                    details += `✅ <span class="success">Auth Token Found</span>\n`;
+                    details += `   Length: ${token.length} characters\n`;
+                    details += `   Preview: ${token.substring(0, 50)}...\n\n`;
+                } else {
+                    details += `❌ <span class="error">Auth Token NOT Found</span>\n\n`;
+                }
+                
+                if (refreshToken) {
+                    details += `✅ <span class="success">Refresh Token Found</span>\n`;
+                } else {
+                    details += `❌ <span class="error">Refresh Token NOT Found</span>\n\n`;
+                }
+                
+                if (userInfo) {
+                    details += `✅ <span class="success">User Info Found</span>\n`;
+                    details += `   ${userInfo}\n`;
+                } else {
+                    details += `❌ <span class="error">User Info NOT Found</span>\n`;
+                }
+                
+                tokenDetails.innerHTML = details;
+                
+                // Try to decode JWT
+                if (token) {
+                    try {
+                        const parts = token.split('.');
+                        if (parts.length === 3) {
+                            const payload = JSON.parse(atob(parts[1]));
+                            decodedToken.innerHTML = JSON.stringify(payload, null, 2);
+                            
+                            // Check expiration
+                            if (payload.exp) {
+                                const expiryDate = new Date(payload.exp * 1000);
+                                const now = new Date();
+                                if (expiryDate < now) {
+                                    decodedToken.innerHTML += `\n\n<span class="error">⚠️ TOKEN EXPIRED at ${expiryDate.toISOString()}</span>`;
+                                } else {
+                                    decodedToken.innerHTML += `\n\n<span class="success">✅ Token valid until ${expiryDate.toISOString()}</span>`;
+                                }
+                            }
+                        } else {
+                            decodedToken.innerHTML = '<span class="error">Not a valid JWT format</span>';
+                        }
+                    } catch (e) {
+                        decodedToken.innerHTML = `<span class="error">Failed to decode: ${e.message}</span>`;
+                    }
+                } else {
+                    decodedToken.innerHTML = '<span class="error">No token to decode</span>';
+                }
+                
+            } catch (error) {
+                storageContent.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+        
+        function clearTokens() {
+            if (confirm('Clear all marketplace tokens?')) {
+                localStorage.removeItem('marketplace_auth_token');
+                localStorage.removeItem('marketplace_refresh_token');
+                localStorage.removeItem('marketplace_user_info');
+                alert('Tokens cleared! Refresh the page and log in again.');
+                checkLocalStorage();
+            }
+        }
+        
+        async function testApiCall() {
+            const apiResult = document.getElementById('api-result');
+            const token = localStorage.getItem('marketplace_auth_token');
+            
+            apiResult.innerHTML = '🔄 Testing API call...\n';
+            
+            try {
+                const url = 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api/requests/viewAll';
+                
+                apiResult.innerHTML += `\nURL: ${url}\n`;
+                apiResult.innerHTML += `Token: ${token ? 'Present (' + token.length + ' chars)' : 'MISSING'}\n`;
+                apiResult.innerHTML += `\nMaking request...\n`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify({
+                        userEmail: 'test@example.com'
+                    })
+                });
+                
+                apiResult.innerHTML += `\nStatus: ${response.status} ${response.statusText}\n`;
+                
+                const responseText = await response.text();
+                apiResult.innerHTML += `\nResponse:\n${responseText.substring(0, 500)}${responseText.length > 500 ? '...' : ''}\n`;
+                
+                if (response.status === 403) {
+                    apiResult.innerHTML += `\n<span class="error">❌ 403 Forbidden - Token is invalid, expired, or missing required roles</span>\n`;
+                } else if (response.status === 200) {
+                    apiResult.innerHTML += `\n<span class="success">✅ Success!</span>\n`;
+                }
+                
+            } catch (error) {
+                apiResult.innerHTML += `\n<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+        
+        // Auto-check on load
+        window.addEventListener('load', checkLocalStorage);
+    </script>
+</body>
+</html>
