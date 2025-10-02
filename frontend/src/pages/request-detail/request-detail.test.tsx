@@ -26,7 +26,7 @@ vi.mock("../../hooks/useAuth", () => ({
 
 // Mock API config
 vi.mock("@/utils/api-config", () => ({
-  getApiUrl: vi.fn((path: string) => `http://localhost:8081${path}`),
+  getApiUrl: vi.fn((path: string) => `http://localhost:8082${path}`),
 }));
 
 // Mock helper functions
