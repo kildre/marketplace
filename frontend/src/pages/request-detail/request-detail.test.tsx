@@ -24,6 +24,14 @@ vi.mock("../../hooks/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 
+// Mock AuthService
+const mockGetStoredToken = vi.fn();
+vi.mock("@/services/authService", () => ({
+  AuthService: {
+    getStoredToken: () => mockGetStoredToken(),
+  },
+}));
+
 // Mock API config
 vi.mock("@/utils/api-config", () => ({
   getApiUrl: vi.fn((path: string) => `http://localhost:8082${path}`),
@@ -796,6 +804,159 @@ describe("RequestDetail", () => {
       const statusDiv = screen.getByText(/Status:/);
       expect(statusDiv).toBeInTheDocument();
       expect(statusDiv).toHaveTextContent("Status: Pending");
+    });
+  });
+
+  describe("Authorization Header Tests", () => {
+    const validRequestId = "123"; // Using the ID from our mock data
+    
+    beforeEach(() => {
+      mockGetStoredToken.mockClear();
+      mockFetch.mockClear();
+    });
+
+    test("should include Authorization header when token exists for approvers", async () => {
+      const mockToken = "mock-jwt-token-approver";
+      mockGetStoredToken.mockReturnValue(mockToken);
+
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes("/api/requests/viewAll")) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                requests: [
+                  {
+                    requestNumber: validRequestId,
+                    requestorEmail: "test@army.mil",
+                    designation: "Military",
+                    agency: "Army",
+                    organization: "CDAO",
+                    cartItems: [{ name: "AWS", quantity: 1 }],
+                    statusId: 1,
+                    createdAt: "2024-01-01T00:00:00Z",
+                    updatedAt: "2024-01-01T00:00:00Z",
+                    decision: null,
+                  },
+                ],
+              }),
+          });
+        }
+        return Promise.resolve({ ok: false });
+      });
+
+      await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/requests/viewAll"),
+          expect.objectContaining({
+            method: "POST",
+            headers: expect.objectContaining({
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${mockToken}`,
+            }),
+          })
+        );
+      });
+    });
+
+    test("should include Authorization header when token exists for requestors", async () => {
+      const mockToken = "mock-jwt-token-requestor";
+      mockGetStoredToken.mockReturnValue(mockToken);
+
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes("/api/requests/viewForRequestor")) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                requests: [
+                  {
+                    requestNumber: validRequestId,
+                    requestorEmail: "joe.snuffy.ctr@army.mil",
+                    designation: "Contractor",
+                    agency: "Army",
+                    organization: "CDAO",
+                    cartItems: [{ name: "AWS", quantity: 1 }],
+                    statusId: 1,
+                    createdAt: "2024-01-01T00:00:00Z",
+                    updatedAt: "2024-01-01T00:00:00Z",
+                    decision: null,
+                  },
+                ],
+              }),
+          });
+        }
+        return Promise.resolve({ ok: false });
+      });
+
+      await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.REQUESTOR);
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/requests/viewForRequestor"),
+          expect.objectContaining({
+            method: "POST",
+            headers: expect.objectContaining({
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${mockToken}`,
+            }),
+          })
+        );
+      });
+    });
+
+    test("should not include Authorization header when no token exists", async () => {
+      mockGetStoredToken.mockReturnValue(null);
+
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes("/api/requests/viewAll")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ requests: [] }),
+          });
+        }
+        return Promise.resolve({ ok: false });
+      });
+
+      await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/requests/viewAll"),
+          expect.objectContaining({
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+        );
+      });
+    });
+
+    test("should display error message when API returns 403 Forbidden", async () => {
+      mockGetStoredToken.mockReturnValue("invalid-token");
+
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes("/api/requests/viewAll")) {
+          return Promise.resolve({
+            ok: false,
+            status: 403,
+            json: () => Promise.resolve({ errMsg: "Forbidden" }),
+          });
+        }
+        return Promise.resolve({ ok: false });
+      });
+
+      await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.APPROVER);
+
+      // Should show loading state then no request found
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Loading request details...")
+        ).not.toBeInTheDocument();
+      });
     });
   });
 });

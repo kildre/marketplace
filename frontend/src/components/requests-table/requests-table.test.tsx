@@ -90,6 +90,14 @@ vi.mock("../../hooks/useAuth", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+// Mock AuthService
+const mockGetStoredToken = vi.fn();
+vi.mock("@/services/authService", () => ({
+  AuthService: {
+    getStoredToken: () => mockGetStoredToken(),
+  },
+}));
+
 // Mock react-router-dom navigate
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
@@ -109,6 +117,10 @@ describe("RequestsTable", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockNavigate.mockClear();
+    mockGetStoredToken.mockClear();
+    
+    // Mock fetch globally
+    window.fetch = vi.fn();
   });
 
   const mockRequestorAuth = {
@@ -641,6 +653,122 @@ describe("RequestsTable", () => {
         </TestWrapper>
       );
 
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Authorization Header Tests", () => {
+    it("should include Authorization header when token exists for approvers", async () => {
+      const mockToken = "mock-jwt-token-12345";
+      mockGetStoredToken.mockReturnValue(mockToken);
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ requests: [] }),
+      });
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/requests/viewAll"),
+          expect.objectContaining({
+            method: "POST",
+            headers: expect.objectContaining({
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${mockToken}`,
+            }),
+          })
+        );
+      });
+    });
+
+    it("should include Authorization header when token exists for requestors", async () => {
+      const mockToken = "mock-jwt-token-67890";
+      mockGetStoredToken.mockReturnValue(mockToken);
+      mockUseAuth.mockReturnValue(mockRequestorAuth);
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ requests: [] }),
+      });
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/requests/viewForRequestor"),
+          expect.objectContaining({
+            method: "POST",
+            headers: expect.objectContaining({
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${mockToken}`,
+            }),
+          })
+        );
+      });
+    });
+
+    it("should not include Authorization header when no token exists", async () => {
+      mockGetStoredToken.mockReturnValue(null);
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ requests: [] }),
+      });
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining("/api/requests/viewAll"),
+          expect.objectContaining({
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+        );
+      });
+    });
+
+    it("should handle 403 Forbidden errors gracefully", async () => {
+      mockGetStoredToken.mockReturnValue("invalid-token");
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 403,
+        json: async () => ({ errMsg: "Forbidden" }),
+      });
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      // Component should handle the error and render empty grid
       await waitFor(() => {
         expect(screen.getByRole("grid")).toBeInTheDocument();
       });

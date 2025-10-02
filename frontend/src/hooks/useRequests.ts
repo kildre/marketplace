@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { useRequestsRefresh } from "./useRequestsRefresh";
 import { getApiUrl } from "@/utils/api-config";
+import { AuthService } from "@/services/authService";
 
 export const useRequests = (
   overrideUserId?: string,
@@ -72,10 +73,12 @@ export const useRequests = (
 
       if (currentIsApprover) {
         // Approvers can see all requests
+        const token = AuthService.getStoredToken();
         response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             userEmail: userInfo.email,
@@ -83,12 +86,14 @@ export const useRequests = (
         });
       } else if (currentIsRequestor) {
         // Requestors see only their own requests
+        const token = AuthService.getStoredToken();
         response = await window.fetch(
           getApiUrl("/api/requests/viewForRequestor"),
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              ...(token ? { "Authorization": `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({
               userEmail: actualUserId || userInfo.email, // Use actualUserId if available
