@@ -14,6 +14,7 @@ import {
 } from "@/utils/helper-functions";
 import { mockProducts } from "@/data/mock-productData";
 import { getApiUrl } from "@/utils/api-config";
+import { AuthService } from "@/services/authService";
 
 // Transform API response to RequestData format (similar to useRequestsData)
 const transformApiRequestToRequestData = (
@@ -173,10 +174,12 @@ export const RequestDetail = (): React.ReactElement => {
 
         if (hasRole(AppRoles.APPROVER)) {
           // Approvers can see all requests
+          const token = AuthService.getStoredToken();
           response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              ...(token ? { "Authorization": `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({
               userEmail: userInfo.email,
@@ -184,12 +187,14 @@ export const RequestDetail = (): React.ReactElement => {
           });
         } else {
           // Requestors see only their own requests
+          const token = AuthService.getStoredToken();
           response = await window.fetch(
             getApiUrl("/api/requests/viewForRequestor"),
             {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                ...(token ? { "Authorization": `Bearer ${token}` } : {}),
               },
               body: JSON.stringify({
                 userEmail: userInfo.email,

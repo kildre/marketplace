@@ -8,6 +8,7 @@ import { RequestsTableProps } from "../../interfaces/interfaceStore";
 import { calculateEstimatedCost } from "../../utils/helper-functions";
 import { mockProducts } from "../../data/mock-productData";
 import { getApiUrl } from "@/utils/api-config";
+import { AuthService } from "@/services/authService";
 
 // Transform Product data to RequestData format
 const getStatusColor = (
@@ -50,10 +51,12 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
       if (currentIsApprover) {
         // Approvers can see all requests, pass their email
+        const token = AuthService.getStoredToken();
         response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             userEmail: currentUserInfo.email,
@@ -61,12 +64,14 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         });
       } else {
         // Requestors see only their own requests
+        const token = AuthService.getStoredToken();
         response = await window.fetch(
           getApiUrl("/api/requests/viewForRequestor"),
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              ...(token ? { "Authorization": `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({
               userEmail: currentUserInfo.email,
@@ -105,6 +110,13 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       fetchRequests();
     }
   }, [fetchRequests, data]);
+
+  // Update allRequests state when data prop changes
+  React.useEffect(() => {
+    if (data) {
+      setAllRequests(data);
+    }
+  }, [data]);
 
   // Convert to format expected by DataGrid - ensure allRequests is always an array
   const safeRequests = Array.isArray(allRequests) ? allRequests : [];
