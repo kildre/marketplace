@@ -20,9 +20,11 @@ const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
 
 // Keycloak initialization options
 const keycloakInitOptions = {
-  onLoad: "login-required", // Forces login on app load
+  onLoad: "login-required" as const, // Forces login on app load
   checkLoginIframe: false, // Disable iframe-based check for better performance
-  pkceMethod: "S256", // Use PKCE for enhanced security
+  pkceMethod: "S256" as const, // Use PKCE for enhanced security
+  flow: "standard" as const, // Use standard authorization code flow (NOT implicit)
+  // This ensures tokens are stored in memory (keycloak.token) not just in cookies
 };
 
 // Loading component while Keycloak initializes
@@ -77,17 +79,37 @@ if (bypassAuth) {
   // Production mode with Keycloak - import only when needed
   import("./keycloak")
     .then(({ default: keycloak }) => {
+      // eslint-disable-next-line no-console
+      console.log("[main] Keycloak instance created, initializing...");
+      
       // Token capture callback - Keycloak manages tokens in memory/cookies
       // We only need to store user info for quick access
       const handleTokens = (tokens: { token?: string; refreshToken?: string; idToken?: string }) => {
+        // eslint-disable-next-line no-console
+        console.log("[main] onTokens callback fired:", {
+          hasToken: !!tokens.token,
+          hasRefreshToken: !!tokens.refreshToken,
+          hasIdToken: !!tokens.idToken,
+          tokenLength: tokens.token?.length,
+        });
+        
         if (tokens.token && keycloak.tokenParsed) {
           // Extract and store user info from the token (for role checks)
           const userInfo = AuthService.createUserInfoFromToken(keycloak.tokenParsed);
           AuthService.storeUserInfo(userInfo);
           
+          // eslint-disable-next-line no-console
+          console.log("[main] User info stored:", {
+            email: userInfo.email,
+            roles: userInfo.roles,
+          });
+          
           // NOTE: We do NOT store the token in localStorage
           // Keycloak manages tokens in memory and cookies automatically
           // Always use keycloak.token to get the current (potentially refreshed) token
+        } else {
+          // eslint-disable-next-line no-console
+          console.warn("[main] onTokens called but no token or tokenParsed available");
         }
       };
 
