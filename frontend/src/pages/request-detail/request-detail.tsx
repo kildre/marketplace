@@ -3,6 +3,7 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { PageTitle } from "../../components/page-title/page-title";
 import { RequestDetailView } from "../../components/common/request-detail-view";
 import { useAuth } from "@/hooks/useAuth";
+import { useKeycloak } from "@/hooks/useKeycloak";
 import { AppRoles } from "@/types/auth";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Button } from "@mui/material";
@@ -14,7 +15,6 @@ import {
 } from "@/utils/helper-functions";
 import { mockProducts } from "@/data/mock-productData";
 import { getApiUrl } from "@/utils/api-config";
-import { AuthService } from "@/services/authService";
 
 // Transform API response to RequestData format (similar to useRequestsData)
 const transformApiRequestToRequestData = (
@@ -131,6 +131,7 @@ export const RequestDetail = (): React.ReactElement => {
   const requestId = searchParams.get("id");
   const userId = searchParams.get("userId"); // Get userId from URL
   const { hasRole, getUserInfo } = useAuth();
+  const { keycloak } = useKeycloak();
   const [request, setRequest] = useState<RequestData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -174,7 +175,8 @@ export const RequestDetail = (): React.ReactElement => {
 
         if (hasRole(AppRoles.APPROVER)) {
           // Approvers can see all requests
-          const token = AuthService.getStoredToken();
+          // Get token directly from keycloak instance (not from localStorage)
+          const token = keycloak.token;
           response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
             method: "POST",
             headers: {
@@ -187,7 +189,8 @@ export const RequestDetail = (): React.ReactElement => {
           });
         } else {
           // Requestors see only their own requests
-          const token = AuthService.getStoredToken();
+          // Get token directly from keycloak instance (not from localStorage)
+          const token = keycloak.token;
           response = await window.fetch(
             getApiUrl("/api/requests/viewForRequestor"),
             {

@@ -2,13 +2,14 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { useRequestsRefresh } from "./useRequestsRefresh";
 import { getApiUrl } from "@/utils/api-config";
-import { AuthService } from "@/services/authService";
+import { useKeycloak } from "./useKeycloak";
 
 export const useRequests = (
   overrideUserId?: string,
   enabled: boolean = false
 ) => {
   const { getUserInfo, isApprover, isRequestor } = useAuth();
+  const { keycloak } = useKeycloak();
   const { subscribe } = useRequestsRefresh();
   const [allRequests, setAllRequests] = useState<Record<string, unknown>[]>([]);
 
@@ -73,7 +74,8 @@ export const useRequests = (
 
       if (currentIsApprover) {
         // Approvers can see all requests
-        const token = AuthService.getStoredToken();
+        // Get token directly from keycloak instance (not from localStorage)
+        const token = keycloak.token;
         response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
           headers: {
@@ -86,7 +88,8 @@ export const useRequests = (
         });
       } else if (currentIsRequestor) {
         // Requestors see only their own requests
-        const token = AuthService.getStoredToken();
+        // Get token directly from keycloak instance (not from localStorage)
+        const token = keycloak.token;
         response = await window.fetch(
           getApiUrl("/api/requests/viewForRequestor"),
           {
@@ -126,7 +129,7 @@ export const useRequests = (
       console.error("Error fetching requests:", error);
       setAllRequests([]);
     }
-  }, [actualUserId]); // Include actualUserId as dependency
+  }, [actualUserId, keycloak]); // Include keycloak to ensure we have the token
 
   useEffect(() => {
     if (enabled) {

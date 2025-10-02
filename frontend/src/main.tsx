@@ -10,6 +10,7 @@ import {
   MockUserSwitcher,
 } from "./contexts/EnhancedMockKeycloakProvider";
 import { queryClient } from "./lib/queryClient";
+import { AuthService } from "./services/authService";
 import "./styles/main.scss";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
@@ -76,6 +77,20 @@ if (bypassAuth) {
   // Production mode with Keycloak - import only when needed
   import("./keycloak")
     .then(({ default: keycloak }) => {
+      // Token capture callback - Keycloak manages tokens in memory/cookies
+      // We only need to store user info for quick access
+      const handleTokens = (tokens: { token?: string; refreshToken?: string; idToken?: string }) => {
+        if (tokens.token && keycloak.tokenParsed) {
+          // Extract and store user info from the token (for role checks)
+          const userInfo = AuthService.createUserInfoFromToken(keycloak.tokenParsed);
+          AuthService.storeUserInfo(userInfo);
+          
+          // NOTE: We do NOT store the token in localStorage
+          // Keycloak manages tokens in memory and cookies automatically
+          // Always use keycloak.token to get the current (potentially refreshed) token
+        }
+      };
+
       root.render(
         <React.StrictMode>
           <QueryClientProvider client={queryClient}>
@@ -83,6 +98,7 @@ if (bypassAuth) {
               authClient={keycloak}
               initOptions={keycloakInitOptions}
               LoadingComponent={LoadingComponent}
+              onTokens={handleTokens}
             >
               <BrowserRouter>
                 <CartProvider>
