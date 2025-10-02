@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Refresh Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .log {
+            background: #2d2d2d;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .success { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .info { color: #569cd6; }
+    </style>
+</head>
+<body>
+    <h1>Keycloak Token Refresh Test</h1>
+    <p>Open this in your dev environment where Keycloak is loaded</p>
+    
+    <button onclick="checkToken()">Check Token</button>
+    <button onclick="testRefresh()">Test Refresh</button>
+    <button onclick="clearLogs()">Clear Logs</button>
+    
+    <div id="logs"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.insertBefore(logEntry, logs.firstChild);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        async function checkToken() {
+            try {
+                // Try to get keycloak from window (if loaded)
+                if (window.keycloak) {
+                    const token = window.keycloak.token;
+                    const tokenParsed = window.keycloak.tokenParsed;
+                    
+                    if (token) {
+                        log(`Token exists: ${token.substring(0, 30)}...`, 'success');
+                        log(`Token expires at: ${new Date(tokenParsed.exp * 1000).toLocaleString()}`, 'info');
+                        
+                        const now = Date.now() / 1000;
+                        const timeUntilExpiry = tokenParsed.exp - now;
+                        log(`Time until expiry: ${Math.floor(timeUntilExpiry / 60)} minutes`, 'info');
+                    } else {
+                        log('No token found', 'error');
+                    }
+                } else {
+                    log('Keycloak not loaded - are you in the app?', 'error');
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testRefresh() {
+            try {
+                if (window.keycloak) {
+                    log('Attempting token refresh...', 'info');
+                    
+                    const refreshed = await window.keycloak.updateToken(30);
+                    
+                    if (refreshed) {
+                        log('✅ Token was refreshed!', 'success');
+                        log(`New token: ${window.keycloak.token.substring(0, 30)}...`, 'success');
+                    } else {
+                        log('✅ Token is still valid (no refresh needed)', 'success');
+                    }
+                    
+                    const tokenParsed = window.keycloak.tokenParsed;
+                    log(`Token expires at: ${new Date(tokenParsed.exp * 1000).toLocaleString()}`, 'info');
+                } else {
+                    log('Keycloak not loaded - are you in the app?', 'error');
+                }
+            } catch (error) {
+                log(`❌ Token refresh failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check on load
+        setTimeout(checkToken, 500);
+    </script>
+</body>
+</html>

@@ -52,8 +52,21 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
       if (currentIsApprover) {
         // Approvers can see all requests, pass their email
-        // Get token directly from keycloak instance (not from localStorage)
+        // Refresh token before making API call to ensure it's valid
+        try {
+          const refreshed = await keycloak.updateToken(30); // Refresh if expires within 30 seconds
+          // eslint-disable-next-line no-console
+          console.log('[RequestsTable] Token refresh check:', refreshed ? 'Token was refreshed' : 'Token still valid');
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error("Failed to refresh token:", error);
+          setAllRequests(data || []);
+          return;
+        }
+        
         const token = keycloak.token;
+        // eslint-disable-next-line no-console
+        console.log('[RequestsTable] Using token for API call (first 20 chars):', token?.substring(0, 20) + '...');
         response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
           headers: {
@@ -66,8 +79,21 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         });
       } else {
         // Requestors see only their own requests
-        // Get token directly from keycloak instance (not from localStorage)
+        // Refresh token before making API call to ensure it's valid
+        try {
+          const refreshed = await keycloak.updateToken(30); // Refresh if expires within 30 seconds
+          // eslint-disable-next-line no-console
+          console.log('[RequestsTable] Token refresh check:', refreshed ? 'Token was refreshed' : 'Token still valid');
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error("Failed to refresh token:", error);
+          setAllRequests(data || []);
+          return;
+        }
+        
         const token = keycloak.token;
+        // eslint-disable-next-line no-console
+        console.log('[RequestsTable] Using token for API call (first 20 chars):', token?.substring(0, 20) + '...');
         response = await window.fetch(
           getApiUrl("/api/requests/viewForRequestor"),
           {

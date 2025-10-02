@@ -1,5 +1,6 @@
 import { AuthService } from "./authService";
 import { getApiUrl } from "../utils/api-config";
+import type { KeycloakInstance } from "keycloak-js";
 
 // Interface definitions for API requests and responses
 export interface SubmitRequestApiRequest {

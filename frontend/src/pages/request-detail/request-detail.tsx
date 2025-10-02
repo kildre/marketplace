@@ -175,7 +175,17 @@ export const RequestDetail = (): React.ReactElement => {
 
         if (hasRole(AppRoles.APPROVER)) {
           // Approvers can see all requests
-          // Get token directly from keycloak instance (not from localStorage)
+          // Refresh token before making API call to ensure it's valid
+          try {
+            await keycloak.updateToken(30); // Refresh if expires within 30 seconds
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error("Failed to refresh token:", error);
+            setLoading(false);
+            setError("Failed to refresh authentication token");
+            return;
+          }
+          
           const token = keycloak.token;
           response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
             method: "POST",
@@ -189,7 +199,17 @@ export const RequestDetail = (): React.ReactElement => {
           });
         } else {
           // Requestors see only their own requests
-          // Get token directly from keycloak instance (not from localStorage)
+          // Refresh token before making API call to ensure it's valid
+          try {
+            await keycloak.updateToken(30); // Refresh if expires within 30 seconds
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error("Failed to refresh token:", error);
+            setLoading(false);
+            setError("Failed to refresh authentication token");
+            return;
+          }
+          
           const token = keycloak.token;
           response = await window.fetch(
             getApiUrl("/api/requests/viewForRequestor"),
@@ -333,10 +353,26 @@ export const RequestDetail = (): React.ReactElement => {
     const updateRequest = async (statusId: number) => {
       const userInfo = getUserInfo();
       const computedDecisionNumber = generateRequestId(12);
+      
+      // Refresh token before making API call to ensure it's valid
+      try {
+        const refreshed = await keycloak.updateToken(30); // Refresh if expires within 30 seconds
+        // eslint-disable-next-line no-console
+        console.log('[RequestDetail] Token refresh check:', refreshed ? 'Token was refreshed' : 'Token still valid');
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to refresh token:", error);
+        throw new Error("Failed to refresh authentication token");
+      }
+      
+      const token = keycloak.token;
+      // eslint-disable-next-line no-console
+      console.log('[RequestDetail] Using token for decision API call (first 20 chars):', token?.substring(0, 20) + '...');
       const response = await window.fetch(getApiUrl("/api/decisions"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           decisionNumber: computedDecisionNumber,
