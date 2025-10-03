@@ -12,6 +12,10 @@ export const useRequests = (
   const { keycloak } = useKeycloak();
   const { subscribe } = useRequestsRefresh();
   const [allRequests, setAllRequests] = useState<Record<string, unknown>[]>([]);
+  
+  // Stabilize keycloak reference to prevent unnecessary re-renders
+  const keycloakToken = keycloak?.token;
+  const keycloakAuthenticated = keycloak?.authenticated;
 
   // Track user info changes to trigger re-renders in development mode
   const [userTracker, setUserTracker] = useState(0);
@@ -76,9 +80,9 @@ export const useRequests = (
         // Approvers can see all requests
         // eslint-disable-next-line no-console
         console.log("[useRequests] DEBUG - keycloak state:", {
-          authenticated: keycloak.authenticated,
-          hasToken: !!keycloak.token,
-          tokenLength: keycloak.token?.length,
+          authenticated: keycloakAuthenticated,
+          hasToken: !!keycloakToken,
+          tokenLength: keycloakToken?.length,
           tokenParsed: keycloak.tokenParsed ? "present" : "missing",
         });
         
@@ -108,8 +112,8 @@ export const useRequests = (
         if (!token) {
           // eslint-disable-next-line no-console
           console.error("[useRequests] CRITICAL: No token available! Keycloak state:", {
-            authenticated: keycloak.authenticated,
-            token: keycloak.token,
+            authenticated: keycloakAuthenticated,
+            token: keycloakToken,
             refreshToken: keycloak.refreshToken,
           });
           setAllRequests([]);
@@ -202,13 +206,13 @@ export const useRequests = (
       console.error("Error fetching requests:", error);
       setAllRequests([]);
     }
-  }, [actualUserId, keycloak, getUserInfo, isApprover, isRequestor]); // Include all dependencies
+  }, [actualUserId, keycloak]); // Don't include functions - they're called inside, not used as dependencies
 
   useEffect(() => {
     if (enabled) {
       fetchRequests();
     }
-  }, [fetchRequests, enabled, actualUserId]); // Include actualUserId to refetch when user changes
+  }, [fetchRequests, enabled]); // Remove actualUserId - it's already in fetchRequests dependencies
 
   // Subscribe to global refresh events
   useEffect(() => {
@@ -218,7 +222,7 @@ export const useRequests = (
       }
     });
     return unsubscribe;
-  }, [subscribe, fetchRequests, enabled, actualUserId]); // Include actualUserId to refetch when user changes
+  }, [subscribe, fetchRequests, enabled]); // Remove actualUserId - it's already in fetchRequests dependencies
 
   return {
     requestsCount: allRequests.length,
