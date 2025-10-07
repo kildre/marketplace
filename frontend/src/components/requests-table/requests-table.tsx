@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Chip, Button, Paper } from "@mui/material";
+import { Chip, Button, Paper, IconButton, Tooltip, Box } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -9,6 +9,7 @@ import { RequestsTableProps } from "../../interfaces/interfaceStore";
 import { calculateEstimatedCost } from "../../utils/helper-functions";
 import { mockProducts } from "../../data/mock-productData";
 import { getApiUrl } from "@/utils/api-config";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
 // Transform Product data to RequestData format
 const getStatusColor = (
@@ -35,6 +36,12 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   const { isApprover, getUserInfo } = useAuth();
   const { keycloak } = useKeycloak();
   const [allRequests, setAllRequests] = React.useState(data || []);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const [showLeftFade, setShowLeftFade] = React.useState(false);
+  const [showRightFade, setShowRightFade] = React.useState(false);
+  const [showResetButton, setShowResetButton] = React.useState(false);
+  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState({});
+  const [resetKey, setResetKey] = React.useState(0);
 
   // Fetch requests from API - memoized to prevent infinite loops
   const fetchRequests = React.useCallback(async () => {
@@ -139,6 +146,91 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       fetchRequests();
     }
   }, [fetchRequests, data]);
+
+  React.useEffect(() => {
+    // Update allRequests state when data prop changes
+    if (data) {
+      setAllRequests(data);
+    }
+  }, [data]);
+
+  // Handle scroll to show/hide fade indicators
+  const handleScroll = React.useCallback((event: Event) => {
+    const target = event.target as HTMLElement;
+    if (!target) return;
+
+    const scrollLeft = target.scrollLeft;
+    const scrollWidth = target.scrollWidth;
+    const clientWidth = target.clientWidth;
+
+    // Show left fade if scrolled right
+    setShowLeftFade(scrollLeft > 10);
+    
+    // Show right fade if not at the end
+    setShowRightFade(scrollLeft < scrollWidth - clientWidth - 10);
+    
+    // Show reset button if scrolled or content is wider than container
+    setShowResetButton(scrollLeft > 10 || scrollWidth > clientWidth);
+  }, []);
+
+  // Check if content overflows on mount and window resize
+  React.useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const checkOverflow = () => {
+      const scrollWidth = scrollContainer.scrollWidth;
+      const clientWidth = scrollContainer.clientWidth;
+      const hasOverflow = scrollWidth > clientWidth;
+      
+      setShowRightFade(hasOverflow);
+      setShowResetButton(hasOverflow || scrollContainer.scrollLeft > 10);
+    };
+
+    // Initial check
+    checkOverflow();
+
+    // Add scroll listener
+    scrollContainer.addEventListener('scroll', handleScroll as EventListener);
+
+    // Add resize listener
+    window.addEventListener('resize', checkOverflow);
+
+    // Use MutationObserver to detect when table content changes (e.g., column resize)
+    const observer = new MutationObserver(checkOverflow);
+    observer.observe(scrollContainer, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style'],
+    });
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll as EventListener);
+      window.removeEventListener('resize', checkOverflow);
+      observer.disconnect();
+    };
+  }, [handleScroll]);
+
+  // Reset table view - reset column widths and scroll position
+  const handleResetView = () => {
+    // Reset the DataGrid by changing the key, which forces a remount
+    setResetKey(prev => prev + 1);
+    
+    // Also reset scroll position
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+      window.setTimeout(() => {
+        if (scrollContainer.scrollLeft !== 0) {
+          scrollContainer.scrollLeft = 0;
+        }
+      }, 100);
+    }
+    
+    // Hide the reset button temporarily
+    setShowResetButton(false);
+  };
 
   // Update allRequests state when data prop changes
   React.useEffect(() => {
@@ -341,9 +433,86 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   };
 
   return (
-    <div style={{ width: "100%", marginBottom: "2rem" }}>
-      <Paper sx={{ width: "100%" }}>
+    <div style={{ width: "100%", marginBottom: "2rem", position: "relative" }}>
+      {/* Left fade gradient */}
+      {showLeftFade && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: "60px",
+            background: "linear-gradient(to right, rgba(255,255,255,0.95), transparent)",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        />
+      )}
+      
+      {/* Right fade gradient */}
+      {showRightFade && (
+        <Box
+          sx={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: "60px",
+            background: "linear-gradient(to left, rgba(255,255,255,0.95), transparent)",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        />
+      )}
+
+      {/* Reset View Button */}
+      {showResetButton && (
+        <Tooltip title="Reset Table View" placement="left">
+          <IconButton
+            onClick={handleResetView}
+            sx={{
+              position: "absolute",
+              bottom: "16px",
+              right: "16px",
+              zIndex: 20,
+              backgroundColor: "white",
+              boxShadow: 2,
+              "&:hover": {
+                backgroundColor: "#f5f5f5",
+                boxShadow: 4,
+              },
+            }}
+            size="small"
+          >
+            <RestartAltIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      <Paper 
+        ref={scrollContainerRef}
+        sx={{ 
+          width: "100%",
+          overflowX: "auto",
+          position: "relative",
+          "&::-webkit-scrollbar": {
+            height: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "#f1f1f1",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#bbb",
+            borderRadius: "4px",
+            "&:hover": {
+              backgroundColor: "#999",
+            },
+          },
+        }}
+      >
         <DataGrid
+          key={resetKey}
           rows={tableData}
           columns={getColumns()}
           slotProps={{
@@ -362,7 +531,17 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           disableRowSelectionOnClick
           hideFooterSelectedRowCount
           disableColumnResize={false}
+          columnVisibilityModel={columnVisibilityModel}
+          onColumnVisibilityModelChange={setColumnVisibilityModel}
           sx={{
+            minWidth: "100%",
+            width: "fit-content",
+            "& .MuiDataGrid-main": {
+              overflow: "visible",
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              overflow: "visible",
+            },
             "& .MuiDataGrid-footerContainer": {
               marginTop: 0,
               paddingTop: "8px",
