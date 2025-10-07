@@ -37,34 +37,17 @@ ingress:
           serviceType: ClusterIP
           serviceName: http
 
-# crossplane: 
-#   postgres:
-#     enabled: false
-#     apiVersion: database.advana.cdao.us/v1alpha1
-#     kind: Postgres
-#     metadata:
-#       name: "{{ $.Release.Name }}"
-#       namespace: "{{ $.Release.Name }}"
-#     spec:
-#       region: "{{ $.Values.global.awsRegion }}"
-#       dbName: "marketplace"
-#       allocatedStorage: 40  # units: GiB
-#       # deletionPolicy: Delete
-#       deletionPolicy: Orphan
-#       tags:
-#         application: "{{ $.Release.Name }}"
-#         description: "RDS Postgres for {{ $.Release.Name }}"
-#         poc: "yolo@foo.bar"
-#         pocTeam: "{{ $.Release.Name }} team"
-#       writeConnectionSecretToRef:
-#         name: secret-env-crossplane
-
 securityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  runAsNonRoot: true
   capabilities:
     drop:
       - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 podSecurityContext:
   # the node:node user defined in the chainguard base images is 65532:65532
@@ -73,6 +56,8 @@ podSecurityContext:
   runAsUser: 65532
   runAsGroup: 65532
   fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
 
 deployment:
   web:
@@ -89,58 +74,9 @@ deployment:
     podAnnotations:
       iam.amazonaws.com/role: aws-role-arn
     serviceAccountName: "{{ $.Release.Name }}"
-    # initContainer:
-    # 01-postgresql-advana-ready:
-    #   # postgres-ready script installed by @advana/sequelize module
-    #   args:
-    #     - node_modules/.bin/postgres-ready
-    #     - --host
-    #     - $(PG_HOST)
-    #     - --port
-    #     - $(PG_PORT)
-    #     - --database
-    #     - $(PG_UM_DB)
-    #     - --user
-    #     - $(PG_USER)
-    #     - --password
-    #     - $(PG_PASSWORD)
-    #   envFrom:
-    #     - secretRef:
-    #         name: public-env-db-postgresql
-    #     - secretRef:
-    #         name: secret-env-db-postgresql
-    #     - secretRef:
-    #         name: public-env-web
-
-    # 02-postgresql-app-ready: *postgresql-app-ready-init-container
-
-    # 03-postgresql-app-migration-ready:
-    #   # migration-ready script installed by @advana/sequelize module
-    #   args:
-    #     - node_modules/.bin/migration-ready
-    #   envFrom:
-    #     - secretRef:
-    #         name: public-env-db-postgresql
-    #     - secretRef:
-    #         name: secret-env-db-postgresql
-    #     - secretRef:
-    #         name: public-env-web
-
-    # 04-redis-ready:
-    #   # redis-ready script installed by @advana/redis-client module
-    #   args:
-    #     - node_modules/.bin/redis-ready
-    #   envFrom:
-    #     - secretRef:
-    #         name: public-env-db-redis
-    #     - secretRef:
-    #         name: secret-env-db-redis
-    #     - secretRef:
-    #         name: public-env-web
 
     container:
       web:
-        # args: ["./index.js"] # Removed - nginx doesn't need custom args
         envFrom:
           - secretRef:
               name: public-env-platform-ui
@@ -181,8 +117,6 @@ deployment:
           requests:
             cpu: 0
             memory: 0Mi
-        securityContext:
-          readOnlyRootFilesystem: false
     nodeSelector: {}
     tolerations: []
     affinity: {}
