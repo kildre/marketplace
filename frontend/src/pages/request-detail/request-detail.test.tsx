@@ -24,6 +24,21 @@ vi.mock("../../hooks/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 
+// Mock useKeycloak hook
+const mockUpdateToken = vi.fn().mockResolvedValue(true);
+const mockKeycloakObject = {
+  authenticated: true,
+  token: "mock-token",
+  tokenParsed: { preferred_username: "testuser" },
+  updateToken: mockUpdateToken,
+};
+vi.mock("../../hooks/useKeycloak", () => ({
+  useKeycloak: vi.fn(() => ({
+    keycloak: mockKeycloakObject,
+    initialized: true,
+  })),
+}));
+
 // Mock AuthService
 const mockGetStoredToken = vi.fn();
 vi.mock("@/services/authService", () => ({
@@ -182,6 +197,10 @@ describe("RequestDetail", () => {
       new window.URLSearchParams(),
       vi.fn(),
     ]);
+
+    // Reset updateToken mock
+    mockUpdateToken.mockClear();
+    mockUpdateToken.mockResolvedValue(true);
 
     // Default to APPROVER role unless specified otherwise
     mockUseAuth.mockReturnValue({
@@ -812,12 +831,16 @@ describe("RequestDetail", () => {
     
     beforeEach(() => {
       mockGetStoredToken.mockClear();
-      mockFetch.mockClear();
+      mockFetch.mockReset(); // Reset instead of clear to remove implementation
+      mockUpdateToken.mockClear();
+      mockUpdateToken.mockResolvedValue(true);
+      mockKeycloakObject.token = "mock-token"; // Reset to default token
     });
 
     test("should include Authorization header when token exists for approvers", async () => {
       const mockToken = "mock-jwt-token-approver";
       mockGetStoredToken.mockReturnValue(mockToken);
+      mockKeycloakObject.token = mockToken; // Set the keycloak token
 
       mockFetch.mockImplementation((url: string) => {
         if (url.includes("/api/requests/viewAll")) {
@@ -864,6 +887,7 @@ describe("RequestDetail", () => {
     test("should include Authorization header when token exists for requestors", async () => {
       const mockToken = "mock-jwt-token-requestor";
       mockGetStoredToken.mockReturnValue(mockToken);
+      mockKeycloakObject.token = mockToken; // Set the keycloak token
 
       mockFetch.mockImplementation((url: string) => {
         if (url.includes("/api/requests/viewForRequestor")) {
@@ -909,6 +933,7 @@ describe("RequestDetail", () => {
 
     test("should not include Authorization header when no token exists", async () => {
       mockGetStoredToken.mockReturnValue(null);
+      mockKeycloakObject.token = null as any; // Set keycloak token to null
 
       mockFetch.mockImplementation((url: string) => {
         if (url.includes("/api/requests/viewAll")) {

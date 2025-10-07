@@ -356,9 +356,7 @@ export const RequestDetail = (): React.ReactElement => {
       
       // Refresh token before making API call to ensure it's valid
       try {
-        const refreshed = await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-        // eslint-disable-next-line no-console
-        console.log('[RequestDetail] Token refresh check:', refreshed ? 'Token was refreshed' : 'Token still valid');
+        await keycloak.updateToken(30); // Refresh if expires within 30 seconds
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error("Failed to refresh token:", error);
@@ -366,8 +364,6 @@ export const RequestDetail = (): React.ReactElement => {
       }
       
       const token = keycloak.token;
-      // eslint-disable-next-line no-console
-      console.log('[RequestDetail] Using token for decision API call (first 20 chars):', token?.substring(0, 20) + '...');
       const response = await window.fetch(getApiUrl("/api/decisions"), {
         method: "POST",
         headers: {

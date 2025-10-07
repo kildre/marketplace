@@ -78,19 +78,9 @@ export const useRequests = (
 
       if (currentIsApprover) {
         // Approvers can see all requests
-        // eslint-disable-next-line no-console
-        console.log("[useRequests] DEBUG - keycloak state:", {
-          authenticated: keycloakAuthenticated,
-          hasToken: !!keycloakToken,
-          tokenLength: keycloakToken?.length,
-          tokenParsed: keycloak.tokenParsed ? "present" : "missing",
-        });
-        
         // Refresh token before making API call to ensure it's valid
         try {
-          const refreshed = await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-          // eslint-disable-next-line no-console
-          console.log("[useRequests] Token refresh result:", refreshed);
+          await keycloak.updateToken(30); // Refresh if expires within 30 seconds
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error("[useRequests] Failed to refresh token:", error);
@@ -102,13 +92,6 @@ export const useRequests = (
         // Get the fresh token from Keycloak (after potential refresh)
         const token = keycloak.token;
         
-        // eslint-disable-next-line no-console
-        console.log("[useRequests] Token after refresh:", {
-          hasToken: !!token,
-          tokenLength: token?.length,
-          first50Chars: token?.substring(0, 50),
-        });
-        
         if (!token) {
           // eslint-disable-next-line no-console
           console.error("[useRequests] CRITICAL: No token available! Keycloak state:", {
@@ -119,9 +102,6 @@ export const useRequests = (
           setAllRequests([]);
           return;
         }
-        
-        // eslint-disable-next-line no-console
-        console.log('[useRequests] Making API call with token to:', getApiUrl("/api/requests/viewAll"));
         
         response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
@@ -155,9 +135,6 @@ export const useRequests = (
           setAllRequests([]);
           return;
         }
-        
-        // eslint-disable-next-line no-console
-        console.log('[useRequests] Making API call with valid token');
         
         response = await window.fetch(
           getApiUrl("/api/requests/viewForRequestor"),

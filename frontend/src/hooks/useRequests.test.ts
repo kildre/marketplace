@@ -16,6 +16,21 @@ vi.mock("./useAuth", () => ({
   }),
 }));
 
+// Mock useKeycloak hook
+const mockUpdateToken = vi.fn().mockResolvedValue(true);
+const mockKeycloakObject = {
+  authenticated: true,
+  token: "mock-token",
+  tokenParsed: { preferred_username: "testuser" },
+  updateToken: mockUpdateToken,
+};
+vi.mock("./useKeycloak", () => ({
+  useKeycloak: vi.fn(() => ({
+    keycloak: mockKeycloakObject,
+    initialized: true,
+  })),
+}));
+
 // Mock AuthService
 const mockGetStoredToken = vi.fn();
 vi.mock("@/services/authService", () => ({
@@ -81,6 +96,9 @@ describe("useRequests", () => {
     vi.clearAllMocks();
     mockGetStoredToken.mockClear();
     mockSubscribe.mockClear();
+    mockUpdateToken.mockClear();
+    mockUpdateToken.mockResolvedValue(true);
+    mockKeycloakObject.token = "mock-token"; // Reset to default token
     window.fetch = vi.fn();
   });
 
@@ -88,6 +106,7 @@ describe("useRequests", () => {
     it("should include Authorization header when token exists for approvers", async () => {
       const mockToken = "mock-jwt-token-approver";
       mockGetStoredToken.mockReturnValue(mockToken);
+      mockKeycloakObject.token = mockToken; // Set the keycloak token
       mockGetUserInfo.mockReturnValue(mockApproverUserInfo);
       mockIsApprover.mockReturnValue(true);
       mockIsRequestor.mockReturnValue(false);
@@ -120,6 +139,7 @@ describe("useRequests", () => {
     it("should include Authorization header when token exists for requestors", async () => {
       const mockToken = "mock-jwt-token-requestor";
       mockGetStoredToken.mockReturnValue(mockToken);
+      mockKeycloakObject.token = mockToken; // Set the keycloak token
       mockGetUserInfo.mockReturnValue(mockRequestorUserInfo);
       mockIsApprover.mockReturnValue(false);
       mockIsRequestor.mockReturnValue(true);
@@ -148,8 +168,9 @@ describe("useRequests", () => {
       );
     });
 
-    it("should not include Authorization header when no token exists", async () => {
+    it("should not make API call when no token exists", async () => {
       mockGetStoredToken.mockReturnValue(null);
+      mockKeycloakObject.token = null as any; // Set keycloak token to null
       mockGetUserInfo.mockReturnValue(mockApproverUserInfo);
       mockIsApprover.mockReturnValue(true);
       mockIsRequestor.mockReturnValue(false);
@@ -163,18 +184,11 @@ describe("useRequests", () => {
       const { result } = renderHook(() => useRequests(undefined, true));
 
       await waitFor(() => {
-        expect(result.current.requests).toBeDefined();
+        expect(result.current.requests).toEqual([]);
       });
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/requests/viewAll"),
-        expect.objectContaining({
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-      );
+      // Fetch should NOT be called when there's no token
+      expect(mockFetch).not.toHaveBeenCalled();
     });
 
     it("should handle 403 Forbidden errors gracefully", async () => {

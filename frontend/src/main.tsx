@@ -79,30 +79,13 @@ if (bypassAuth) {
   // Production mode with Keycloak - import only when needed
   import("./keycloak")
     .then(({ default: keycloak }) => {
-      // eslint-disable-next-line no-console
-      console.log("[main] Keycloak instance created, initializing...");
-      
       // Token capture callback - Keycloak manages tokens in memory/cookies
       // We only need to store user info for quick access
       const handleTokens = (tokens: { token?: string; refreshToken?: string; idToken?: string }) => {
-        // eslint-disable-next-line no-console
-        console.log("[main] onTokens callback fired:", {
-          hasToken: !!tokens.token,
-          hasRefreshToken: !!tokens.refreshToken,
-          hasIdToken: !!tokens.idToken,
-          tokenLength: tokens.token?.length,
-        });
-        
         if (tokens.token && keycloak.tokenParsed) {
           // Extract and store user info from the token (for role checks)
           const userInfo = AuthService.createUserInfoFromToken(keycloak.tokenParsed);
           AuthService.storeUserInfo(userInfo);
-          
-          // eslint-disable-next-line no-console
-          console.log("[main] User info stored:", {
-            email: userInfo.email,
-            roles: userInfo.roles,
-          });
           
           // NOTE: We do NOT store the token in localStorage
           // Keycloak manages tokens in memory and cookies automatically

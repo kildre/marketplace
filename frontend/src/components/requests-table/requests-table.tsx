@@ -54,9 +54,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         // Approvers can see all requests, pass their email
         // Refresh token before making API call to ensure it's valid
         try {
-          const refreshed = await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-          // eslint-disable-next-line no-console
-          console.log('[RequestsTable] Token refresh check:', refreshed ? 'Token was refreshed' : 'Token still valid');
+          await keycloak.updateToken(30); // Refresh if expires within 30 seconds
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error("Failed to refresh token:", error);
@@ -65,8 +63,6 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         }
         
         const token = keycloak.token;
-        // eslint-disable-next-line no-console
-        console.log('[RequestsTable] Using token for API call (first 20 chars):', token?.substring(0, 20) + '...');
         response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
           method: "POST",
           headers: {
@@ -81,9 +77,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         // Requestors see only their own requests
         // Refresh token before making API call to ensure it's valid
         try {
-          const refreshed = await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-          // eslint-disable-next-line no-console
-          console.log('[RequestsTable] Token refresh check:', refreshed ? 'Token was refreshed' : 'Token still valid');
+          await keycloak.updateToken(30); // Refresh if expires within 30 seconds
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error("Failed to refresh token:", error);
@@ -92,8 +86,6 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         }
         
         const token = keycloak.token;
-        // eslint-disable-next-line no-console
-        console.log('[RequestsTable] Using token for API call (first 20 chars):', token?.substring(0, 20) + '...');
         response = await window.fetch(
           getApiUrl("/api/requests/viewForRequestor"),
           {

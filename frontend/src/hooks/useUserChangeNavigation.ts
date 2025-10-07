@@ -20,11 +20,7 @@ export const useUserChangeNavigation = () => {
         previousUserRef.current !== null &&
         previousUserRef.current !== currentUserKey
       ) {
-        // Navigate to home page when user changes
-        // eslint-disable-next-line no-console
-        console.log(
-          `🎭 User changed from "${previousUserRef.current}" to "${currentUserKey}", navigating to home page`
-        );
+
         navigate("/", { replace: true });
       }
 
