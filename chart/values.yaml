@@ -39,7 +39,7 @@ ingress:
 
 securityContext:
   allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false
   runAsUser: 65532
   runAsGroup: 65532
   runAsNonRoot: true
