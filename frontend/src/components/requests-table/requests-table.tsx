@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Chip, Button, Paper, IconButton, Tooltip, Box } from "@mui/material";
+import { Chip, Button, Paper, IconButton, Tooltip, Box } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -9,6 +10,7 @@ import { RequestsTableProps } from "../../interfaces/interfaceStore";
 import { calculateEstimatedCost } from "../../utils/helper-functions";
 import { mockProducts } from "../../data/mock-productData";
 import { getApiUrl } from "@/utils/api-config";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
 // Transform Product data to RequestData format
@@ -511,7 +513,86 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           },
         }}
       >
+    <div style={{ width: "100%", marginBottom: "2rem", position: "relative" }}>
+      {/* Left fade gradient */}
+      {showLeftFade && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: "60px",
+            background: "linear-gradient(to right, rgba(255,255,255,0.95), transparent)",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        />
+      )}
+      
+      {/* Right fade gradient */}
+      {showRightFade && (
+        <Box
+          sx={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: "60px",
+            background: "linear-gradient(to left, rgba(255,255,255,0.95), transparent)",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        />
+      )}
+
+      {/* Reset View Button */}
+      {showResetButton && (
+        <Tooltip title="Reset Table View" placement="left">
+          <IconButton
+            onClick={handleResetView}
+            sx={{
+              position: "absolute",
+              bottom: "16px",
+              right: "16px",
+              zIndex: 20,
+              backgroundColor: "white",
+              boxShadow: 2,
+              "&:hover": {
+                backgroundColor: "#f5f5f5",
+                boxShadow: 4,
+              },
+            }}
+            size="small"
+          >
+            <RestartAltIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      <Paper 
+        ref={scrollContainerRef}
+        sx={{ 
+          width: "100%",
+          overflowX: "auto",
+          position: "relative",
+          "&::-webkit-scrollbar": {
+            height: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "#f1f1f1",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#bbb",
+            borderRadius: "4px",
+            "&:hover": {
+              backgroundColor: "#999",
+            },
+          },
+        }}
+      >
         <DataGrid
+          key={resetKey}
           key={resetKey}
           rows={tableData}
           columns={getColumns()}
@@ -533,7 +614,17 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           disableColumnResize={false}
           columnVisibilityModel={columnVisibilityModel}
           onColumnVisibilityModelChange={setColumnVisibilityModel}
+          columnVisibilityModel={columnVisibilityModel}
+          onColumnVisibilityModelChange={setColumnVisibilityModel}
           sx={{
+            minWidth: "100%",
+            width: "fit-content",
+            "& .MuiDataGrid-main": {
+              overflow: "visible",
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              overflow: "visible",
+            },
             minWidth: "100%",
             width: "fit-content",
             "& .MuiDataGrid-main": {
