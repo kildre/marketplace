@@ -12,6 +12,7 @@ export const formKeys = {
   organization: ["form", "organization"] as const,
   requestDetails: ["form", "requestDetails"] as const,
   submissionAttempts: ["form", "submissionAttempts"] as const,
+  validationErrors: ["form", "validationErrors"] as const,
   all: ["form"] as const,
 };
 
@@ -222,5 +223,48 @@ export const useSubmissionAttempts = () => {
     hasAttemptedSubmission: submissionData.hasAttempted,
     markSubmissionAttempt: markSubmissionAttempt.mutate,
     resetSubmissionAttempts: resetSubmissionAttempts.mutate,
+  };
+};
+
+// Hook for tracking validation errors
+export const useValidationErrors = () => {
+  const queryClient = useQueryClient();
+
+  const {
+    data: validationData = { phoneError: "", emailError: "" },
+  } = useQuery({
+    queryKey: formKeys.validationErrors,
+    queryFn: () => ({ phoneError: "", emailError: "" }),
+    staleTime: Infinity,
+  });
+
+  const updateValidationErrors = useMutation({
+    mutationFn: async (data: { phoneError?: string; emailError?: string }) => {
+      const currentData = queryClient.getQueryData<{
+        phoneError: string;
+        emailError: string;
+      }>(formKeys.validationErrors) || { phoneError: "", emailError: "" };
+      return { ...currentData, ...data };
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(formKeys.validationErrors, data);
+    },
+  });
+
+  const resetValidationErrors = useMutation({
+    mutationFn: async () => ({ phoneError: "", emailError: "" }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(formKeys.validationErrors, data);
+    },
+  });
+
+  const hasValidationErrors = validationData.phoneError !== "" || validationData.emailError !== "";
+
+  return {
+    phoneError: validationData.phoneError,
+    emailError: validationData.emailError,
+    hasValidationErrors,
+    updateValidationErrors: updateValidationErrors.mutate,
+    resetValidationErrors: resetValidationErrors.mutate,
   };
 };
