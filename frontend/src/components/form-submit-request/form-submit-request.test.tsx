@@ -76,6 +76,7 @@ const mockSubmitMutation = {
 const mockUseFormData = vi.fn();
 const mockUseSubmitRequest = vi.fn();
 const mockMarkSubmissionAttempt = vi.fn();
+const mockUseValidationErrors = vi.fn();
 
 vi.mock("../../hooks/useFormQueries", () => ({
   useFormData: () => mockUseFormData(),
@@ -85,6 +86,7 @@ vi.mock("../../hooks/useFormQueries", () => ({
     markSubmissionAttempt: mockMarkSubmissionAttempt,
     resetSubmissionAttempts: vi.fn(),
   }),
+  useValidationErrors: () => mockUseValidationErrors(),
 }));
 
 describe("FormSubmitRequest", () => {
@@ -93,7 +95,8 @@ describe("FormSubmitRequest", () => {
   // Helper function to render component with different form data
   const renderFormSubmitRequest = (
     formDataOverrides = {},
-    submissionOverrides = {}
+    submissionOverrides = {},
+    validationErrorsOverrides = {}
   ) => {
     mockUseFormData.mockReturnValue({
       ...mockFormData,
@@ -103,6 +106,15 @@ describe("FormSubmitRequest", () => {
     mockUseSubmitRequest.mockReturnValue({
       ...mockSubmitMutation,
       ...submissionOverrides,
+    });
+
+    mockUseValidationErrors.mockReturnValue({
+      phoneError: "",
+      emailError: "",
+      hasValidationErrors: false,
+      updateValidationErrors: vi.fn(),
+      resetValidationErrors: vi.fn(),
+      ...validationErrorsOverrides,
     });
 
     return renderWithProviders(<FormSubmitRequest />);
@@ -268,6 +280,67 @@ describe("FormSubmitRequest", () => {
       });
       expect(submitButton).not.toBeDisabled();
       expect(submitButton).not.toHaveClass("button--disabled");
+    });
+
+    test("should be invalid when there is a phone validation error", async () => {
+      renderFormSubmitRequest(
+        { organization: "Army" },
+        {},
+        { 
+          phoneError: "Please enter a valid phone number",
+          hasValidationErrors: true 
+        }
+      );
+
+      const checkbox = screen.getByRole("checkbox");
+      await user.click(checkbox);
+
+      const submitButton = screen.getByRole("button", {
+        name: /submit request/i,
+      });
+      expect(submitButton).toBeDisabled();
+      expect(submitButton).toHaveClass("button--disabled");
+    });
+
+    test("should be invalid when there is an email validation error", async () => {
+      renderFormSubmitRequest(
+        { organization: "Army" },
+        {},
+        { 
+          emailError: "Please enter a valid email address",
+          hasValidationErrors: true 
+        }
+      );
+
+      const checkbox = screen.getByRole("checkbox");
+      await user.click(checkbox);
+
+      const submitButton = screen.getByRole("button", {
+        name: /submit request/i,
+      });
+      expect(submitButton).toBeDisabled();
+      expect(submitButton).toHaveClass("button--disabled");
+    });
+
+    test("should be invalid when there are both phone and email validation errors", async () => {
+      renderFormSubmitRequest(
+        { organization: "Army" },
+        {},
+        { 
+          phoneError: "Please enter a valid phone number",
+          emailError: "Please enter a valid email address",
+          hasValidationErrors: true 
+        }
+      );
+
+      const checkbox = screen.getByRole("checkbox");
+      await user.click(checkbox);
+
+      const submitButton = screen.getByRole("button", {
+        name: /submit request/i,
+      });
+      expect(submitButton).toBeDisabled();
+      expect(submitButton).toHaveClass("button--disabled");
     });
   });
 

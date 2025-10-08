@@ -6,6 +6,7 @@ import {
   useFormData,
   useSubmitRequest,
   useSubmissionAttempts,
+  useValidationErrors,
 } from "../../hooks/useFormQueries";
 import { SubmissionData } from "../../interfaces";
 import { generateRequestId } from "../../utils/helper-functions";
@@ -19,11 +20,17 @@ export const FormSubmitRequest = (): React.ReactElement => {
   const formData = useFormData();
   const submitMutation = useSubmitRequest();
   const { markSubmissionAttempt } = useSubmissionAttempts();
+  const { hasValidationErrors } = useValidationErrors();
 
   // Check if form is valid for submission
   const isFormValid = React.useMemo(() => {
     // If checkbox is not checked, form is invalid
     if (!checked) {
+      return false;
+    }
+
+    // If there are validation errors in phone or email, form is invalid
+    if (hasValidationErrors) {
       return false;
     }
 
@@ -41,7 +48,7 @@ export const FormSubmitRequest = (): React.ReactElement => {
     }
 
     return true;
-  }, [checked, formData.organization, formData.organizationOther]);
+  }, [checked, hasValidationErrors, formData.organization, formData.organizationOther]);
 
   // Navigate to requests page on successful submission
   React.useEffect(() => {

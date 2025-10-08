@@ -13,6 +13,7 @@ import {
   useOrganizationForm,
   useRequestDetailsForm,
   useSubmissionAttempts,
+  useValidationErrors,
 } from "../../hooks/useFormQueries";
 import { FormRequestDetailsProps } from "../../interfaces";
 
@@ -33,6 +34,12 @@ export const FormRequestDetails = ({
 
   const { hasAttemptedSubmission } = useSubmissionAttempts();
 
+  const { updateValidationErrors } = useValidationErrors();
+
+  // Validation state for phone and email
+  const [phoneError, setPhoneError] = React.useState<string>("");
+  const [emailError, setEmailError] = React.useState<string>("");
+
   // Use viewData for view mode, form data for edit mode
   const data =
     mode === "view" && viewData
@@ -47,6 +54,52 @@ export const FormRequestDetails = ({
         };
 
   const isViewMode = mode === "view";
+
+  // Validation functions
+  const validatePhoneNumber = (phone: string): boolean => {
+    if (!phone) {
+      setPhoneError("");
+      updateValidationErrors({ phoneError: "" });
+      return true; // Empty is valid (field is optional)
+    }
+    
+    // Phone number regex: supports various formats
+    // Examples: (123) 456-7890, 123-456-7890, 123.456.7890, 1234567890, +1 123 456 7890
+    const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/;
+    
+    if (!phoneRegex.test(phone)) {
+      const errorMsg = "Please enter a valid phone number";
+      setPhoneError(errorMsg);
+      updateValidationErrors({ phoneError: errorMsg });
+      return false;
+    }
+    
+    setPhoneError("");
+    updateValidationErrors({ phoneError: "" });
+    return true;
+  };
+
+  const validateEmail = (email: string): boolean => {
+    if (!email) {
+      setEmailError("");
+      updateValidationErrors({ emailError: "" });
+      return true; // Empty is valid (field is optional)
+    }
+    
+    // Email regex: standard email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!emailRegex.test(email)) {
+      const errorMsg = "Please enter a valid email address";
+      setEmailError(errorMsg);
+      updateValidationErrors({ emailError: errorMsg });
+      return false;
+    }
+    
+    setEmailError("");
+    updateValidationErrors({ emailError: "" });
+    return true;
+  };
 
   const handleOrganizationChange = (event: SelectChangeEvent<string>) => {
     const value = event.target.value as string;
@@ -74,9 +127,28 @@ export const FormRequestDetails = ({
 
   const handleFieldChange =
     (fieldName: string) => (e: React.ChangeEvent<{ value: string }>) => {
-      const update: Record<string, string> = { [fieldName]: e.target.value };
+      const value = e.target.value;
+      const update: Record<string, string> = { [fieldName]: value };
       updateRequestDetails(update);
+      
+      // Clear error when user is typing (don't validate on every keystroke)
+      if (fieldName === "pocPhone" && phoneError) {
+        setPhoneError("");
+        updateValidationErrors({ phoneError: "" });
+      } else if (fieldName === "pocEmail" && emailError) {
+        setEmailError("");
+        updateValidationErrors({ emailError: "" });
+      }
     };
+
+  // Handle blur events for validation
+  const handlePhoneBlur = () => {
+    validatePhoneNumber(data.pocPhone);
+  };
+
+  const handleEmailBlur = () => {
+    validateEmail(data.pocEmail);
+  };
 
   return (
     <div className="form-request-details__container">
@@ -190,9 +262,12 @@ export const FormRequestDetails = ({
                 type="tel"
                 size="small"
                 value={data.pocPhone}
+                error={!isViewMode && !!phoneError}
+                helperText={!isViewMode ? phoneError : ""}
                 onChange={
                   isViewMode ? undefined : handleFieldChange("pocPhone")
                 }
+                onBlur={isViewMode ? undefined : handlePhoneBlur}
               />
             </div>
             <div className="form-request-details__poc-detail-item">
@@ -205,9 +280,12 @@ export const FormRequestDetails = ({
                 type="email"
                 size="small"
                 value={data.pocEmail}
+                error={!isViewMode && !!emailError}
+                helperText={!isViewMode ? emailError : ""}
                 onChange={
                   isViewMode ? undefined : handleFieldChange("pocEmail")
                 }
+                onBlur={isViewMode ? undefined : handleEmailBlur}
               />
             </div>
           </div>
