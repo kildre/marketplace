@@ -1,6 +1,5 @@
 import { AuthService } from "./authService";
 import { getApiUrl } from "../utils/api-config";
-import type { KeycloakInstance } from "keycloak-js";
 
 // Interface definitions for API requests and responses
 export interface SubmitRequestApiRequest {
@@ -76,8 +75,6 @@ export class ApiService {
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      // eslint-disable-next-line no-console
-      console.log("Using bypass auth mode");
     } else {
       const token = AuthService.getStoredToken();
       if (token) {
@@ -119,13 +116,6 @@ export class ApiService {
   ): Promise<SubmitRequestApiResponse> {
     try {
       const headers = this.getAuthHeaders();
-
-      // eslint-disable-next-line no-console
-      console.log("Submitting request to:", getApiUrl("/api/requests"));
-      // eslint-disable-next-line no-console
-      console.log("Request data:", requestData);
-      // eslint-disable-next-line no-console
-      console.log("Headers:", headers);
 
       const response = await window.fetch(getApiUrl("/api/requests"), {
         method: "POST",

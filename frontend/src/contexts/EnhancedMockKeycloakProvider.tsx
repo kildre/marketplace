@@ -389,10 +389,6 @@ export const MockUserSwitcher: React.FC = () => {
 
             // Navigate to home page when user switches (in bypass auth mode)
             if (import.meta.env.VITE_BYPASS_AUTH === "true") {
-              // eslint-disable-next-line no-console
-              console.log(
-                `🎭 User switched to: ${newUserType}, navigating to home page`
-              );
               // Use window.location for immediate navigation since we can't use useNavigate hook here
               window.location.href = "/";
             }

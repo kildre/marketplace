@@ -90,6 +90,21 @@ vi.mock("../../hooks/useAuth", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+// Mock useKeycloak hook
+const mockUpdateToken = vi.fn().mockResolvedValue(true);
+const mockKeycloakObject = {
+  authenticated: true,
+  token: "mock-token",
+  tokenParsed: { preferred_username: "testuser" },
+  updateToken: mockUpdateToken,
+};
+vi.mock("../../hooks/useKeycloak", () => ({
+  useKeycloak: vi.fn(() => ({
+    keycloak: mockKeycloakObject,
+    initialized: true,
+  })),
+}));
+
 // Mock AuthService
 const mockGetStoredToken = vi.fn();
 vi.mock("@/services/authService", () => ({
@@ -118,6 +133,9 @@ describe("RequestsTable", () => {
     vi.clearAllMocks();
     mockNavigate.mockClear();
     mockGetStoredToken.mockClear();
+    mockUpdateToken.mockClear();
+    mockUpdateToken.mockResolvedValue(true);
+    mockKeycloakObject.token = "mock-token"; // Reset to default token
     
     // Mock fetch globally
     window.fetch = vi.fn();
@@ -663,6 +681,7 @@ describe("RequestsTable", () => {
     it("should include Authorization header when token exists for approvers", async () => {
       const mockToken = "mock-jwt-token-12345";
       mockGetStoredToken.mockReturnValue(mockToken);
+      mockKeycloakObject.token = mockToken; // Set the keycloak token
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
       const mockFetch = vi.fn().mockResolvedValue({
@@ -694,6 +713,7 @@ describe("RequestsTable", () => {
     it("should include Authorization header when token exists for requestors", async () => {
       const mockToken = "mock-jwt-token-67890";
       mockGetStoredToken.mockReturnValue(mockToken);
+      mockKeycloakObject.token = mockToken; // Set the keycloak token
       mockUseAuth.mockReturnValue(mockRequestorAuth);
 
       const mockFetch = vi.fn().mockResolvedValue({
@@ -724,6 +744,7 @@ describe("RequestsTable", () => {
 
     it("should not include Authorization header when no token exists", async () => {
       mockGetStoredToken.mockReturnValue(null);
+      mockKeycloakObject.token = null as any; // Set keycloak token to null
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
       const mockFetch = vi.fn().mockResolvedValue({
