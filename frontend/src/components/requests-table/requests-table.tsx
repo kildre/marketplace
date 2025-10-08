@@ -36,7 +36,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   const { isApprover, getUserInfo } = useAuth();
   const { keycloak } = useKeycloak();
   const [allRequests, setAllRequests] = React.useState(data || []);
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const scrollContainerRef = React.useRef<globalThis.HTMLDivElement>(null);
   const [showLeftFade, setShowLeftFade] = React.useState(false);
   const [showRightFade, setShowRightFade] = React.useState(false);
   const [showResetButton, setShowResetButton] = React.useState(false);
@@ -155,7 +155,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   }, [data]);
 
   // Handle scroll to show/hide fade indicators
-  const handleScroll = React.useCallback((event: Event) => {
+  const handleScroll = React.useCallback((event: globalThis.Event) => {
     const target = event.target as HTMLElement;
     if (!target) return;
 
@@ -191,13 +191,13 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
     checkOverflow();
 
     // Add scroll listener
-    scrollContainer.addEventListener('scroll', handleScroll as EventListener);
+    scrollContainer.addEventListener('scroll', handleScroll as globalThis.EventListener);
 
     // Add resize listener
     window.addEventListener('resize', checkOverflow);
 
     // Use MutationObserver to detect when table content changes (e.g., column resize)
-    const observer = new MutationObserver(checkOverflow);
+    const observer = new globalThis.MutationObserver(checkOverflow);
     observer.observe(scrollContainer, {
       childList: true,
       subtree: true,
@@ -206,7 +206,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
     });
 
     return () => {
-      scrollContainer.removeEventListener('scroll', handleScroll as EventListener);
+      scrollContainer.removeEventListener('scroll', handleScroll as globalThis.EventListener);
       window.removeEventListener('resize', checkOverflow);
       observer.disconnect();
     };
