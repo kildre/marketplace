@@ -11,5 +11,8 @@
     "docker:prune": "docker system prune -af",
     "docker:stop": "docker-compose stop",
     "docker:kill": "docker-compose kill"
+  },
+  "devDependencies": {
+    "sonarqube-scanner": "^4.3.2"
   }
 }
