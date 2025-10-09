@@ -348,6 +348,7 @@ describe("RoleBasedDemo", () => {
 
     test("should show environment variables in debug section", () => {
       // Use Vitest's environment variable mocking
+      vi.stubEnv("VITE_BYPASS_AUTH", "true");
       vi.stubEnv("VITE_MOCK_USER_ROLES", "marketplace-requestor");
 
       mockUseAuth.mockReturnValue({
