@@ -18,7 +18,20 @@ if [ -z "$SONAR_TOKEN" ]; then
   exit 1
 fi
 
-echo "Running SonarQube analysis..."
+echo "============================================"
+echo "Step 1: Running tests with coverage..."
+echo "============================================"
+cd frontend && npm run test:coverage
+if [ $? -ne 0 ]; then
+  echo "Error: Tests failed. Fix test failures before running SonarQube analysis."
+  exit 1
+fi
+cd ..
+
+echo ""
+echo "============================================"
+echo "Step 2: Running SonarQube analysis..."
+echo "============================================"
 echo "Project: $PROJECT_KEY"
 echo "Host: $SONAR_HOST_URL"
 
