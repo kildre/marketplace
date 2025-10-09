@@ -1,12 +1,22 @@
 #!/bin/bash
 
 # SonarQube Analysis Script
-# Replace SONAR_HOST_URL with your actual SonarQube server URL
-# Common values: http://localhost:9000 (local) or your hosted SonarQube URL
+# Set these environment variables before running:
+#   export SONAR_TOKEN="your-token-here"
+#   export SONAR_HOST_URL="https://sonarqube.cdao.us"
+# Or create a .env file and source it: source .env
 
-SONAR_HOST_URL="https://sonarqube.cdao.us/dashboard?branch=CA-579&id=tenant-metrostar-advana-marketplace&codeScope=overall"  # Update this with your actual SonarQube URL
-SONAR_TOKEN="sqp_11058430c61f5a81d802594adb6dcb61172003f8"
+# Default values (can be overridden by environment variables)
+SONAR_HOST_URL="${SONAR_HOST_URL:-https://sonarqube.cdao.us}"
 PROJECT_KEY="tenant-metrostar-advana-marketplace"
+
+# Check if token is set
+if [ -z "$SONAR_TOKEN" ]; then
+  echo "Error: SONAR_TOKEN environment variable is not set"
+  echo "Please set it with: export SONAR_TOKEN='your-token-here'"
+  echo "Or create a .env file with SONAR_TOKEN=your-token-here and run: source .env"
+  exit 1
+fi
 
 echo "Running SonarQube analysis..."
 echo "Project: $PROJECT_KEY"
