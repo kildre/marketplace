@@ -13,6 +13,13 @@
     "docker:kill": "docker-compose kill"
   },
   "devDependencies": {
-    "sonarqube-scanner": "^4.3.2"
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.5",
+    "@vitejs/plugin-react": "^4.4.1",
+    "sass": "^1.89.0",
+    "sonarqube-scanner": "^4.3.2",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }
