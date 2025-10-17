@@ -10,6 +10,11 @@
     "docker:build": "docker-compose up --build",
     "docker:prune": "docker system prune -af",
     "docker:stop": "docker-compose stop",
-    "docker:kill": "docker-compose kill"
+    "docker:kill": "docker-compose kill",
+    "sonar": "./run-sonar-analysis.sh",
+    "sonar:analyze": "npx sonarqube-scanner"
+  },
+  "devDependencies": {
+    "sonarqube-scanner": "^4.3.2"
   }
 }

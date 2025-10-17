@@ -81,6 +81,38 @@ From the root directory:
 - `npm run docker:build` - Build Docker image
 - `npm run docker:run` - Run Docker container
 
+### Code Quality & Analysis
+
+#### SonarQube Analysis
+
+This project uses SonarQube for code quality and security analysis. 
+
+**Quick Start:**
+```bash
+# Setup (first time only)
+source .env.sonar
+
+# Run analysis
+cd frontend
+npm run sonar
+```
+
+**Available Commands:**
+- `npm run sonar` - Full analysis (runs tests + coverage + scan)
+- `npm run sonar:quick` - Quick scan only (requires existing coverage)
+
+📖 **[Complete SonarQube Setup Guide](./SONARQUBE_COMPLETE_GUIDE.md)** - Comprehensive documentation for setup, configuration, and troubleshooting.
+
+**View Results:** [SonarQube Dashboard](https://sonarqube.cdao.us/dashboard?id=tenant-metrostar-advana-marketplace)
+
+#### Testing & Coverage
+
+- `npm run test` - Run all tests
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:a11y` - Run accessibility tests
+- `npm run lint` - Run ESLint
+
 ### Project Structure
 
 ```

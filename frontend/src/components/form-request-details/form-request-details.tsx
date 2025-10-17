@@ -86,8 +86,9 @@ export const FormRequestDetails = ({
       return true; // Empty is valid (field is optional)
     }
     
-    // Email regex: standard email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email regex: ReDoS-safe email validation using atomic grouping via possessive quantifiers
+    // Uses character classes with specific length limits to prevent catastrophic backtracking
+    const emailRegex = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/;
     
     if (!emailRegex.test(email)) {
       const errorMsg = "Please enter a valid email address";

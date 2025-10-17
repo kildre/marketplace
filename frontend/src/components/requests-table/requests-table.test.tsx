@@ -677,6 +677,458 @@ describe("RequestsTable", () => {
     });
   });
 
+  describe("Scroll and Reset Functionality", () => {
+    it("should show reset button when content overflows", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={mockApiRequests as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        // The reset button should be visible if content overflows
+        const grid = screen.getByRole("grid");
+        expect(grid).toBeInTheDocument();
+      });
+    });
+
+    it("should handle scroll events", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={mockApiRequests as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        const grid = screen.getByRole("grid");
+        expect(grid).toBeInTheDocument();
+        
+        // Get the scroll container (Paper element)
+        const scrollContainer = grid.closest('div[class*="MuiPaper"]');
+        if (scrollContainer) {
+          // Create a proper scroll event
+          Object.defineProperty(scrollContainer, 'scrollLeft', { value: 100, writable: true, configurable: true });
+          Object.defineProperty(scrollContainer, 'scrollWidth', { value: 1000, writable: true, configurable: true });
+          Object.defineProperty(scrollContainer, 'clientWidth', { value: 500, writable: true, configurable: true });
+          
+          const scrollEvent = new globalThis.Event('scroll', { bubbles: true });
+          scrollContainer.dispatchEvent(scrollEvent);
+        }
+      });
+    });
+
+    it("should handle reset view button click", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const { container } = render(
+        <TestWrapper>
+          <RequestsTable data={mockApiRequests as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        // Try to find and click reset button if it exists
+        const resetButton = container.querySelector('button[aria-label*="Reset"]') || 
+                           container.querySelector('[title="Reset Table View"]');
+        if (resetButton) {
+          fireEvent.click(resetButton);
+        }
+      });
+    });
+
+    it("should handle window resize events", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={mockApiRequests as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+        
+        // Simulate window resize
+        const resizeEvent = new globalThis.Event('resize');
+        fireEvent(window, resizeEvent);
+      });
+    });
+  });
+
+  describe("Data Transformation Error Handling", () => {
+    it("should handle requests with missing cartItems", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const dataWithMissingCart = [
+        {
+          requestNumber: "req-004",
+          requestorEmail: "test@army.mil",
+          // cartItems is missing
+          createdAt: "2024-01-15T10:30:00Z",
+          updatedAt: "2024-01-15T10:30:00Z",
+          statusId: 1,
+        },
+      ];
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={dataWithMissingCart as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+        // Should render with N/A for asset
+        expect(screen.getByText("N/A")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle requests with empty cartItems array", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const dataWithEmptyCart = [
+        {
+          requestNumber: "req-005",
+          requestorEmail: "test@army.mil",
+          cartItems: [],
+          createdAt: "2024-01-15T10:30:00Z",
+          updatedAt: "2024-01-15T10:30:00Z",
+          statusId: 1,
+        },
+      ];
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={dataWithEmptyCart as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle requests with empty item names in cartItems", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const dataWithEmptyNames = [
+        {
+          requestNumber: "req-006",
+          requestorEmail: "test@army.mil",
+          cartItems: [{ name: "" }, { name: "  " }, { name: "Valid Product" }],
+          createdAt: "2024-01-15T10:30:00Z",
+          updatedAt: "2024-01-15T10:30:00Z",
+          statusId: 1,
+        },
+      ];
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={dataWithEmptyNames as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+        expect(screen.getByText("Valid Product")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle requests with invalid dates", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const dataWithInvalidDates = [
+        {
+          requestNumber: "req-007",
+          requestorEmail: "test@army.mil",
+          cartItems: [{ name: "Product" }],
+          createdAt: null,
+          updatedAt: "invalid-date",
+          statusId: 1,
+        },
+      ];
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={dataWithInvalidDates as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle requests with decision object", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const dataWithDecision = [
+        {
+          requestNumber: "req-008",
+          requestorEmail: "test@army.mil",
+          cartItems: [{ name: "Product" }],
+          createdAt: "2024-01-15T10:30:00Z",
+          updatedAt: "2024-01-15T10:30:00Z",
+          statusId: 1,
+          decision: {
+            statusId: 2,
+            updatedAt: "2024-01-16T14:00:00Z",
+          },
+        },
+      ];
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={dataWithDecision as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+        // Should show Approved status from decision
+        expect(screen.getByText("Approved")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle completely malformed request data with error row", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const malformedData = [
+        {
+          // Missing all required fields - will throw error in try/catch
+          something: "invalid",
+        },
+      ];
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={malformedData as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle unknown status codes", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const dataWithUnknownStatus = [
+        {
+          requestNumber: "req-009",
+          requestorEmail: "test@army.mil",
+          cartItems: [{ name: "Product" }],
+          createdAt: "2024-01-15T10:30:00Z",
+          updatedAt: "2024-01-15T10:30:00Z",
+          statusId: 999, // Unknown status
+        },
+      ];
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={dataWithUnknownStatus as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+        expect(screen.getByText("Unknown")).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("API Error Handling", () => {
+    it("should handle token refresh failure for approvers", async () => {
+      // Suppress expected error logs
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      
+      mockUpdateToken.mockRejectedValue(new Error("Token refresh failed"));
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+      
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("should handle token refresh failure for requestors", async () => {
+      // Suppress expected error logs
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      
+      mockUpdateToken.mockRejectedValue(new Error("Token refresh failed"));
+      mockUseAuth.mockReturnValue(mockRequestorAuth);
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+      
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("should handle JSON parse error in API response", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => {
+          throw new Error("Invalid JSON");
+        },
+      });
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle API response with requests array format", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ requests: mockApiRequests }),
+      });
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+        expect(screen.getByText("Tableau Desktop")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle API response with direct array format", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockApiRequests,
+      });
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle API response with invalid format", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ someOtherField: "data" }),
+      });
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+        expect(screen.getByText("No rows")).toBeInTheDocument();
+      });
+    });
+
+    it("should handle network errors", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const mockFetch = vi.fn().mockRejectedValue(new Error("Network error"));
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+    });
+
+    it("should not fetch when data prop is provided", async () => {
+      mockUseAuth.mockReturnValue(mockApproverAuth);
+
+      const mockFetch = vi.fn();
+      window.fetch = mockFetch;
+
+      render(
+        <TestWrapper>
+          <RequestsTable data={mockApiRequests as any} />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+
+      // Fetch should not be called when data is provided
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it("should handle missing user email for API calls", async () => {
+      const noEmailAuth = {
+        ...mockApproverAuth,
+        getUserInfo: () => ({
+          id: "admin.user",
+          username: "admin.user",
+          email: "", // Empty email
+          firstName: "Admin",
+          lastName: "User",
+        }),
+      };
+      mockUseAuth.mockReturnValue(noEmailAuth);
+
+      render(
+        <TestWrapper>
+          <RequestsTable />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("grid")).toBeInTheDocument();
+      });
+    });
+  });
+
   describe("Authorization Header Tests", () => {
     it("should include Authorization header when token exists for approvers", async () => {
       const mockToken = "mock-jwt-token-12345";

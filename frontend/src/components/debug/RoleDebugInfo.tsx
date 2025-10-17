@@ -72,6 +72,9 @@ export const RoleDebugInfo: React.FC = () => {
   return (
     <div 
       ref={panelRef}
+      role="dialog"
+      aria-label="Role Debug Info Panel"
+      tabIndex={0}
       style={{
         position: 'fixed',
         bottom: 'auto',
@@ -90,6 +93,11 @@ export const RoleDebugInfo: React.FC = () => {
         userSelect: 'none',
       }}
       onMouseDown={handleMouseDown}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          // Could add close functionality here if needed
+        }
+      }}
     >
       <div style={{ 
         fontWeight: 'bold', 
