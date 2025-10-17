@@ -10,16 +10,11 @@
     "docker:build": "docker-compose up --build",
     "docker:prune": "docker system prune -af",
     "docker:stop": "docker-compose stop",
-    "docker:kill": "docker-compose kill"
+    "docker:kill": "docker-compose kill",
+    "sonar": "./run-sonar-analysis.sh",
+    "sonar:analyze": "npx sonarqube-scanner"
   },
   "devDependencies": {
-    "@types/react": "^19.1.4",
-    "@types/react-dom": "^19.1.5",
-    "@vitejs/plugin-react": "^4.4.1",
-    "sass": "^1.89.0",
-    "sonarqube-scanner": "^4.3.2",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.5",
-    "vite-tsconfig-paths": "^5.1.4"
+    "sonarqube-scanner": "^4.3.2"
   }
 }

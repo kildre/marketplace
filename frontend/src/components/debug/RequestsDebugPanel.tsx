@@ -78,6 +78,9 @@ export const RequestsDebugPanel: React.FC<RequestsDebugProps> = ({
   return (
     <div 
       ref={panelRef}
+      role="dialog"
+      aria-label="Requests Debug Panel"
+      tabIndex={0}
       style={{
         position: 'fixed',
         bottom: 'auto',
@@ -96,6 +99,11 @@ export const RequestsDebugPanel: React.FC<RequestsDebugProps> = ({
         userSelect: 'none',
       }}
       onMouseDown={handleMouseDown}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          // Could add close functionality here if needed
+        }
+      }}
     >
       <div style={{ 
         fontWeight: 'bold', 

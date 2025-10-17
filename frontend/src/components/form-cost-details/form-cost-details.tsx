@@ -19,12 +19,12 @@ export const FormCostDetails = ({
             PRODUCTS REQUESTED<span>{summary.totalItems}</span>
           </p>
           <p>
-            APPLICATIONS PENDING PRICE
+            APPLICATIONS PENDING PRICE{" "}
             <span className="cost-warning">{summary.pendingPriceItems}</span>
           </p>
         </div>
         <h6>
-          Estimated ROM
+          Estimated ROM{" "}
           <span id="estimatedRom">{summary.estimatedROM}</span>
         </h6>
       </>
@@ -75,12 +75,12 @@ export const FormCostDetails = ({
           PRODUCTS REQUESTED<span>{cartCount}</span>
         </p>
         <p>
-          APPLICATIONS PENDING PRICE
+          APPLICATIONS PENDING PRICE{" "}
           <span className="cost-warning">{pendingPriceCount}</span>
         </p>
       </div>
       <h6>
-        Estimated ROM
+        Estimated ROM{" "}
         <span id="estimatedRom">{estimatedRom}</span>
       </h6>
     </>

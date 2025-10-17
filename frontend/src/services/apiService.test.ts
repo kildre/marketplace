@@ -9,10 +9,16 @@ vi.mock('../utils/api-config');
 
 describe('ApiService', () => {
   let mockFetch: ReturnType<typeof vi.fn>;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+  let consoleLogSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     // Reset all mocks before each test
     vi.clearAllMocks();
+    
+    // Mock console methods to suppress expected error/log outputs
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     
     // Mock getApiUrl to return a predictable URL
     vi.mocked(apiConfig.getApiUrl).mockImplementation((path: string) => `http://localhost:3000${path}`);
@@ -27,6 +33,8 @@ describe('ApiService', () => {
   });
 
   afterEach(() => {
+    consoleErrorSpy.mockRestore();
+    consoleLogSpy.mockRestore();
     vi.restoreAllMocks();
   });
 

@@ -59,17 +59,17 @@ describe("CustomMenuLogoSection", () => {
       // Check for DoD logo
       const dodLogo = screen.getByAltText("dod_logo");
       expect(dodLogo).toBeInTheDocument();
-      expect(dodLogo).toHaveAttribute("src", "/assets/images/DOD_color.png");
+      expect(dodLogo).toHaveAttribute("src", "/public/assets/images/DOD_color.png");
 
       // Check for CDAO logo
       const cdaoLogo = screen.getByAltText("cdao_logo");
       expect(cdaoLogo).toBeInTheDocument();
-      expect(cdaoLogo).toHaveAttribute("src", "/assets/images/cdao_Logo.png");
+      expect(cdaoLogo).toHaveAttribute("src", "/public/assets/images/cdao_Logo.png");
 
       // Check for Advana logo
-      const advanaLogo = screen.getByAltText("advana_logo");
+      const advanaLogo = screen.getByAltText("Advana logo");
       expect(advanaLogo).toBeInTheDocument();
-      expect(advanaLogo).toHaveAttribute("src", "/assets/images/AdvanaDarkTheme.png");
+      expect(advanaLogo).toHaveAttribute("src", "/public/assets/images/AdvanaDarkTheme.png");
     });
 
     it("renders with correct styling", () => {
@@ -77,7 +77,7 @@ describe("CustomMenuLogoSection", () => {
 
       const dodLogo = screen.getByAltText("dod_logo");
       const cdaoLogo = screen.getByAltText("cdao_logo");
-      const advanaLogo = screen.getByAltText("advana_logo");
+      const advanaLogo = screen.getByAltText("Advana logo");
 
       // Check logo dimensions
       expect(dodLogo).toHaveStyle({ width: "40px", height: "40px" });
@@ -88,7 +88,7 @@ describe("CustomMenuLogoSection", () => {
     it("handles Advana logo click navigation with default settings", () => {
       render(<CustomMenuLogoSection />);
 
-      const advanaLogo = screen.getByAltText("advana_logo");
+      const advanaLogo = screen.getByAltText("Advana logo");
       fireEvent.click(advanaLogo);
 
       expect(mockLocation.hash).toBe("#/");
@@ -102,7 +102,7 @@ describe("CustomMenuLogoSection", () => {
         />
       );
 
-      const advanaLogo = screen.getByAltText("advana_logo");
+      const advanaLogo = screen.getByAltText("Advana logo");
       fireEvent.click(advanaLogo);
 
       expect(mockLocation.href).toBe("https://custom.domain.com#/");
@@ -113,7 +113,7 @@ describe("CustomMenuLogoSection", () => {
       render(<CustomMenuLogoSection alternateLogo={alternateLogo} />);
 
       // Should not render default Advana logo
-      expect(screen.queryByAltText("advana_logo")).not.toBeInTheDocument();
+      expect(screen.queryByAltText("Advana logo")).not.toBeInTheDocument();
 
       // Should render alternate logo
       const customLogo = screen.getByAltText("alternate_logo");
@@ -127,21 +127,21 @@ describe("CustomMenuLogoSection", () => {
       render(<CustomMenuLogoSection enclave="jupiter" />);
 
       // Check for Jupiter logos
-      expect(screen.getByAltText("_navydeptlogo")).toBeInTheDocument();
-      expect(screen.getByAltText("_marineslogo")).toBeInTheDocument();
-      expect(screen.getByAltText("_navylogo")).toBeInTheDocument();
-      expect(screen.getByAltText("jupiter_logo")).toBeInTheDocument();
+      expect(screen.getByAltText("Navy Department logo")).toBeInTheDocument();
+      expect(screen.getByAltText("Marines logo")).toBeInTheDocument();
+      expect(screen.getByAltText("Navy logo")).toBeInTheDocument();
+      expect(screen.getByAltText("Jupiter logo")).toBeInTheDocument();
 
       // Should not render Advana logos
       expect(screen.queryByAltText("dod_logo")).not.toBeInTheDocument();
       expect(screen.queryByAltText("cdao_logo")).not.toBeInTheDocument();
-      expect(screen.queryByAltText("advana_logo")).not.toBeInTheDocument();
+      expect(screen.queryByAltText("Advana logo")).not.toBeInTheDocument();
     });
 
     it("handles Jupiter logo clicks with navigation", () => {
       render(<CustomMenuLogoSection enclave="jupiter" />);
 
-      const jupiterLogo = screen.getByAltText("jupiter_logo");
+      const jupiterLogo = screen.getByAltText("Jupiter logo");
       fireEvent.click(jupiterLogo);
 
       expect(mockLocation.hash).toBe("#/");
@@ -151,10 +151,10 @@ describe("CustomMenuLogoSection", () => {
       render(<CustomMenuLogoSection enclave="jupiter" />);
 
       const logos = [
-        screen.getByAltText("_navydeptlogo"),
-        screen.getByAltText("_marineslogo"),
-        screen.getByAltText("_navylogo"),
-        screen.getByAltText("jupiter_logo"),
+        screen.getByAltText("Navy Department logo"),
+        screen.getByAltText("Marines logo"),
+        screen.getByAltText("Navy logo"),
+        screen.getByAltText("Jupiter logo"),
       ];
 
       logos.forEach((logo) => {
@@ -180,7 +180,7 @@ describe("CustomMenuLogoSection", () => {
     it("handles CRA mode navigation correctly", () => {
       render(<CustomMenuLogoSection isCRA={true} />);
 
-      const advanaLogo = screen.getByAltText("advana_logo");
+      const advanaLogo = screen.getByAltText("Advana logo");
       fireEvent.click(advanaLogo);
 
       // In CRA mode, should use hash navigation
@@ -195,7 +195,7 @@ describe("CustomMenuLogoSection", () => {
         />
       );
 
-      const advanaLogo = screen.getByAltText("advana_logo");
+      const advanaLogo = screen.getByAltText("Advana logo");
       fireEvent.click(advanaLogo);
 
       // In non-CRA mode, should set href directly
@@ -229,7 +229,7 @@ describe("CustomMenuLogoSection", () => {
     it("maintains keyboard accessibility for clickable logos", () => {
       render(<CustomMenuLogoSection />);
       
-      const advanaLogo = screen.getByAltText("advana_logo");
+      const advanaLogo = screen.getByAltText("Advana logo");
       expect(advanaLogo).toHaveStyle({ cursor: "pointer" });
     });
   });
@@ -239,7 +239,7 @@ describe("CustomMenuLogoSection", () => {
       render(<CustomMenuLogoSection />);
       
       // Should render Advana enclave by default
-      expect(screen.getByAltText("advana_logo")).toBeInTheDocument();
+      expect(screen.getByAltText("Advana logo")).toBeInTheDocument();
     });
 
     it("handles all props correctly", () => {
@@ -254,7 +254,7 @@ describe("CustomMenuLogoSection", () => {
 
       // Should render alternate logo
       expect(screen.getByAltText("alternate_logo")).toBeInTheDocument();
-      expect(screen.queryByAltText("advana_logo")).not.toBeInTheDocument();
+      expect(screen.queryByAltText("Advana logo")).not.toBeInTheDocument();
     });
   });
 
@@ -264,36 +264,36 @@ describe("CustomMenuLogoSection", () => {
 
       expect(screen.getByAltText("dod_logo")).toHaveAttribute(
         "src",
-        "/assets/images/DOD_color.png"
+        "/public/assets/images/DOD_color.png"
       );
       expect(screen.getByAltText("cdao_logo")).toHaveAttribute(
         "src",
-        "/assets/images/cdao_Logo.png"
+        "/public/assets/images/cdao_Logo.png"
       );
-      expect(screen.getByAltText("advana_logo")).toHaveAttribute(
+      expect(screen.getByAltText("Advana logo")).toHaveAttribute(
         "src",
-        "/assets/images/AdvanaDarkTheme.png"
+        "/public/assets/images/AdvanaDarkTheme.png"
       );
     });
 
     it("uses correct image paths for Jupiter enclave", () => {
       renderWithRouter(<CustomMenuLogoSection enclave="jupiter" />);
 
-      expect(screen.getByAltText("_navydeptlogo")).toHaveAttribute(
+      expect(screen.getByAltText("Navy Department logo")).toHaveAttribute(
         "src",
-        "/assets/images/Jupiter_DON_logo.png"
+        "/public/assets/images/Jupiter_DON_logo.png"
       );
-      expect(screen.getByAltText("_marineslogo")).toHaveAttribute(
+      expect(screen.getByAltText("Marines logo")).toHaveAttribute(
         "src",
-        "/assets/images/Jupiter_USMC_logo.png"
+        "/public/assets/images/Jupiter_USMC_logo.png"
       );
-      expect(screen.getByAltText("_navylogo")).toHaveAttribute(
+      expect(screen.getByAltText("Navy logo")).toHaveAttribute(
         "src",
-        "/assets/images/Jupiter_USN_logo.png"
+        "/public/assets/images/Jupiter_USN_logo.png"
       );
-      expect(screen.getByAltText("jupiter_logo")).toHaveAttribute(
+      expect(screen.getByAltText("Jupiter logo")).toHaveAttribute(
         "src",
-        "/assets/images/Jupiter_logo.png"
+        "/public/assets/images/Jupiter_logo.png"
       );
     });
   });

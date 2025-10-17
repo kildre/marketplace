@@ -944,6 +944,9 @@ describe("RequestsTable", () => {
 
   describe("API Error Handling", () => {
     it("should handle token refresh failure for approvers", async () => {
+      // Suppress expected error logs
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      
       mockUpdateToken.mockRejectedValue(new Error("Token refresh failed"));
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
@@ -956,9 +959,14 @@ describe("RequestsTable", () => {
       await waitFor(() => {
         expect(screen.getByRole("grid")).toBeInTheDocument();
       });
+      
+      consoleErrorSpy.mockRestore();
     });
 
     it("should handle token refresh failure for requestors", async () => {
+      // Suppress expected error logs
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      
       mockUpdateToken.mockRejectedValue(new Error("Token refresh failed"));
       mockUseAuth.mockReturnValue(mockRequestorAuth);
 
@@ -971,6 +979,8 @@ describe("RequestsTable", () => {
       await waitFor(() => {
         expect(screen.getByRole("grid")).toBeInTheDocument();
       });
+      
+      consoleErrorSpy.mockRestore();
     });
 
     it("should handle JSON parse error in API response", async () => {

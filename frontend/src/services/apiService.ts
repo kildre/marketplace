@@ -68,18 +68,10 @@ export class ApiService {
       "Content-Type": "application/json",
     };
 
-    // In bypass auth mode, try to use mock user email
-    if (import.meta.env.VITE_BYPASS_AUTH === "true") {
-      // Still try to get the stored token from mock keycloak
-      const token = AuthService.getStoredToken();
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-    } else {
-      const token = AuthService.getStoredToken();
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
+    // Get the stored token (works in both normal and bypass auth mode)
+    const token = AuthService.getStoredToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
     return headers;

@@ -91,7 +91,7 @@ export const Footer = (): React.ReactElement => {
             rel="noopener noreferrer"
             className="footer-external-link"
           >
-            Visit https://www.ai.mil/
+            Visit https://www.ai.mil/{" "}
             <span className="footer-external__external-icon"></span>
           </a>
         </div>

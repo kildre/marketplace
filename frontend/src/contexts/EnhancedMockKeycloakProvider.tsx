@@ -342,6 +342,9 @@ export const MockUserSwitcher: React.FC = () => {
   return (
     <div
       ref={panelRef}
+      role="dialog"
+      aria-label="Mock User Debug Panel"
+      tabIndex={0}
       style={{
         position: "fixed",
         bottom: "auto",
@@ -359,6 +362,11 @@ export const MockUserSwitcher: React.FC = () => {
         userSelect: "none",
       }}
       onMouseDown={handleMouseDown}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          // Could add close functionality here if needed
+        }
+      }}
     >
       <div
         style={{
