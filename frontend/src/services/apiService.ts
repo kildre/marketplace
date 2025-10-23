@@ -1,5 +1,5 @@
 import { AuthService } from "./authService";
-import { getApiUrl } from "../utils/api-config";
+import { getEndpointUrl, isBypassAuth } from "../utils/api-config";
 
 // Interface definitions for API requests and responses
 export interface SubmitRequestApiRequest {
@@ -109,7 +109,7 @@ export class ApiService {
     try {
       const headers = this.getAuthHeaders();
 
-      const response = await window.fetch(getApiUrl("/api/requests"), {
+      const response = await window.fetch(getEndpointUrl("SUBMIT_REQUEST"), {
         method: "POST",
         headers: headers,
         body: JSON.stringify(requestData),
@@ -123,7 +123,7 @@ export class ApiService {
       console.error("Error submitting request:", error);
 
       // In development mode with bypass auth, return a mock success response
-      if (import.meta.env.VITE_BYPASS_AUTH === "true") {
+      if (isBypassAuth) {
         // eslint-disable-next-line no-console
         console.log(
           "API call failed in bypass auth mode, returning mock success response"
@@ -148,7 +148,7 @@ export class ApiService {
       const requestData: ViewRequestsApiRequest = { userEmail };
 
       const response = await window.fetch(
-        getApiUrl("/api/requests/viewForRequestor"),
+        getEndpointUrl("VIEW_FOR_REQUESTOR"),
         {
           method: "POST",
           headers: this.getAuthHeaders(),
@@ -173,14 +173,11 @@ export class ApiService {
     try {
       const requestData: ViewRequestsApiRequest = { userEmail };
 
-      const response = await window.fetch(
-        getApiUrl("/api/requests/viewPending"),
-        {
-          method: "POST",
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify(requestData),
-        }
-      );
+      const response = await window.fetch(getEndpointUrl("VIEW_PENDING"), {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(requestData),
+      });
 
       return this.handleResponse<ViewRequestsApiResponse>(response);
     } catch (error) {
@@ -199,7 +196,7 @@ export class ApiService {
     try {
       const requestData: ViewRequestsApiRequest = { userEmail };
 
-      const response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
+      const response = await window.fetch(getEndpointUrl("VIEW_ALL"), {
         method: "POST",
         headers: this.getAuthHeaders(),
         body: JSON.stringify(requestData),
