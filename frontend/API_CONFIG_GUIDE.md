@@ -166,7 +166,7 @@ import { logApiConfig } from "@/utils/api-config";
 logApiConfig();
 ```
 
-Output:
+**Output for localhost/development:**
 
 ```text
 📡 API Configuration
@@ -180,15 +180,272 @@ Output:
 Example endpoint: http://localhost:8082/api/requests
 ```
 
-### 2. Browser Console
+**Output for IL-2 environment:**
+
+```text
+📡 API Configuration
+┌────────────┬─────────────────────────┐
+│ (index)    │ Values                  │
+├────────────┼─────────────────────────┤
+│ mode       │ 'il2'                   │
+│ apiBaseUrl │ 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us' │
+│ bypassAuth │ false                   │
+└────────────┴─────────────────────────┘
+Example endpoint: https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api/requests
+```
+
+**Output for IL-5 environment (when available):**
+
+```text
+📡 API Configuration
+┌────────────┬─────────────────────────┐
+│ (index)    │ Values                  │
+├────────────┼─────────────────────────┤
+│ mode       │ 'il5'                   │
+│ apiBaseUrl │ 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us' │
+│ bypassAuth │ false                   │
+└────────────┴─────────────────────────┘
+Example endpoint: https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api/requests
+```
+
+**Note:** Currently IL-2 and IL-5 use the same endpoint. When IL-5 becomes available, update `.env.il5` with the proper IL-5 specific endpoints.
+
+### 2. Browser Console Debugging
+
+The application exposes debugging utilities via `window.debugAdvana` for easy testing:
 
 ```javascript
-// Check loaded environment variables
-console.log(import.meta.env);
+// ✅ View complete API configuration
+debugAdvana.logApiConfig()
 
-// Check specific variable
-console.log(import.meta.env.VITE_API_BASE_URL);
+// ✅ Get environment info
+debugAdvana.getEnvironmentInfo()
+
+// ✅ Test API URL generation
+debugAdvana.getApiUrl('/api/requests')
+
+// ✅ Access environment variables
+debugAdvana.env.VITE_API_BASE_URL
+debugAdvana.env.VITE_ENVIRONMENT_NAME
+debugAdvana.env.VITE_KEYCLOAK_URL
+
+```javascript
+// ✅ Quick verification table
+console.table({
+  'API Base URL': debugAdvana.env.VITE_API_BASE_URL,
+  'Environment': debugAdvana.env.VITE_ENVIRONMENT_NAME,
+  'Keycloak URL': debugAdvana.env.VITE_KEYCLOAK_URL,
+  'Test Endpoint': debugAdvana.getApiUrl('/api/requests')
+});
+
+// ✅ Environment-specific validation
+// For localhost:
+// Expected: Environment: 'localhost', API Base URL: '', Test Endpoint: '/api/requests'
+
+// For IL-2:
+// Expected: Environment: 'IL-2', API Base URL: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us'
+
+// For IL-5 (when available):
+// Expected: Environment: 'IL-5', API Base URL: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us' (currently same as IL-2)
 ```
+```
+
+**Note:** ❌ Don't use `import.meta.env` directly in browser console (causes SyntaxError). Use `debugAdvana.env` instead.
+
+## Environment Validation
+
+### Acceptance Criteria Testing
+
+**Given:** The site exists on localhost, IL-2, and IL-5
+**When:** A user interacts on either side
+**Then:** They only interact with the corresponding environment
+
+### Step-by-Step Validation
+
+#### Test 1: Localhost Environment
+
+```bash
+# 1. Start local development
+npm run dev
+# Opens: http://localhost:8080
+```
+
+**Browser Console Validation:**
+```javascript
+// Should show localhost configuration
+debugAdvana.logApiConfig()
+// Expected: mode: 'development', apiBaseUrl: '', bypassAuth: true
+
+// Test API URL generation
+debugAdvana.getApiUrl('/api/requests')
+// Expected: '/api/requests' (relative path for proxy)
+
+// Verify proxy target
+debugAdvana.getEnvironmentInfo()
+// Expected: { mode: 'development', apiBaseUrl: '', bypassAuth: true }
+```
+
+**Network Tab Verification:**
+- API calls should go to `localhost:8082` via proxy
+- No CORS preflight requests
+
+#### Test 2: IL-2 Environment
+
+```bash
+# 1. Build for IL-2
+npm run build:il2
+
+# 2. Start preview
+npm run preview
+# Opens: http://localhost:8080
+```
+
+**Browser Console Validation:**
+```javascript
+// Should show IL-2 configuration
+debugAdvana.logApiConfig()
+// Expected: mode: 'il2', apiBaseUrl: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us'
+
+// Test environment variables
+console.table({
+  'Environment': debugAdvana.env.VITE_ENVIRONMENT_NAME,        // Expected: 'IL-2'
+  'API Base': debugAdvana.env.VITE_API_BASE_URL,              // Expected: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us'
+  'Keycloak': debugAdvana.env.VITE_KEYCLOAK_URL,              // Expected: 'https://keycloak.cdao.us/auth'
+  'Realm': debugAdvana.env.VITE_KEYCLOAK_REALM,               // Expected: 'baby-yoda'
+  'Bypass Auth': debugAdvana.env.VITE_BYPASS_AUTH             // Expected: 'false'
+});
+
+// Test API endpoint generation
+debugAdvana.getApiUrl('/api/requests')
+// Expected: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api/requests'
+
+// Test typed endpoints
+import { getEndpointUrl } from '@/utils/api-config'  // In app code, not console
+// getEndpointUrl('SUBMIT_REQUEST') should resolve to IL-2 API
+```
+
+#### Test 3: IL-5 Environment (Future)
+
+```bash
+# 1. Build for IL-5
+npm run build:il5
+
+# 2. Start preview  
+npm run preview
+# Opens: http://localhost:8080
+```
+
+**Browser Console Validation:**
+```javascript
+// Should show IL-5 configuration
+debugAdvana.logApiConfig()
+// Expected: mode: 'il5', apiBaseUrl: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us'
+
+// Test environment variables
+console.table({
+  'Environment': debugAdvana.env.VITE_ENVIRONMENT_NAME,        // Expected: 'IL-5'
+  'Classification': debugAdvana.env.VITE_CLASSIFICATION_LEVEL, // Expected: 'unclassified'
+  'API Base': debugAdvana.env.VITE_API_BASE_URL,              // Expected: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us'
+  'Keycloak': debugAdvana.env.VITE_KEYCLOAK_URL,              // Expected: 'https://keycloak.cdao.us/auth'
+  'Realm': debugAdvana.env.VITE_KEYCLOAK_REALM,               // Expected: 'baby-yoda'
+  'Bypass Auth': debugAdvana.env.VITE_BYPASS_AUTH             // Expected: 'false'
+});
+
+// Test API endpoint generation
+debugAdvana.getApiUrl('/api/requests')
+// Expected: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api/requests'
+
+// Verify environment isolation
+debugAdvana.getEnvironmentInfo()
+// Expected: mode: 'il5', not 'il2' or 'development'
+```
+
+**When IL-5 becomes available:**
+1. Update `.env.il5` with IL-5 specific endpoints
+2. Rebuild with `npm run build:il5`
+3. Verify new endpoints in browser console
+4. Test that IL-5 and IL-2 use different API endpoints
+5. Confirm no cross-environment API calls
+
+**Current Status:** IL-5 uses same endpoints as IL-2 but with different environment identifier for future separation.
+
+### Automated Validation Tests
+
+Create comprehensive test suite for environment isolation:
+
+```typescript
+// In api-config.test.ts
+describe('Environment Isolation Acceptance Tests', () => {
+  
+  test('localhost environment isolates correctly', async () => {
+    mockEnvironment('localhost');
+    
+    const config = getExpectedConfig('localhost');
+    const actualEndpoint = getApiUrl('/api/requests');
+    
+    expect(actualEndpoint).toBe(config.expectedEndpoint);
+    expect(isBypassAuth).toBe(config.expectedBypassAuth);
+  });
+  
+  test('IL-2 environment isolates correctly', async () => {
+    mockEnvironment('il2');
+    
+    const config = getExpectedConfig('il2');
+    const actualEndpoint = getApiUrl('/api/requests');
+    
+    expect(actualEndpoint).toBe(config.expectedEndpoint);
+    expect(isBypassAuth).toBe(config.expectedBypassAuth);
+    expect(getEnvironmentInfo().apiBaseUrl).toBe(config.expectedApiBaseUrl);
+  });
+  
+  test('IL-5 environment isolates correctly', async () => {
+    mockEnvironment('il5');
+    
+    const config = getExpectedConfig('il5');
+    const actualEndpoint = getApiUrl('/api/requests');
+    
+    expect(actualEndpoint).toBe(config.expectedEndpoint);
+    expect(isBypassAuth).toBe(config.expectedBypassAuth);
+  });
+  
+  test('environments do not cross-communicate', () => {
+    // Test that each environment uses distinct endpoints
+    mockEnvironment('localhost');
+    const localhostUrl = getApiUrl('/api/test');
+    
+    mockEnvironment('il2');
+    const il2Url = getApiUrl('/api/test');
+    
+    mockEnvironment('il5');
+    const il5Url = getApiUrl('/api/test');
+    
+    // Ensure environments are isolated
+    expect(localhostUrl).not.toBe(il2Url);
+    expect(il2Url).toBe(il5Url); // Currently same endpoint, but different env identifier
+  });
+});
+```
+
+### Manual Integration Testing
+
+**Cross-Environment Verification:**
+
+1. **Build all environments:**
+```bash
+npm run build:localhost
+npm run build:il2  
+npm run build:il5
+```
+
+2. **Deploy to different domains and verify:**
+   - Each environment only calls its designated API endpoints
+   - No cross-environment API leakage
+   - Authentication flows use correct Keycloak instances
+
+3. **Network monitoring:**
+   - Use browser DevTools Network tab
+   - Verify API calls match expected environment endpoints
+   - Check for any unauthorized cross-environment requests
 
 ## Common Scenarios
 
@@ -360,34 +617,95 @@ npm run build -- --mode production
 
 ## Migration from Old System
 
-If you're migrating from the old `env-switching.ts`:
+If you're migrating from the old `env-switching.ts` and `getDomainConfig`:
 
-**Old way:**
+**Old way (deprecated):**
 
 ```typescript
 import getDomainConfig from "./env-switching";
 const config = getDomainConfig();
 fetch(`${config.apiEndpoint}/api/requests`);
+
+// Old testing approach
+const domain = getDomainConfig();
+console.log(domain); // Runtime domain detection
 ```
 
-**New way:**
+**New way (current):**
 
 ```typescript
 import { getEndpointUrl } from "@/utils/api-config";
 fetch(getEndpointUrl("SUBMIT_REQUEST"));
+
+// New testing approach - browser console
+debugAdvana.logApiConfig();
+debugAdvana.getApiUrl('/api/requests');
+```
+
+**Testing Migration:**
+
+**Old Test Pattern (❌ Deprecated):**
+```typescript
+// Don't use this anymore
+test('getDomainConfig detects environment', () => {
+  const config = getDomainConfig();
+  expect(config.apiEndpoint).toBeDefined();
+});
+```
+
+**New Test Pattern (✅ Current):**
+```typescript
+// Use this instead
+test('environment isolation works correctly', () => {
+  mockEnvironment('il2');
+  
+  const endpoint = getApiUrl('/api/requests');
+  expect(endpoint).toBe('https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api/requests');
+  
+  const envInfo = getEnvironmentInfo();
+  expect(envInfo.apiBaseUrl).toBe('https://advana-marketplace-monolith-node.dev.mtt.cdao.us');
+});
 ```
 
 **Benefits:**
 
-- ✅ Type safety
-- ✅ Environment variable based (standard)
-- ✅ Works with build tools
-- ✅ Better debugging
+- ✅ Type safety with `getEndpointUrl()`
+- ✅ Environment variable based (standard Vite approach)
+- ✅ Works with build tools and different deployment modes
+- ✅ Better debugging with `debugAdvana` utilities
 - ✅ No runtime hostname detection needed
+- ✅ Proper environment isolation testing
+- ✅ Browser console debugging support
 
 ## References
 
 - [Vite Environment Variables](https://vitejs.dev/guide/env-and-mode.html)
 - [Vite Proxy Configuration](https://vitejs.dev/config/server-options.html#server-proxy)
+
 - Project: `chart/values.yaml` - Kubernetes environment configuration
 - Project: `vite.config.ts` - Development proxy configuration
+
+### Documentation
+- [Vite Environment Variables](https://vitejs.dev/guide/env-and-mode.html)
+- [Vite Proxy Configuration](https://vitejs.dev/config/server-options.html#server-proxy)
+
+### Project Files
+- `chart/values.yaml` - Kubernetes environment configuration
+- `vite.config.ts` - Development proxy configuration  
+- `src/utils/api-config.ts` - Core API configuration module
+- `src/utils/test-utils.ts` - Environment testing utilities
+- `.env.il2` - IL-2 environment configuration
+- `.env.il5` - IL-5 environment configuration
+
+### Testing & Validation
+- Browser console: `debugAdvana.*` utilities for runtime validation
+- Unit tests: `mockEnvironment()` helper for environment simulation
+- Integration tests: `getExpectedConfig()` for assertion patterns
+- Network monitoring: Browser DevTools for API call verification
+
+### Build Commands
+- `npm run dev` - Local development with proxy
+- `npm run build:localhost` - Build for localhost environment
+- `npm run build:il2` - Build for IL-2 environment  
+- `npm run build:il5` - Build for IL-5 environment
+- `npm run preview` - Preview built application

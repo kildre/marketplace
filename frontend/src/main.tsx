@@ -1,8 +1,8 @@
+import { ReactKeycloakProvider } from "@react-keycloak/web";
+import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { ReactKeycloakProvider } from "@react-keycloak/web";
-import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import { CartProvider } from "./contexts/CartContext";
 import {
@@ -12,6 +12,18 @@ import {
 import { queryClient } from "./lib/queryClient";
 import { AuthService } from "./services/authService";
 import "./styles/main.scss";
+import { getApiUrl, getEnvironmentInfo, logApiConfig } from "./utils/api-config";
+
+// Expose debugging utilities to window for browser console access
+if (typeof window !== "undefined") {
+  // @ts-ignore - Adding to window for debugging
+  window.debugAdvana = {
+    logApiConfig,
+    getEnvironmentInfo,
+    getApiUrl,
+    env: import.meta.env,
+  };
+}
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 

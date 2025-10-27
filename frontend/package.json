@@ -10,7 +10,10 @@
   "scripts": {
     "dev": "vite --port 8080",
     "build": "vite build",
-    "preview": "npm run preview",
+    "build:il2": "vite build --mode il2",
+    "build:il5": "vite build --mode il5",
+    "build:localhost": "vite build --mode development",
+    "preview": "vite preview --port 8080",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
