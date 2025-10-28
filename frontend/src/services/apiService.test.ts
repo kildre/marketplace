@@ -7,6 +7,14 @@ import * as apiConfig from "../utils/api-config";
 vi.mock("./authService");
 vi.mock("../utils/api-config");
 
+  // Mock Keycloak module with proper typing
+  const mockKeycloak = {
+    authenticated: true,
+    token: "mock-token-123" as string | null,
+    updateToken: vi.fn().mockResolvedValue(true),
+  };
+vi.mock("../keycloak", () => ({ default: mockKeycloak }));
+
 describe("ApiService", () => {
   let mockFetch: ReturnType<typeof vi.fn>;
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
@@ -15,6 +23,12 @@ describe("ApiService", () => {
   beforeEach(() => {
     // Reset all mocks before each test
     vi.clearAllMocks();
+
+    // Reset keycloak mock
+    mockKeycloak.authenticated = true;
+    mockKeycloak.token = "mock-token-123";
+    mockKeycloak.updateToken.mockClear();
+    mockKeycloak.updateToken.mockResolvedValue(true);
 
     // Mock console methods to suppress expected error/log outputs
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -183,8 +197,10 @@ describe("ApiService", () => {
       vi.unstubAllGlobals();
     });
 
-    it("should not include Authorization header when token is unavailable", async () => {
-      vi.mocked(AuthService.getStoredToken).mockReturnValue(null);
+    it("should not include Authorization header when Keycloak is not authenticated", async () => {
+      // Set Keycloak to not authenticated state
+      mockKeycloak.authenticated = false;
+      mockKeycloak.token = null;
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -366,16 +382,10 @@ describe("ApiService", () => {
       expect(headers?.["Content-Type"]).toBe("application/json");
     });
 
-    it("should work in bypass auth mode", async () => {
-      vi.stubGlobal("import", {
-        meta: {
-          env: { VITE_BYPASS_AUTH: "true" },
-        },
-      });
-
-      vi.mocked(AuthService.getStoredToken).mockReturnValue(
-        "mock-bypass-token"
-      );
+    it("should include Authorization header when Keycloak is authenticated", async () => {
+      // Ensure Keycloak is authenticated with a token
+      mockKeycloak.authenticated = true;
+      mockKeycloak.token = "test-keycloak-token";
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -388,9 +398,8 @@ describe("ApiService", () => {
       const callArgs = mockFetch.mock.calls[0][1];
       const headers = callArgs?.headers as Record<string, string>;
 
-      expect(headers?.["Authorization"]).toBe("Bearer mock-bypass-token");
-
-      vi.unstubAllGlobals();
+      expect(headers?.["Authorization"]).toBe("Bearer test-keycloak-token");
+      expect(headers?.["Content-Type"]).toBe("application/json");
     });
   });
 

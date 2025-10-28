@@ -1,4 +1,3 @@
-import { AuthService } from "./authService";
 import { getEndpointUrl, isBypassAuth } from "../utils/api-config";
 
 // Interface definitions for API requests and responses
@@ -61,17 +60,27 @@ export interface UseCaseRequestApiDto {
  */
 export class ApiService {
   /**
-   * Get authorization headers for API requests
+   * Get authorization headers for API requests using Keycloak's current token
    */
-  private static getAuthHeaders(): Record<string, string> {
+  private static async getAuthHeaders(): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
 
-    // Get the stored token (works in both normal and bypass auth mode)
-    const token = AuthService.getStoredToken();
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+    try {
+      // Import keycloak instance dynamically to avoid circular dependencies
+      const { default: keycloak } = await import("../keycloak");
+      
+      // Check if keycloak is authenticated and has a valid token
+      if (keycloak?.authenticated && keycloak.token) {
+        // Ensure token is fresh before using it (refresh if expires within 30 seconds)
+        await keycloak.updateToken(30);
+        headers["Authorization"] = `Bearer ${keycloak.token}`;
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to get authentication token from Keycloak:", error);
+      // Continue without token - let the backend handle unauthenticated requests
     }
 
     return headers;
@@ -107,7 +116,7 @@ export class ApiService {
     requestData: SubmitRequestApiRequest
   ): Promise<SubmitRequestApiResponse> {
     try {
-      const headers = this.getAuthHeaders();
+      const headers = await this.getAuthHeaders();
 
       const response = await window.fetch(getEndpointUrl("SUBMIT_REQUEST"), {
         method: "POST",
@@ -151,7 +160,7 @@ export class ApiService {
         getEndpointUrl("VIEW_FOR_REQUESTOR"),
         {
           method: "POST",
-          headers: this.getAuthHeaders(),
+          headers: await this.getAuthHeaders(),
           body: JSON.stringify(requestData),
         }
       );
@@ -175,7 +184,7 @@ export class ApiService {
 
       const response = await window.fetch(getEndpointUrl("VIEW_PENDING"), {
         method: "POST",
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         body: JSON.stringify(requestData),
       });
 
@@ -198,7 +207,7 @@ export class ApiService {
 
       const response = await window.fetch(getEndpointUrl("VIEW_ALL"), {
         method: "POST",
-        headers: this.getAuthHeaders(),
+        headers: await this.getAuthHeaders(),
         body: JSON.stringify(requestData),
       });
 
@@ -206,6 +215,27 @@ export class ApiService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching all requests:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Make a decision on a request (approve/reject)
+   */
+  static async makeDecision(
+    decisionData: unknown
+  ): Promise<unknown> {
+    try {
+      const response = await window.fetch(getEndpointUrl("DECISIONS"), {
+        method: "POST",
+        headers: await this.getAuthHeaders(),
+        body: JSON.stringify(decisionData),
+      });
+
+      return this.handleResponse<unknown>(response);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error making decision:", error);
       throw error;
     }
   }

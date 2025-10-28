@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { PageTitle } from "../../components/page-title/page-title";
-import { RequestDetailView } from "../../components/common/request-detail-view";
+import { mockProducts } from "@/data/mock-productData";
 import { useAuth } from "@/hooks/useAuth";
-import { useKeycloak } from "@/hooks/useKeycloak";
+import { CartItemData, RequestData } from "@/interfaces/interfaceStore";
+import { ApiService } from "@/services/apiService";
 import { AppRoles } from "@/types/auth";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Button } from "@mui/material";
-import { RequestData, CartItemData } from "@/interfaces/interfaceStore";
 import {
-  generateRequestId,
   calculateEstimatedCost,
+  generateRequestId,
   getUserNameFromEmail,
 } from "@/utils/helper-functions";
-import { mockProducts } from "@/data/mock-productData";
-import { getApiUrl } from "@/utils/api-config";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { RequestDetailView } from "../../components/common/request-detail-view";
+import { PageTitle } from "../../components/page-title/page-title";
 
 // Transform API response to RequestData format (similar to useRequestsData)
 const transformApiRequestToRequestData = (
@@ -131,7 +130,6 @@ export const RequestDetail = (): React.ReactElement => {
   const requestId = searchParams.get("id");
   const userId = searchParams.get("userId"); // Get userId from URL
   const { hasRole, getUserInfo } = useAuth();
-  const { keycloak } = useKeycloak();
   const [request, setRequest] = useState<RequestData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -171,93 +169,52 @@ export const RequestDetail = (): React.ReactElement => {
         setLoading(true);
         setError(null);
 
-        let response;
-
         if (hasRole(AppRoles.APPROVER)) {
           // Approvers can see all requests
-          // Refresh token before making API call to ensure it's valid
-          try {
-            await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error("Failed to refresh token:", error);
-            setLoading(false);
-            setError("Failed to refresh authentication token");
-            return;
-          }
+          const requestsData = await ApiService.getAllRequests(userInfo.email);
           
-          const token = keycloak.token;
-          response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({
-              userEmail: userInfo.email,
-            }),
-          });
+          // Handle API response format: { requests: [...], errMsg: "..." }
+          let allRequests: unknown[] = [];
+          if (requestsData && Array.isArray(requestsData.requests)) {
+            allRequests = requestsData.requests;
+          } else if (Array.isArray(requestsData)) {
+            allRequests = requestsData;
+          }
+
+          // Find the specific request by requestNumber (from API) matching requestId (from URL)
+          const foundRequest = allRequests.find(
+            (req: unknown) =>
+              (req as Record<string, unknown>).requestNumber === requestId
+          ) as Record<string, unknown> | undefined;
+
+          if (foundRequest) {
+            setRequest(transformApiRequestToRequestData(foundRequest));
+          } else {
+            setRequest(null);
+          }
         } else {
           // Requestors see only their own requests
-          // Refresh token before making API call to ensure it's valid
-          try {
-            await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error("Failed to refresh token:", error);
-            setLoading(false);
-            setError("Failed to refresh authentication token");
-            return;
-          }
+          const requestsData = await ApiService.getRequestsForRequestor(userInfo.email);
           
-          const token = keycloak.token;
-          response = await window.fetch(
-            getApiUrl("/api/requests/viewForRequestor"),
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-              },
-              body: JSON.stringify({
-                userEmail: userInfo.email,
-              }),
-            }
-          );
-        }
-
-        if (response.ok) {
-          try {
-            const requestsData = await response.json();
-
-            // Handle API response format: { requests: [...], errMsg: "..." }
-            let allRequests = [];
-            if (requestsData && Array.isArray(requestsData.requests)) {
-              allRequests = requestsData.requests;
-            } else if (Array.isArray(requestsData)) {
-              allRequests = requestsData;
-            }
-
-            // Find the specific request by requestNumber (from API) matching requestId (from URL)
-            const foundRequest = allRequests.find(
-              (req: Record<string, unknown>) =>
-                (req.requestNumber as string) === requestId
-            );
-
-            if (foundRequest) {
-              setRequest(transformApiRequestToRequestData(foundRequest));
-            } else {
-              setRequest(null);
-            }
-          } catch (jsonError) {
-            // eslint-disable-next-line no-console
-            console.error("Failed to parse response as JSON:", jsonError);
-            setError("Failed to parse request data");
+          // Handle API response format: { requests: [...], errMsg: "..." }
+          let allRequests: unknown[] = [];
+          if (requestsData && Array.isArray(requestsData.requests)) {
+            allRequests = requestsData.requests;
+          } else if (Array.isArray(requestsData)) {
+            allRequests = requestsData;
           }
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(`API request failed with status ${response.status}: ${response.statusText}`);
-          setError("Failed to fetch request data");
+
+          // Find the specific request by requestNumber (from API) matching requestId (from URL)
+          const foundRequest = allRequests.find(
+            (req: unknown) =>
+              (req as Record<string, unknown>).requestNumber === requestId
+          ) as Record<string, unknown> | undefined;
+
+          if (foundRequest) {
+            setRequest(transformApiRequestToRequestData(foundRequest));
+          } else {
+            setRequest(null);
+          }
         }
       } catch (err) {
         setError("Failed to fetch request data");
@@ -354,47 +311,23 @@ export const RequestDetail = (): React.ReactElement => {
       const userInfo = getUserInfo();
       const computedDecisionNumber = generateRequestId(12);
       
-      // Refresh token before making API call to ensure it's valid
-      try {
-        await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error("Failed to refresh token:", error);
-        throw new Error("Failed to refresh authentication token");
-      }
-      
-      const token = keycloak.token;
-      const response = await window.fetch(getApiUrl("/api/decisions"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          decisionNumber: computedDecisionNumber,
-          requestNumber: request.requestId,
-          adjudicatorEmail: userInfo?.email,
-          statusId: statusId,
-          comments: request.statusReason,
-          ticketType: "Request",
-          asset: "",
+      const decisionData = {
+        decisionNumber: computedDecisionNumber,
+        requestNumber: request.requestId,
+        adjudicatorEmail: userInfo?.email,
+        statusId: statusId,
+        comments: request.statusReason,
+        ticketType: "Request",
+        asset: "",
+        cartItem: {
+          name: "",
           quantity: 0,
           estimatedPrice: 0,
-        }),
-      });
+        },
+      };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      try {
-        const result = await response.json();
-        return result;
-      } catch (jsonError) {
-        // eslint-disable-next-line no-console
-        console.error("Failed to parse response as JSON:", jsonError);
-        throw new Error("Failed to parse server response");
-      }
+      const result = await ApiService.makeDecision(decisionData);
+      return result;
     };
 
     const handleReasoningChange = (

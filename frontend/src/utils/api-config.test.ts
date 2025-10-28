@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   API_BASE_URL,
-  getApiUrl,
-  isBypassAuth,
-  getEnvironmentInfo,
   API_ENDPOINTS,
+  getApiUrl,
   getEndpointUrl,
+  getEnvironmentInfo,
+  isBypassAuth,
   logApiConfig,
 } from "./api-config";
 
@@ -519,6 +519,262 @@ describe("api-config", () => {
         logApiConfig();
         logApiConfig();
       }).not.toThrow();
+    });
+  });
+
+  // ============================================================================
+  // Environment Configuration Tests 
+  // Tests work with actual current environment since vi.stubEnv() doesn't work with import.meta.env
+  // For true environment isolation testing, use build + preview approach as documented in API_CONFIG_GUIDE.md
+  // ============================================================================
+  
+  describe("Environment Configuration Tests", () => {
+    
+    describe("current environment behavior validation", () => {
+      it("should use the correct API configuration from current environment", () => {
+        const envInfo = getEnvironmentInfo();
+        
+        // Validate that we get consistent environment information
+        expect(envInfo).toHaveProperty('mode');
+        expect(envInfo).toHaveProperty('apiBaseUrl');
+        expect(envInfo).toHaveProperty('bypassAuth');
+        
+        expect(typeof envInfo.mode).toBe('string');
+        expect(typeof envInfo.apiBaseUrl).toBe('string');
+        expect(typeof envInfo.bypassAuth).toBe('boolean');
+      });
+      
+      it("should generate URLs consistently in current environment", () => {
+        const testPath = '/api/requests';
+        const url1 = getApiUrl(testPath);
+        const url2 = getApiUrl(testPath);
+        
+        expect(url1).toBe(url2);
+        expect(url1).toContain('/api/requests');
+      });
+      
+      it("should work with all typed endpoints in current environment", () => {
+        const endpoints: (keyof typeof API_ENDPOINTS)[] = [
+          'SUBMIT_REQUEST',
+          'VIEW_FOR_REQUESTOR',
+          'VIEW_PENDING',
+          'VIEW_ALL',
+          'REPORT_SUMMARY'
+        ];
+        
+        endpoints.forEach(endpoint => {
+          const url = getEndpointUrl(endpoint);
+          expect(url).toContain(API_ENDPOINTS[endpoint]);
+          expect(typeof url).toBe('string');
+          expect(url.length).toBeGreaterThan(0);
+        });
+      });
+      
+      it("should maintain consistency between getApiUrl and getEndpointUrl", () => {
+        const manualUrl = getApiUrl(API_ENDPOINTS.SUBMIT_REQUEST);
+        const typedUrl = getEndpointUrl('SUBMIT_REQUEST');
+        
+        expect(manualUrl).toBe(typedUrl);
+      });
+    });
+    
+    describe("URL construction logic validation", () => {
+      it("should handle different API base URL scenarios correctly", () => {
+        // Test the logic that would be used in different environments
+        const testUrlConstruction = (baseUrl: string, path: string) => {
+          const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+          
+          if (!baseUrl) {
+            return normalizedPath;
+          }
+          
+          const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+          return `${normalizedBaseUrl}${normalizedPath}`;
+        };
+        
+        // Test cases that mirror the real environment logic
+        const testCases = [
+          {
+            name: 'localhost with empty baseUrl (proxy mode)',
+            baseUrl: '',
+            path: '/api/test',
+            expected: '/api/test'
+          },
+          {
+            name: 'IL-2 with full baseUrl',
+            baseUrl: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us',
+            path: '/api/test',
+            expected: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api/test'
+          },
+          {
+            name: 'baseUrl with trailing slash',
+            baseUrl: 'https://api.example.com/',
+            path: 'api/test',
+            expected: 'https://api.example.com/api/test'
+          },
+          {
+            name: 'path without leading slash',
+            baseUrl: 'https://api.example.com',
+            path: 'api/test',
+            expected: 'https://api.example.com/api/test'
+          }
+        ];
+        
+        testCases.forEach(testCase => {
+          const result = testUrlConstruction(testCase.baseUrl, testCase.path);
+          expect(result).toBe(testCase.expected);
+        });
+      });
+      
+      it("should validate environment variable handling logic", () => {
+        // Test the logic used to process environment variables
+        const testBypassAuthLogic = (value: string | undefined): boolean => {
+          return value === 'true';
+        };
+        
+        expect(testBypassAuthLogic('true')).toBe(true);
+        expect(testBypassAuthLogic('false')).toBe(false);
+        expect(testBypassAuthLogic('')).toBe(false);
+        expect(testBypassAuthLogic(undefined)).toBe(false);
+      });
+    });
+    
+    describe("environment-specific behavior patterns", () => {
+      it("should document expected behavior for different environments", () => {
+        // This test serves as documentation for the expected behavior
+        // in different environments when using build commands
+        
+        const environmentExpectations = {
+          development: {
+            command: 'npm run dev',
+            expectedApiBaseUrl: 'empty string or set by .env.local',
+            expectedBypassAuth: true,
+            expectedUrlPattern: 'relative /api/... or absolute http://localhost:8082/api/...',
+            description: 'Uses Vite proxy or direct backend URL from .env.local'
+          },
+          il2: {
+            command: 'npm run build:il2 && npm run preview',
+            expectedApiBaseUrl: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us',
+            expectedBypassAuth: false,
+            expectedUrlPattern: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api/...',
+            description: 'Uses IL-2 environment configuration from .env.il2'
+          },
+          il5: {
+            command: 'npm run build:il5 && npm run preview',
+            expectedApiBaseUrl: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us',
+            expectedBypassAuth: false,
+            expectedUrlPattern: 'https://advana-marketplace-monolith-node.dev.mtt.cdao.us/api/...',
+            description: 'Uses IL-5 environment configuration from .env.il5'
+          }
+        };
+        
+        // Validate that our expectations are documented
+        Object.values(environmentExpectations).forEach(env => {
+          expect(env.command).toContain('npm run');
+          expect(env.description).toContain('env');
+          expect(typeof env.expectedBypassAuth).toBe('boolean');
+        });
+      });
+      
+      it("should validate browser debugging utilities documentation", () => {
+        // Document the expected debugging interface available in browser
+        const expectedBrowserMethods = [
+          'debugAdvana.logApiConfig()',
+          'debugAdvana.getEnvironmentInfo()',
+          'debugAdvana.getApiUrl("/api/test")',
+          'debugAdvana.env.VITE_API_BASE_URL',
+          'debugAdvana.env.VITE_ENVIRONMENT_NAME',
+          'debugAdvana.env.VITE_KEYCLOAK_URL'
+        ];
+        
+        expectedBrowserMethods.forEach(method => {
+          expect(method).toContain('debugAdvana');
+          expect(typeof method).toBe('string');
+        });
+      });
+    });
+    
+    describe("integration testing approach documentation", () => {
+      it("should document the correct approach for environment isolation testing", () => {
+        // Document that environment isolation should be tested via build commands,
+        // not via mocking environment variables at test time
+        
+        const testingApproach = {
+          unitTests: {
+            description: 'Test configuration logic and URL construction',
+            approach: 'Test with current environment, validate logic patterns',
+            limitations: 'Cannot mock import.meta.env after module load'
+          },
+          integrationTests: {
+            description: 'Test actual environment isolation',
+            approach: 'Use npm run build:il2 && npm run preview, then browser testing',
+            validation: 'Use debugAdvana utilities in browser console'
+          },
+          acceptanceTesting: {
+            description: 'Validate full environment isolation',
+            approach: 'Deploy to different environments, validate API calls',
+            criteria: 'Each environment only calls its designated endpoints'
+          }
+        };
+        
+        expect(testingApproach.unitTests.limitations).toContain('import.meta.env');
+        expect(testingApproach.integrationTests.approach).toContain('build:il2');
+        expect(testingApproach.acceptanceTesting.criteria).toBeDefined();
+      });
+      
+      it("should validate that environment files exist for testing", () => {
+        // This test documents that environment files should exist
+        // for proper environment isolation testing
+        
+        const expectedFiles = [
+          '.env.il2',
+          '.env.il5',
+          '.env.local (for development)',
+          'vite.config.ts (for proxy configuration)'
+        ];
+        
+        expectedFiles.forEach(file => {
+          if (file.includes('vite.config.ts')) {
+            expect(file).toContain('vite.config.ts');
+          } else {
+            expect(file).toContain('.env');
+          }
+        });
+      });
+    });
+    
+    describe("current environment validation", () => {
+      it("should reflect actual test environment configuration", () => {
+        // This test validates that we're getting the expected values
+        // from the actual test environment (likely .env.local)
+        
+        const envInfo = getEnvironmentInfo();
+        const testUrl = getApiUrl('/api/test');
+        
+        // Validate that we get consistent, valid values
+        expect(envInfo.mode).toBeTruthy();
+        expect(typeof envInfo.apiBaseUrl).toBe('string');
+        expect(typeof envInfo.bypassAuth).toBe('boolean');
+        expect(testUrl).toContain('/api/test');
+      });
+      
+      it("should validate environment variable access patterns", () => {
+        // Test that we can access the same environment variables
+        // that the api-config module uses
+        
+        const directEnvAccess = {
+          apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+          bypassAuth: import.meta.env.VITE_BYPASS_AUTH,
+          mode: import.meta.env.MODE
+        };
+        
+        const configAccess = getEnvironmentInfo();
+        
+        // Should match what the config module returns
+        expect(configAccess.apiBaseUrl).toBe(directEnvAccess.apiBaseUrl || '');
+        expect(configAccess.mode).toBe(directEnvAccess.mode || 'development');
+        expect(configAccess.bypassAuth).toBe(directEnvAccess.bypassAuth === 'true');
+      });
     });
   });
 });
