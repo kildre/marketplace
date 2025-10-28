@@ -13,12 +13,16 @@
  * Get the API base URL from environment variables
  * Priority: VITE_API_BASE_URL > fallback to empty string (uses proxy in dev)
  */
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+export const getApiBaseUrl = () => import.meta.env.VITE_API_BASE_URL || "";
 
 /**
  * Check if bypass auth is enabled (for local development)
  */
-export const isBypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
+export const getIsBypassAuth = () => import.meta.env.VITE_BYPASS_AUTH === "true";
+
+// Legacy exports for backward compatibility
+export const API_BASE_URL = getApiBaseUrl();
+export const isBypassAuth = getIsBypassAuth();
 
 // ============================================================================
 // Environment Information (for debugging)
@@ -26,8 +30,8 @@ export const isBypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
 
 export const getEnvironmentInfo = () => ({
   mode: import.meta.env.MODE,
-  apiBaseUrl: API_BASE_URL,
-  bypassAuth: isBypassAuth,
+  apiBaseUrl: getApiBaseUrl(),
+  bypassAuth: getIsBypassAuth(),
 });
 
 // ============================================================================
@@ -56,14 +60,17 @@ export const getApiUrl = (path: string): string => {
   // Normalize path: ensure it starts with a slash
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
 
+  // Get the current API base URL dynamically
+  const apiBaseUrl = getApiBaseUrl();
+
   // If no API_BASE_URL is configured, use relative paths
   // In development, Vite proxy will forward /api/* to the backend
-  if (!API_BASE_URL) {
+  if (!apiBaseUrl) {
     return cleanPath;
   }
 
   // Construct full URL: remove trailing slash from base and combine with path
-  const baseUrl = API_BASE_URL.replace(/\/$/, "");
+  const baseUrl = apiBaseUrl.replace(/\/$/, "");
   return `${baseUrl}${cleanPath}`;
 };
 
@@ -76,6 +83,9 @@ export const API_ENDPOINTS = {
   VIEW_FOR_REQUESTOR: "/api/requests/viewForRequestor",
   VIEW_PENDING: "/api/requests/viewPending",
   VIEW_ALL: "/api/requests/viewAll",
+
+  // Decisions
+  DECISIONS: "/api/decisions",
 
   // Report/Metrics
   REPORT_SUMMARY: "/api/report/summary",

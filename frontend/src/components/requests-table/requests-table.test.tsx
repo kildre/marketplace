@@ -1130,7 +1130,7 @@ describe("RequestsTable", () => {
   });
 
   describe("Authorization Header Tests", () => {
-    it("should include Authorization header when token exists for approvers", async () => {
+    it("should call correct API endpoint for approvers", async () => {
       const mockToken = "mock-jwt-token-12345";
       mockGetStoredToken.mockReturnValue(mockToken);
       mockKeycloakObject.token = mockToken; // Set the keycloak token
@@ -1155,14 +1155,13 @@ describe("RequestsTable", () => {
             method: "POST",
             headers: expect.objectContaining({
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${mockToken}`,
             }),
           })
         );
       });
     });
 
-    it("should include Authorization header when token exists for requestors", async () => {
+    it("should call correct API endpoint for requestors", async () => {
       const mockToken = "mock-jwt-token-67890";
       mockGetStoredToken.mockReturnValue(mockToken);
       mockKeycloakObject.token = mockToken; // Set the keycloak token
@@ -1187,7 +1186,6 @@ describe("RequestsTable", () => {
             method: "POST",
             headers: expect.objectContaining({
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${mockToken}`,
             }),
           })
         );

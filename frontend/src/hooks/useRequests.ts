@@ -1,22 +1,16 @@
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { ApiService } from "@/services/apiService";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./useAuth";
 import { useRequestsRefresh } from "./useRequestsRefresh";
-import { getApiUrl } from "@/utils/api-config";
-import { useKeycloak } from "./useKeycloak";
 
 export const useRequests = (
   overrideUserId?: string,
   enabled: boolean = false
 ) => {
   const { getUserInfo, isApprover, isRequestor } = useAuth();
-  const { keycloak } = useKeycloak();
   const { subscribe } = useRequestsRefresh();
   const [allRequests, setAllRequests] = useState<Record<string, unknown>[]>([]);
   
-  // Stabilize keycloak reference to prevent unnecessary re-renders
-  const keycloakToken = keycloak?.token;
-  const keycloakAuthenticated = keycloak?.authenticated;
-
   // Track user info changes to trigger re-renders in development mode
   const [userTracker, setUserTracker] = useState(0);
   const userInfo = getUserInfo();
@@ -74,116 +68,44 @@ export const useRequests = (
     }
 
     try {
-      let response;
-
       if (currentIsApprover) {
         // Approvers can see all requests
-        // Refresh token before making API call to ensure it's valid
-        try {
-          await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error("[useRequests] Failed to refresh token:", error);
-          // Token refresh failed - user might need to re-authenticate
-          setAllRequests([]);
-          return;
+        const requestsData = await ApiService.getAllRequests(userInfo.email);
+        
+        // Handle API response format: { requests: [...], errMsg: "..." }
+        let allRequestsResponse: unknown[] = [];
+        if (requestsData && Array.isArray(requestsData.requests)) {
+          allRequestsResponse = requestsData.requests;
+        } else if (Array.isArray(requestsData)) {
+          allRequestsResponse = requestsData;
         }
-        
-        // Get the fresh token from Keycloak (after potential refresh)
-        const token = keycloak.token;
-        
-        if (!token) {
-          // eslint-disable-next-line no-console
-          console.error("[useRequests] CRITICAL: No token available! Keycloak state:", {
-            authenticated: keycloakAuthenticated,
-            token: keycloakToken,
-            refreshToken: keycloak.refreshToken,
-          });
-          setAllRequests([]);
-          return;
-        }
-        
-        response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            userEmail: userInfo.email,
-          }),
-        });
+
+        setAllRequests(allRequestsResponse as Record<string, unknown>[]);
       } else if (currentIsRequestor) {
         // Requestors see only their own requests
-        // Refresh token before making API call to ensure it's valid
-        try {
-          await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error("[useRequests] Failed to refresh token:", error);
-          // Token refresh failed - user might need to re-authenticate
-          setAllRequests([]);
-          return;
-        }
-        
-        // Get the fresh token from Keycloak (after potential refresh)
-        const token = keycloak.token;
-        
-        if (!token) {
-          // eslint-disable-next-line no-console
-          console.error("[useRequests] No token available after refresh attempt");
-          setAllRequests([]);
-          return;
-        }
-        
-        response = await window.fetch(
-          getApiUrl("/api/requests/viewForRequestor"),
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              userEmail: actualUserId || userInfo.email, // Use actualUserId if available
-            }),
-          }
+        const requestsData = await ApiService.getRequestsForRequestor(
+          actualUserId || userInfo.email
         );
+        
+        // Handle API response format: { requests: [...], errMsg: "..." }
+        let allRequestsResponse: unknown[] = [];
+        if (requestsData && Array.isArray(requestsData.requests)) {
+          allRequestsResponse = requestsData.requests;
+        } else if (Array.isArray(requestsData)) {
+          allRequestsResponse = requestsData;
+        }
+
+        setAllRequests(allRequestsResponse as Record<string, unknown>[]);
       } else {
         setAllRequests([]);
         return;
-      }
-
-      if (response.ok) {
-        try {
-          const requestsData = await response.json();
-
-          // Handle API response format: { requests: [...], errMsg: "..." }
-          let apiRequests = [];
-          if (requestsData && Array.isArray(requestsData.requests)) {
-            apiRequests = requestsData.requests;
-          } else if (Array.isArray(requestsData)) {
-            apiRequests = requestsData;
-          }
-
-          setAllRequests(apiRequests);
-        } catch (jsonError) {
-          // eslint-disable-next-line no-console
-          console.error("Failed to parse response as JSON:", jsonError);
-          setAllRequests([]);
-        }
-      } else {
-        // Handle error responses (403, 401, etc.)
-        // eslint-disable-next-line no-console
-        console.error(`API request failed with status ${response.status}: ${response.statusText}`);
-        setAllRequests([]);
       }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching requests:", error);
       setAllRequests([]);
     }
-  }, [actualUserId, keycloak]); // Don't include functions - they're called inside, not used as dependencies
+  }, [actualUserId]); // Removed keycloak dependency since ApiService handles auth internally
 
   useEffect(() => {
     if (enabled) {

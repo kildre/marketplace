@@ -7,6 +7,7 @@ import { vi } from "vitest";
 import * as ReactRouterDom from "react-router-dom";
 import { AppRoles } from "../../types/auth";
 import * as UseAuthHook from "../../hooks/useAuth";
+import { ApiService } from "@/services/apiService";
 import React from "react";
 
 // Mock react-router-dom
@@ -47,9 +48,19 @@ vi.mock("@/services/authService", () => ({
   },
 }));
 
+// Mock ApiService
+vi.mock("@/services/apiService", () => ({
+  ApiService: {
+    getAllRequests: vi.fn(),
+    getRequestsForRequestor: vi.fn(),
+    makeDecision: vi.fn(),
+  },
+}));
+
 // Mock API config
 vi.mock("@/utils/api-config", () => ({
   getApiUrl: vi.fn((path: string) => `http://localhost:8082${path}`),
+  getEndpointUrl: vi.fn((endpoint: string) => `http://localhost:8082/api/${endpoint.toLowerCase()}`),
 }));
 
 // Mock helper functions
@@ -190,6 +201,7 @@ expect.extend(toHaveNoViolations);
 describe("RequestDetail", () => {
   const mockUseSearchParams = vi.mocked(ReactRouterDom.useSearchParams);
   const mockUseAuth = vi.mocked(UseAuthHook.useAuth);
+  const mockApiService = vi.mocked(ApiService);
 
   beforeEach(() => {
     // Reset to default (no search params) before each test
@@ -229,7 +241,49 @@ describe("RequestDetail", () => {
       keycloak: {} as any,
     });
 
-    // Mock fetch with default successful API response
+    // Mock ApiService with default successful responses
+    const mockRequestData = [
+      {
+        requestNumber: "123",
+        requestorEmail: "joe.snuffy.ctr@army.mil",
+        requestorUsername: "joe.snuffy.ctr",
+        designation: "Military",
+        agency: "III Corps",
+        organization: "Other",
+        otherOrganization: "CDAO",
+        pointOfContact: "Jane Doe",
+        phoneNumber: "2192192199",
+        email: "jane.doe.civ@mil.gov",
+        requestedToolName: "Test Tool",
+        description: "Test use case description",
+        statusId: 1, // Pending
+        statusReason: "Approved by John Smith",
+        cartItems: [
+          { name: "AWS", quantity: 1 },
+          { name: "C3AI", quantity: 2 },
+          { name: "Databricks", quantity: 1 },
+        ],
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z",
+        decision: null,
+      },
+    ];
+
+    mockApiService.getAllRequests.mockResolvedValue({
+      requests: mockRequestData,
+      errMsg: "",
+    });
+
+    mockApiService.getRequestsForRequestor.mockResolvedValue({
+      requests: mockRequestData,
+      errMsg: "",
+    });
+
+    mockApiService.makeDecision.mockResolvedValue({
+      success: true,
+    });
+
+    // Mock fetch with default successful API response (for legacy tests that still use fetch)
     mockFetch.mockReset();
     mockFetch.mockImplementation((url: string) => {
       // Check if it's one of the request APIs
@@ -241,30 +295,7 @@ describe("RequestDetail", () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              requests: [
-                {
-                  requestNumber: "123",
-                  requestorEmail: "joe.snuffy.ctr@army.mil",
-                  designation: "Military",
-                  agency: "III Corps",
-                  organization: "Other",
-                  otherOrganization: "CDAO",
-                  pointOfContact: "Jane Doe",
-                  phoneNumber: "2192192199",
-                  email: "jane.doe.civ@mil.gov",
-                  description: "Test use case description",
-                  statusId: 1, // Pending
-                  statusReason: "Approved by John Smith",
-                  cartItems: [
-                    { name: "AWS", quantity: 1 },
-                    { name: "C3AI", quantity: 2 },
-                    { name: "Databricks", quantity: 1 },
-                  ],
-                  createdAt: "2024-01-01T00:00:00Z",
-                  updatedAt: "2024-01-01T00:00:00Z",
-                  decision: null,
-                },
-              ],
+              requests: mockRequestData,
               errMsg: "",
             }),
         });
@@ -298,6 +329,11 @@ describe("RequestDetail", () => {
   });
 
   afterEach(() => {
+    // Clear all ApiService mocks
+    mockApiService.getAllRequests.mockClear();
+    mockApiService.getRequestsForRequestor.mockClear();
+    mockApiService.makeDecision.mockClear();
+    
     // Restore all mocks
     vi.restoreAllMocks();
   });
@@ -842,44 +878,35 @@ describe("RequestDetail", () => {
       mockGetStoredToken.mockReturnValue(mockToken);
       mockKeycloakObject.token = mockToken; // Set the keycloak token
 
-      mockFetch.mockImplementation((url: string) => {
-        if (url.includes("/api/requests/viewAll")) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                requests: [
-                  {
-                    requestNumber: validRequestId,
-                    requestorEmail: "test@army.mil",
-                    designation: "Military",
-                    agency: "Army",
-                    organization: "CDAO",
-                    cartItems: [{ name: "AWS", quantity: 1 }],
-                    statusId: 1,
-                    createdAt: "2024-01-01T00:00:00Z",
-                    updatedAt: "2024-01-01T00:00:00Z",
-                    decision: null,
-                  },
-                ],
-              }),
-          });
-        }
-        return Promise.resolve({ ok: false });
+      // ApiService handles authentication internally
+      mockApiService.getAllRequests.mockResolvedValue({
+        requests: [
+          {
+            requestNumber: validRequestId,
+            requestorEmail: "test@army.mil",
+            requestorUsername: "test.user",
+            designation: "Military",
+            agency: "Army",
+            organization: "CDAO",
+            otherOrganization: "",
+            pointOfContact: "Test User",
+            email: "test@army.mil",
+            phoneNumber: "123-456-7890",
+            requestedToolName: "AWS",
+            description: "Test description",
+            cartItems: [{ name: "AWS", quantity: 1 }],
+            statusId: 1,
+            createdAt: "2024-01-01T00:00:00Z",
+            updatedAt: "2024-01-01T00:00:00Z",
+          },
+        ],
       });
 
       await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.APPROVER);
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith(
-          expect.stringContaining("/api/requests/viewAll"),
-          expect.objectContaining({
-            method: "POST",
-            headers: expect.objectContaining({
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${mockToken}`,
-            }),
-          })
+        expect(mockApiService.getAllRequests).toHaveBeenCalledWith(
+          expect.any(String)
         );
       });
     });
@@ -889,44 +916,35 @@ describe("RequestDetail", () => {
       mockGetStoredToken.mockReturnValue(mockToken);
       mockKeycloakObject.token = mockToken; // Set the keycloak token
 
-      mockFetch.mockImplementation((url: string) => {
-        if (url.includes("/api/requests/viewForRequestor")) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                requests: [
-                  {
-                    requestNumber: validRequestId,
-                    requestorEmail: "joe.snuffy.ctr@army.mil",
-                    designation: "Contractor",
-                    agency: "Army",
-                    organization: "CDAO",
-                    cartItems: [{ name: "AWS", quantity: 1 }],
-                    statusId: 1,
-                    createdAt: "2024-01-01T00:00:00Z",
-                    updatedAt: "2024-01-01T00:00:00Z",
-                    decision: null,
-                  },
-                ],
-              }),
-          });
-        }
-        return Promise.resolve({ ok: false });
+      // ApiService handles authentication internally
+      mockApiService.getRequestsForRequestor.mockResolvedValue({
+        requests: [
+          {
+            requestNumber: validRequestId,
+            requestorEmail: "joe.snuffy.ctr@army.mil",
+            requestorUsername: "joe.snuffy.ctr",
+            designation: "Contractor",
+            agency: "Army",
+            organization: "CDAO",
+            otherOrganization: "",
+            pointOfContact: "Joe Snuffy",
+            email: "joe.snuffy.ctr@army.mil",
+            phoneNumber: "123-456-7890",
+            requestedToolName: "AWS",
+            description: "Test description",
+            cartItems: [{ name: "AWS", quantity: 1 }],
+            statusId: 1,
+            createdAt: "2024-01-01T00:00:00Z",
+            updatedAt: "2024-01-01T00:00:00Z",
+          },
+        ],
       });
 
       await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.REQUESTOR);
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith(
-          expect.stringContaining("/api/requests/viewForRequestor"),
-          expect.objectContaining({
-            method: "POST",
-            headers: expect.objectContaining({
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${mockToken}`,
-            }),
-          })
+        expect(mockApiService.getRequestsForRequestor).toHaveBeenCalledWith(
+          expect.any(String)
         );
       });
     });
@@ -935,27 +953,16 @@ describe("RequestDetail", () => {
       mockGetStoredToken.mockReturnValue(null);
       mockKeycloakObject.token = null as any; // Set keycloak token to null
 
-      mockFetch.mockImplementation((url: string) => {
-        if (url.includes("/api/requests/viewAll")) {
-          return Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve({ requests: [] }),
-          });
-        }
-        return Promise.resolve({ ok: false });
+      // ApiService handles authentication internally - still mocked to return empty results
+      mockApiService.getAllRequests.mockResolvedValue({
+        requests: []
       });
 
       await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.APPROVER);
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith(
-          expect.stringContaining("/api/requests/viewAll"),
-          expect.objectContaining({
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
+        expect(mockApiService.getAllRequests).toHaveBeenCalledWith(
+          expect.any(String)
         );
       });
     });

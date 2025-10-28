@@ -1,15 +1,14 @@
-import * as React from "react";
-import { Chip, Button, Paper, IconButton, Tooltip, Box } from "@mui/material";
+import { Box, Button, Chip, IconButton, Paper, Tooltip } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import { useKeycloak } from "../../hooks/useKeycloak";
-import { RequestsTableProps } from "../../interfaces/interfaceStore";
+import { RequestData, RequestsTableProps } from "../../interfaces/interfaceStore";
 // import { RequestsDebugPanel } from "../debug/RequestsDebugPanel"; // Uncomment to use debug panel with userId and component
-import { calculateEstimatedCost } from "../../utils/helper-functions";
-import { mockProducts } from "../../data/mock-productData";
-import { getApiUrl } from "@/utils/api-config";
+import { ApiService } from "@/services/apiService";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import { mockProducts } from "../../data/mock-productData";
+import { calculateEstimatedCost } from "../../utils/helper-functions";
 
 // Transform Product data to RequestData format
 const getStatusColor = (
@@ -34,8 +33,8 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 }) => {
   const navigate = useNavigate();
   const { isApprover, getUserInfo } = useAuth();
-  const { keycloak } = useKeycloak();
   const [allRequests, setAllRequests] = React.useState(data || []);
+  const [isLoading, setIsLoading] = React.useState(false);
   const scrollContainerRef = React.useRef<globalThis.HTMLDivElement>(null);
   const [showLeftFade, setShowLeftFade] = React.useState(false);
   const [showRightFade, setShowRightFade] = React.useState(false);
@@ -44,108 +43,41 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   const [resetKey, setResetKey] = React.useState(0);
 
   // Fetch requests from API - memoized to prevent infinite loops
-  const fetchRequests = React.useCallback(async () => {
-    // Get fresh user info inside the function to avoid dependencies
-    const currentUserInfo = getUserInfo();
-    const currentIsApprover = isApprover();
-
-    if (!currentUserInfo?.email) {
-      setAllRequests(data || []);
-      return;
-    }
-
+  const fetchData = React.useCallback(async () => {
+    if (isLoading) return; // Prevent concurrent requests
+    
+    setIsLoading(true);
     try {
-      let response;
-
-      if (currentIsApprover) {
-        // Approvers can see all requests, pass their email
-        // Refresh token before making API call to ensure it's valid
-        try {
-          await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error("Failed to refresh token:", error);
-          setAllRequests(data || []);
-          return;
-        }
-        
-        const token = keycloak.token;
-        response = await window.fetch(getApiUrl("/api/requests/viewAll"), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            userEmail: currentUserInfo.email,
-          }),
-        });
-      } else {
-        // Requestors see only their own requests
-        // Refresh token before making API call to ensure it's valid
-        try {
-          await keycloak.updateToken(30); // Refresh if expires within 30 seconds
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error("Failed to refresh token:", error);
-          setAllRequests(data || []);
-          return;
-        }
-        
-        const token = keycloak.token;
-        response = await window.fetch(
-          getApiUrl("/api/requests/viewForRequestor"),
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({
-              userEmail: currentUserInfo.email,
-            }),
-          }
-        );
+      const userInfo = getUserInfo();
+      if (!userInfo) {
+        console.error("User info not available");
+        setAllRequests([]);
+        return;
       }
 
-      if (response.ok) {
-        try {
-          const requestsData = await response.json();
-
-          // Handle API response format: { requests: [...], errMsg: "..." }
-          let dataToSet = [];
-          if (requestsData && Array.isArray(requestsData.requests)) {
-            dataToSet = requestsData.requests;
-          } else if (Array.isArray(requestsData)) {
-            dataToSet = requestsData;
-          } else {
-            dataToSet = [];
-          }
-
-          setAllRequests(dataToSet);
-        } catch (jsonError) {
-          // eslint-disable-next-line no-console
-          console.error("Failed to parse response as JSON:", jsonError);
-          setAllRequests(data || []);
-        }
+      if (isApprover()) {
+        const response = await ApiService.getAllRequests(userInfo.email);
+        // Cast the API response to the expected RequestData format
+        setAllRequests((response.requests || []) as unknown as RequestData[]);
       } else {
-        // Handle error responses (403, 401, etc.)
-        // eslint-disable-next-line no-console
-        console.error(`API request failed with status ${response.status}: ${response.statusText}`);
-        setAllRequests(data || []);
+        const response = await ApiService.getRequestsForRequestor(userInfo.email);
+        // Cast the API response to the expected RequestData format
+        setAllRequests((response.requests || []) as unknown as RequestData[]);
       }
-    } catch {
-      // Fallback to empty array if API fails
-      setAllRequests(data || []);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setAllRequests([]);
+    } finally {
+      setIsLoading(false);
     }
-  }, [keycloak]); // Include keycloak to ensure we have the token
+  }, []); // Remove the dependencies that cause infinite loops
 
   React.useEffect(() => {
-    // Only fetch requests if no data is provided
-    if (!data) {
-      fetchRequests();
+    // Only fetch requests once on mount if no data is provided
+    if (!data && !isLoading) {
+      fetchData();
     }
-  }, [fetchRequests, data]);
+  }, [data]); // Only depend on data prop, not fetchData to prevent loops
 
   React.useEffect(() => {
     // Update allRequests state when data prop changes

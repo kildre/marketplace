@@ -2,6 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { useRequests } from "./useRequests";
 import { AppRoles } from "../types/auth";
+import { ApiService } from "@/services/apiService";
 
 // Mock useAuth hook
 const mockGetUserInfo = vi.fn();
@@ -52,6 +53,14 @@ vi.mock("@/utils/api-config", () => ({
   getApiUrl: vi.fn((path: string) => `http://localhost:8082${path}`),
 }));
 
+// Mock ApiService
+vi.mock("@/services/apiService", () => ({
+  ApiService: {
+    getAllRequests: vi.fn(),
+    getRequestsForRequestor: vi.fn(),
+  },
+}));
+
 describe("useRequests", () => {
   const mockApproverUserInfo = {
     id: "approver1",
@@ -76,6 +85,16 @@ describe("useRequests", () => {
       {
         requestNumber: "req-001",
         requestorEmail: "joe.snuffy.ctr@army.mil",
+        requestorUsername: "joe.snuffy.ctr",
+        designation: "Contractor",
+        agency: "Army",
+        organization: "CDAO",
+        otherOrganization: "",
+        pointOfContact: "Joe Snuffy",
+        email: "joe.snuffy.ctr@army.mil",
+        phoneNumber: "123-456-7890",
+        requestedToolName: "AWS",
+        description: "Test description",
         cartItems: [{ name: "AWS", quantity: 1 }],
         createdAt: "2024-01-15T10:30:00Z",
         updatedAt: "2024-01-15T10:30:00Z",
@@ -84,6 +103,16 @@ describe("useRequests", () => {
       {
         requestNumber: "req-002",
         requestorEmail: "jane.doe@army.mil",
+        requestorUsername: "jane.doe",
+        designation: "Military",
+        agency: "Army",
+        organization: "CDAO",
+        otherOrganization: "",
+        pointOfContact: "Jane Doe",
+        email: "jane.doe@army.mil",
+        phoneNumber: "123-456-7890",
+        requestedToolName: "Azure",
+        description: "Test description",
         cartItems: [{ name: "Azure", quantity: 2 }],
         createdAt: "2024-01-10T14:20:00Z",
         updatedAt: "2024-01-12T09:15:00Z",
@@ -97,9 +126,10 @@ describe("useRequests", () => {
     mockGetStoredToken.mockClear();
     mockSubscribe.mockClear();
     mockUpdateToken.mockClear();
+    vi.mocked(ApiService.getAllRequests).mockClear();
+    vi.mocked(ApiService.getRequestsForRequestor).mockClear();
     mockUpdateToken.mockResolvedValue(true);
     mockKeycloakObject.token = "mock-token"; // Reset to default token
-    window.fetch = vi.fn();
   });
 
   describe("Authorization Header Tests", () => {
@@ -111,11 +141,8 @@ describe("useRequests", () => {
       mockIsApprover.mockReturnValue(true);
       mockIsRequestor.mockReturnValue(false);
 
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => mockRequestsData,
-      });
-      window.fetch = mockFetch;
+      // ApiService handles authentication internally
+      vi.mocked(ApiService.getAllRequests).mockResolvedValue(mockRequestsData);
 
       const { result } = renderHook(() => useRequests(undefined, true));
 
@@ -123,16 +150,8 @@ describe("useRequests", () => {
         expect(result.current.requests).toBeDefined();
       });
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/requests/viewAll"),
-        expect.objectContaining({
-          method: "POST",
-          headers: expect.objectContaining({
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${mockToken}`,
-          }),
-          body: expect.stringContaining(mockApproverUserInfo.email),
-        })
+      expect(vi.mocked(ApiService.getAllRequests)).toHaveBeenCalledWith(
+        mockApproverUserInfo.email
       );
     });
 
@@ -144,11 +163,8 @@ describe("useRequests", () => {
       mockIsApprover.mockReturnValue(false);
       mockIsRequestor.mockReturnValue(true);
 
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => mockRequestsData,
-      });
-      window.fetch = mockFetch;
+      // ApiService handles authentication internally
+      vi.mocked(ApiService.getRequestsForRequestor).mockResolvedValue(mockRequestsData);
 
       const { result } = renderHook(() => useRequests(undefined, true));
 
@@ -156,30 +172,20 @@ describe("useRequests", () => {
         expect(result.current.requests).toBeDefined();
       });
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/requests/viewForRequestor"),
-        expect.objectContaining({
-          method: "POST",
-          headers: expect.objectContaining({
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${mockToken}`,
-          }),
-        })
+      expect(vi.mocked(ApiService.getRequestsForRequestor)).toHaveBeenCalledWith(
+        mockRequestorUserInfo.email
       );
     });
 
-    it("should not make API call when no token exists", async () => {
+    it("should not make API call when no user email exists", async () => {
       mockGetStoredToken.mockReturnValue(null);
       mockKeycloakObject.token = null as any; // Set keycloak token to null
-      mockGetUserInfo.mockReturnValue(mockApproverUserInfo);
+      mockGetUserInfo.mockReturnValue({ ...mockApproverUserInfo, email: "" }); // No email
       mockIsApprover.mockReturnValue(true);
       mockIsRequestor.mockReturnValue(false);
 
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => mockRequestsData,
-      });
-      window.fetch = mockFetch;
+      // ApiService methods should not be called
+      vi.mocked(ApiService.getAllRequests).mockResolvedValue(mockRequestsData);
 
       const { result } = renderHook(() => useRequests(undefined, true));
 
@@ -187,8 +193,9 @@ describe("useRequests", () => {
         expect(result.current.requests).toEqual([]);
       });
 
-      // Fetch should NOT be called when there's no token
-      expect(mockFetch).not.toHaveBeenCalled();
+      // ApiService methods should NOT be called when there's no email
+      expect(vi.mocked(ApiService.getAllRequests)).not.toHaveBeenCalled();
+      expect(vi.mocked(ApiService.getRequestsForRequestor)).not.toHaveBeenCalled();
     });
 
     it("should handle 403 Forbidden errors gracefully", async () => {
@@ -197,12 +204,8 @@ describe("useRequests", () => {
       mockIsApprover.mockReturnValue(true);
       mockIsRequestor.mockReturnValue(false);
 
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 403,
-        json: async () => ({ errMsg: "Forbidden" }),
-      });
-      window.fetch = mockFetch;
+      // ApiService throws error for 403
+      vi.mocked(ApiService.getAllRequests).mockRejectedValue(new Error("Forbidden"));
 
       const { result } = renderHook(() => useRequests(undefined, true));
 
@@ -224,7 +227,8 @@ describe("useRequests", () => {
       });
 
       // Should not make any API calls
-      expect(window.fetch).not.toHaveBeenCalled();
+      expect(vi.mocked(ApiService.getAllRequests)).not.toHaveBeenCalled();
+      expect(vi.mocked(ApiService.getRequestsForRequestor)).not.toHaveBeenCalled();
     });
   });
 
@@ -235,11 +239,7 @@ describe("useRequests", () => {
       mockIsApprover.mockReturnValue(true);
       mockIsRequestor.mockReturnValue(false);
 
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => mockRequestsData,
-      });
-      window.fetch = mockFetch;
+      vi.mocked(ApiService.getAllRequests).mockResolvedValue(mockRequestsData);
 
       const { result } = renderHook(() => useRequests(undefined, true));
 
@@ -247,9 +247,8 @@ describe("useRequests", () => {
         expect(result.current.requests.length).toBeGreaterThan(0);
       });
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/requests/viewAll"),
-        expect.any(Object)
+      expect(vi.mocked(ApiService.getAllRequests)).toHaveBeenCalledWith(
+        mockApproverUserInfo.email
       );
     });
 
@@ -259,11 +258,7 @@ describe("useRequests", () => {
       mockIsApprover.mockReturnValue(false);
       mockIsRequestor.mockReturnValue(true);
 
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => mockRequestsData,
-      });
-      window.fetch = mockFetch;
+      vi.mocked(ApiService.getRequestsForRequestor).mockResolvedValue(mockRequestsData);
 
       const { result } = renderHook(() => useRequests(undefined, true));
 
@@ -271,9 +266,8 @@ describe("useRequests", () => {
         expect(result.current.requests.length).toBeGreaterThan(0);
       });
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("/api/requests/viewForRequestor"),
-        expect.any(Object)
+      expect(vi.mocked(ApiService.getRequestsForRequestor)).toHaveBeenCalledWith(
+        mockRequestorUserInfo.email
       );
     });
   });
@@ -285,8 +279,7 @@ describe("useRequests", () => {
       mockIsApprover.mockReturnValue(true);
       mockIsRequestor.mockReturnValue(false);
 
-      const mockFetch = vi.fn().mockRejectedValue(new Error("Network error"));
-      window.fetch = mockFetch;
+      vi.mocked(ApiService.getAllRequests).mockRejectedValue(new Error("Network error"));
 
       const { result } = renderHook(() => useRequests(undefined, true));
 
@@ -301,11 +294,7 @@ describe("useRequests", () => {
       mockIsApprover.mockReturnValue(true);
       mockIsRequestor.mockReturnValue(false);
 
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ invalid: "response" }),
-      });
-      window.fetch = mockFetch;
+      vi.mocked(ApiService.getAllRequests).mockResolvedValue({ invalid: "response" } as any);
 
       const { result } = renderHook(() => useRequests(undefined, true));
 
