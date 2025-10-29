@@ -8,24 +8,23 @@
  *  Then: They only interact with the corresponding environment"
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  API_ENDPOINTS,
   getApiUrl,
   getEndpointUrl,
   getEnvironmentInfo,
   getIsBypassAuth,
-  API_ENDPOINTS,
   logApiConfig,
 } from "./api-config";
 import {
-  mockEnvironment,
-  getExpectedConfig,
-  testCrossEnvironmentIsolation,
-  mockBuildMode,
-  getEnvironmentTestPatterns,
   cleanupEnvironmentMocks,
+  getEnvironmentTestPatterns,
+  getExpectedConfig,
+  mockBuildMode,
   mockDebugAdvanaEnvironment,
+  mockEnvironment,
+  testCrossEnvironmentIsolation,
   validateEnvironmentComplete,
 } from "./test-utils";
 
