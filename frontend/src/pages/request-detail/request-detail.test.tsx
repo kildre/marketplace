@@ -1,14 +1,14 @@
+import { ApiService } from "@/services/apiService";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe, toHaveNoViolations } from "jest-axe";
-import { renderWithProviders } from "../../test-utils";
-import { RequestDetail } from "./request-detail";
-import { vi } from "vitest";
-import * as ReactRouterDom from "react-router-dom";
-import { AppRoles } from "../../types/auth";
-import * as UseAuthHook from "../../hooks/useAuth";
-import { ApiService } from "@/services/apiService";
 import React from "react";
+import * as ReactRouterDom from "react-router-dom";
+import { vi } from "vitest";
+import * as UseAuthHook from "../../hooks/useAuth";
+import { renderWithProviders } from "../../test-utils";
+import { AppRoles } from "../../types/auth";
+import { RequestDetail } from "./request-detail";
 
 // Mock react-router-dom
 vi.mock("react-router-dom", async () => {
@@ -53,6 +53,7 @@ vi.mock("@/services/apiService", () => ({
   ApiService: {
     getAllRequests: vi.fn(),
     getRequestsForRequestor: vi.fn(),
+    getRequestByNumber: vi.fn(),
     makeDecision: vi.fn(),
   },
 }));
@@ -279,6 +280,11 @@ describe("RequestDetail", () => {
       errMsg: "",
     });
 
+    mockApiService.getRequestByNumber.mockResolvedValue({
+      request: mockRequestData[0], // Return the first request for any ID
+      errMsg: "",
+    });
+
     mockApiService.makeDecision.mockResolvedValue({
       success: true,
     });
@@ -486,12 +492,10 @@ describe("RequestDetail", () => {
 
   describe("when invalid request ID is provided", () => {
     test("should render 'Request Not Found' for invalid ID", async () => {
-      // Mock fetch to return no matching requests for invalid ID
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          requests: [], // No requests found for invalid ID
-        }),
+      // Mock ApiService.getRequestByNumber to return response with no request for invalid ID
+      mockApiService.getRequestByNumber.mockResolvedValueOnce({
+        request: undefined, // No request found for invalid ID
+        errMsg: "",
       });
 
       const { container } = await renderAndWaitForLoad("?id=invalid-id");
@@ -905,8 +909,9 @@ describe("RequestDetail", () => {
       await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.APPROVER);
 
       await waitFor(() => {
-        expect(mockApiService.getAllRequests).toHaveBeenCalledWith(
-          expect.any(String)
+        expect(mockApiService.getRequestByNumber).toHaveBeenCalledWith(
+          expect.any(String),
+          validRequestId
         );
       });
     });
@@ -943,8 +948,9 @@ describe("RequestDetail", () => {
       await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.REQUESTOR);
 
       await waitFor(() => {
-        expect(mockApiService.getRequestsForRequestor).toHaveBeenCalledWith(
-          expect.any(String)
+        expect(mockApiService.getRequestByNumber).toHaveBeenCalledWith(
+          expect.any(String),
+          validRequestId
         );
       });
     });
@@ -954,15 +960,17 @@ describe("RequestDetail", () => {
       mockKeycloakObject.token = null as any; // Set keycloak token to null
 
       // ApiService handles authentication internally - still mocked to return empty results
-      mockApiService.getAllRequests.mockResolvedValue({
-        requests: []
+      mockApiService.getRequestByNumber.mockResolvedValue({
+        request: undefined,
+        errMsg: ""
       });
 
       await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.APPROVER);
 
       await waitFor(() => {
-        expect(mockApiService.getAllRequests).toHaveBeenCalledWith(
-          expect.any(String)
+        expect(mockApiService.getRequestByNumber).toHaveBeenCalledWith(
+          expect.any(String),
+          validRequestId
         );
       });
     });

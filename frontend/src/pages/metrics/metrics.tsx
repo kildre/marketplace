@@ -1,8 +1,8 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { PageTitle } from "../../components/page-title/page-title";
 import { useAuth } from "@/hooks/useAuth";
 import { getApiUrl } from "@/utils/api-config";
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import { PageTitle } from "../../components/page-title/page-title";
 
 interface MetricsSummaryResponse {
   totalUsers: number;
@@ -16,10 +16,40 @@ interface PendingRequestsResponse {
   errMsg?: string | null;
 }
 
+/**
+ * Get authorization headers for API requests using Keycloak's current token
+ */
+const getAuthHeaders = async (): Promise<Record<string, string>> => {
+  const headers: Record<string, string> = {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+  };
+
+  try {
+    // Import keycloak instance dynamically to avoid circular dependencies
+    const { default: keycloak } = await import("../../keycloak");
+    
+    // Check if keycloak is authenticated and has a valid token
+    if (keycloak?.authenticated && keycloak.token) {
+      // Ensure token is fresh before using it (refresh if expires within 30 seconds)
+      await keycloak.updateToken(30);
+      headers["Authorization"] = `Bearer ${keycloak.token}`;
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to get authentication token from Keycloak:", error);
+    // Continue without token - let the backend handle unauthenticated requests
+  }
+
+  return headers;
+};
+
 const fetchMetricsSummary = async (): Promise<MetricsSummaryResponse> => {
   const endpoint = getApiUrl("/api/report/summary");
+  const headers = await getAuthHeaders();
+  
   const res = await globalThis.fetch(endpoint, {
-    headers: { Accept: "application/json" },
+    headers,
     credentials: "include",
   });
   if (!res.ok) {
@@ -32,12 +62,11 @@ const fetchPendingRequestsCount = async (
   userEmail: string
 ): Promise<number> => {
   const endpoint = getApiUrl("/api/requests/viewPending");
+  const headers = await getAuthHeaders();
+  
   const res = await globalThis.fetch(endpoint, {
     method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+    headers,
     credentials: "include",
     body: JSON.stringify({ userEmail }),
   });

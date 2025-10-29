@@ -4,9 +4,9 @@ import { CartItemData, RequestData } from "@/interfaces/interfaceStore";
 import { ApiService } from "@/services/apiService";
 import { AppRoles } from "@/types/auth";
 import {
-  calculateEstimatedCost,
-  generateRequestId,
-  getUserNameFromEmail,
+    calculateEstimatedCost,
+    generateRequestId,
+    getUserNameFromEmail,
 } from "@/utils/helper-functions";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Button } from "@mui/material";
@@ -174,52 +174,17 @@ export const RequestDetail = (): React.ReactElement => {
         setLoading(true);
         setError(null);
 
-        if (hasRole(AppRoles.APPROVER)) {
-          // Approvers can see all requests
-          const requestsData = await ApiService.getAllRequests(userInfo.email);
-          
-          // Handle API response format: { requests: [...], errMsg: "..." }
-          let allRequests: unknown[] = [];
-          if (requestsData && Array.isArray(requestsData.requests)) {
-            allRequests = requestsData.requests;
-          } else if (Array.isArray(requestsData)) {
-            allRequests = requestsData;
-          }
+        // Use the new direct API call to get specific request by number
+        const requestData = await ApiService.getRequestByNumber(
+          userInfo.email,
+          requestId
+        );
 
-          // Find the specific request by requestNumber (from API) matching requestId (from URL)
-          const foundRequest = allRequests.find(
-            (req: unknown) =>
-              (req as Record<string, unknown>).requestNumber === requestId
-          ) as Record<string, unknown> | undefined;
-
-          if (foundRequest) {
-            setRequest(transformApiRequestToRequestData(foundRequest));
-          } else {
-            setRequest(null);
-          }
+        if (requestData.request) {
+          const transformedRequest = transformApiRequestToRequestData(requestData.request as unknown as Record<string, unknown>);
+          setRequest(transformedRequest);
         } else {
-          // Requestors see only their own requests
-          const requestsData = await ApiService.getRequestsForRequestor(userInfo.email);
-          
-          // Handle API response format: { requests: [...], errMsg: "..." }
-          let allRequests: unknown[] = [];
-          if (requestsData && Array.isArray(requestsData.requests)) {
-            allRequests = requestsData.requests;
-          } else if (Array.isArray(requestsData)) {
-            allRequests = requestsData;
-          }
-
-          // Find the specific request by requestNumber (from API) matching requestId (from URL)
-          const foundRequest = allRequests.find(
-            (req: unknown) =>
-              (req as Record<string, unknown>).requestNumber === requestId
-          ) as Record<string, unknown> | undefined;
-
-          if (foundRequest) {
-            setRequest(transformApiRequestToRequestData(foundRequest));
-          } else {
-            setRequest(null);
-          }
+          setRequest(null);
         }
       } catch (err) {
         setError("Failed to fetch request data");
