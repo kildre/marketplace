@@ -63,6 +63,9 @@ const transformApiRequestToRequestData = (
   const decision = apiRequest.decision as Record<string, unknown> | null;
   const decisionComments = decision?.comments as string;
   const hasDecision = decision !== null;
+  
+  // Use decision.statusId if available, otherwise fall back to apiRequest.statusId
+  const statusId = decision?.statusId || apiRequest.statusId;
 
   return {
     requestId: (apiRequest.requestNumber as string) || "",
@@ -110,11 +113,13 @@ const transformApiRequestToRequestData = (
     },
     submittedAt: (apiRequest.createdAt as string) || new Date().toISOString(),
     status:
-      (apiRequest.statusId as number) === 1
+      (statusId as number) === 1
         ? "Pending"
-        : (apiRequest.statusId as number) === 2
+        : (statusId as number) === 2
         ? "Approved"
-        : "Denied",
+        : (statusId as number) === 3
+        ? "Denied"
+        : "Unknown",
     statusReason: hasDecision
       ? decisionComments || ""
       : (apiRequest.statusReason as string) || "",
