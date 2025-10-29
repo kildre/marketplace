@@ -81,6 +81,7 @@ export const API_ENDPOINTS = {
   // Request Management
   SUBMIT_REQUEST: "/api/requests",
   VIEW_FOR_REQUESTOR: "/api/requests/viewForRequestor",
+  VIEW_FOR_REQUEST_NUMBER: "/api/requests/viewForRequestNumber",
   VIEW_PENDING: "/api/requests/viewPending",
   VIEW_ALL: "/api/requests/viewAll",
 

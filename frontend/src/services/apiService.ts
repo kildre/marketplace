@@ -36,6 +36,16 @@ export interface ViewRequestsApiResponse {
   errMsg?: string;
 }
 
+export interface ViewRequestByNumberApiRequest {
+  userEmail: string;
+  requestNumber: string;
+}
+
+export interface ViewRequestByNumberApiResponse {
+  request?: UseCaseRequestApiDto;
+  errMsg?: string;
+}
+
 export interface UseCaseRequestApiDto {
   requestNumber: string;
   statusId: number;
@@ -215,6 +225,107 @@ export class ApiService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching all requests:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a specific request by request number
+   * NOTE: Temporarily includes fallback logic until local backend is updated
+   */
+  static async getRequestByNumber(
+    userEmail: string,
+    requestNumber: string
+  ): Promise<ViewRequestByNumberApiResponse> {
+    try {
+      const requestData: ViewRequestByNumberApiRequest = { 
+        userEmail, 
+        requestNumber 
+      };
+
+      const response = await window.fetch(
+        getEndpointUrl("VIEW_FOR_REQUEST_NUMBER"),
+        {
+          method: "POST",
+          headers: await this.getAuthHeaders(),
+          body: JSON.stringify(requestData),
+        }
+      );
+
+      // Temporary fallback for local development until backend is updated
+      if (response.status === 501) {
+        // eslint-disable-next-line no-console
+        console.warn("⚠️ Local backend not updated yet, falling back to getAllRequests");
+        
+        // Fall back to getAllRequests and filter client-side
+        const allRequestsResponse = await this.getAllRequests(userEmail);
+        
+        if (allRequestsResponse.requests) {
+          const foundRequest = allRequestsResponse.requests.find(
+            (req: UseCaseRequestApiDto) => req.requestNumber?.toString() === requestNumber
+          );
+          
+          return {
+            request: foundRequest || undefined,
+            errMsg: foundRequest ? "" : "Request not found"
+          };
+        }
+        
+        return {
+          request: undefined,
+          errMsg: "No requests found"
+        };
+      }
+
+      // Handle the actual API response structure
+      const responseData = await this.handleResponse<UseCaseRequestApiDto>(response);
+      
+      // The API returns the request data directly, not wrapped in a "request" property
+      return {
+        request: responseData,
+        errMsg: ""
+      };
+    } catch (error) {
+      // Check if this is an authorization error and fall back to existing endpoints
+      if (error instanceof Error && error.message.includes("UnauthorizedAdjudicatorError")) {
+        // eslint-disable-next-line no-console
+        console.warn("⚠️ User not authorized as adjudicator for new endpoint, falling back to existing endpoints");
+        
+        try {
+          // Try requestor-specific endpoint first, then fall back to getAllRequests
+          let allRequestsResponse: ViewRequestsApiResponse;
+          
+          try {
+            allRequestsResponse = await this.getRequestsForRequestor(userEmail);
+          } catch {
+            // If requestor endpoint fails, try getAllRequests
+            allRequestsResponse = await this.getAllRequests(userEmail);
+          }
+          
+          if (allRequestsResponse.requests) {
+            const foundRequest = allRequestsResponse.requests.find(
+              (req: UseCaseRequestApiDto) => req.requestNumber?.toString() === requestNumber
+            );
+            
+            return {
+              request: foundRequest || undefined,
+              errMsg: foundRequest ? "" : "Request not found"
+            };
+          }
+          
+          return {
+            request: undefined,
+            errMsg: "No requests found"
+          };
+        } catch (fallbackError) {
+          // eslint-disable-next-line no-console
+          console.error("Error in authorization fallback:", fallbackError);
+          throw fallbackError;
+        }
+      }
+      
+      // eslint-disable-next-line no-console
+      console.error("Error fetching request by number:", error);
       throw error;
     }
   }
