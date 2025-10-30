@@ -34,7 +34,7 @@ http {
     server {
         listen 8080;
         server_name localhost;
-        root /usr/share/nginx/html;
+        root /opt/bitnami/nginx/html;
         index index.html;
 
         # Error pages
