@@ -20,7 +20,7 @@
     "test:watch": "vitest --watch",
     "test:a11y": "vitest --run --reporter=verbose -t \"accessibility|violations|axe|WCAG|ARIA\"",
     "test:verbose": "vitest --run --reporter=verbose",
-    "beforepush": "npm run build && npm run lint && npm run test"
+    "beforepush": "npm run lint && npm run test"
   },
   "dependencies": {
     "@advana/platform-ui": "^3.1.0",

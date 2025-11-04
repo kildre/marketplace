@@ -52,6 +52,13 @@
 
   .form-request-details__accordion-details {
     padding: 1rem 1.5rem;
+
+    // Styles for view mode
+    &.view-mode {
+      > div {
+        margin-bottom: 25px;
+      }
+    }
   }
 
   .form-request-details__organization {
@@ -75,5 +82,4 @@
   .form-request-details__poc-detail-item {
     width: calc(1 / 3 * 100% - 0.5rem);
   }
-
 }
