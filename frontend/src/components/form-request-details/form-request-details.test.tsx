@@ -334,7 +334,6 @@ describe("FormRequestDetails", () => {
       // TODO: Rewrite to trigger submission instead of setting initial state
       // This test needs to be rewritten to actually trigger a submission attempt
       // by simulating a user interaction that calls markSubmissionAttempt
-      
       // renderFormRequestDetails({
       //   organization: "Other",
       //   organizationOther: "",
@@ -660,11 +659,11 @@ describe("FormRequestDetails", () => {
       renderFormRequestDetails();
 
       const phoneInput = screen.getByLabelText(/phone number/i);
-      
+
       // Enter invalid phone number
       await user.clear(phoneInput);
       await user.type(phoneInput, "invalid-phone");
-      
+
       // Trigger validation by blurring (click outside)
       await user.tab();
 
@@ -672,73 +671,83 @@ describe("FormRequestDetails", () => {
       await waitFor(() => {
         expect(phoneInput).toHaveAttribute("aria-invalid", "true");
       });
-      expect(screen.getByText(/please enter a valid phone number/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/please enter a valid phone number/i)
+      ).toBeInTheDocument();
     });
 
     test("should accept valid phone number formats", async () => {
       renderFormRequestDetails();
 
       const phoneInput = screen.getByLabelText(/phone number/i);
-      
+
       // Test with simple numeric format first
       await user.clear(phoneInput);
       await user.type(phoneInput, "1234567890");
-      
+
       // Trigger validation
       await user.tab();
-      
+
       // Should not show error after typing complete valid number
-      expect(screen.queryByText(/please enter a valid phone number/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/please enter a valid phone number/i)
+      ).not.toBeInTheDocument();
     });
 
     test("should allow empty phone number (optional field)", async () => {
       renderFormRequestDetails({ pocPhone: "123-456-7890" });
 
       const phoneInput = screen.getByLabelText(/phone number/i);
-      
+
       // Clear the field
       await user.clear(phoneInput);
-      
+
       // Trigger validation
       await user.tab();
 
       // Should not show error for empty field
       expect(phoneInput).not.toHaveAttribute("aria-invalid", "true");
-      expect(screen.queryByText(/please enter a valid phone number/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/please enter a valid phone number/i)
+      ).not.toBeInTheDocument();
     });
 
     test("should show error for phone number with letters", async () => {
       renderFormRequestDetails();
 
       const phoneInput = screen.getByLabelText(/phone number/i);
-      
+
       await user.clear(phoneInput);
       await user.type(phoneInput, "123-ABC-7890");
-      
+
       // Trigger validation
       await user.tab();
 
       await waitFor(() => {
         expect(phoneInput).toHaveAttribute("aria-invalid", "true");
       });
-      expect(screen.getByText(/please enter a valid phone number/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/please enter a valid phone number/i)
+      ).toBeInTheDocument();
     });
 
     test("should show error for too short phone number", async () => {
       renderFormRequestDetails();
 
       const phoneInput = screen.getByLabelText(/phone number/i);
-      
+
       await user.clear(phoneInput);
       await user.type(phoneInput, "123");
-      
+
       // Trigger validation
       await user.tab();
 
       await waitFor(() => {
         expect(phoneInput).toHaveAttribute("aria-invalid", "true");
       });
-      expect(screen.getByText(/please enter a valid phone number/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/please enter a valid phone number/i)
+      ).toBeInTheDocument();
     });
   });
 
@@ -747,11 +756,11 @@ describe("FormRequestDetails", () => {
       renderFormRequestDetails();
 
       const emailInput = screen.getByLabelText(/email address/i);
-      
+
       // Enter invalid email
       await user.clear(emailInput);
       await user.type(emailInput, "invalid-email");
-      
+
       // Trigger validation
       await user.tab();
 
@@ -759,107 +768,121 @@ describe("FormRequestDetails", () => {
       await waitFor(() => {
         expect(emailInput).toHaveAttribute("aria-invalid", "true");
       });
-      expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/please enter a valid email address/i)
+      ).toBeInTheDocument();
     });
 
     test("should accept valid email formats", async () => {
       renderFormRequestDetails();
 
       const emailInput = screen.getByLabelText(/email address/i);
-      
+
       // Test with a simple valid email
       await user.clear(emailInput);
       await user.type(emailInput, "user@example.com");
-      
+
       // Trigger validation
       await user.tab();
-      
+
       // Should not show error after typing complete valid email
-      expect(screen.queryByText(/please enter a valid email address/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/please enter a valid email address/i)
+      ).not.toBeInTheDocument();
     });
 
     test("should allow empty email (optional field)", async () => {
       renderFormRequestDetails({ pocEmail: "user@example.com" });
 
       const emailInput = screen.getByLabelText(/email address/i);
-      
+
       // Clear the field
       await user.clear(emailInput);
-      
+
       // Trigger validation
       await user.tab();
 
       // Should not show error for empty field
       expect(emailInput).not.toHaveAttribute("aria-invalid", "true");
-      expect(screen.queryByText(/please enter a valid email address/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/please enter a valid email address/i)
+      ).not.toBeInTheDocument();
     });
 
     test("should show error for email without @ symbol", async () => {
       renderFormRequestDetails();
 
       const emailInput = screen.getByLabelText(/email address/i);
-      
+
       await user.clear(emailInput);
       await user.type(emailInput, "userexample.com");
-      
+
       // Trigger validation
       await user.tab();
 
       await waitFor(() => {
         expect(emailInput).toHaveAttribute("aria-invalid", "true");
       });
-      expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/please enter a valid email address/i)
+      ).toBeInTheDocument();
     });
 
     test("should show error for email without domain", async () => {
       renderFormRequestDetails();
 
       const emailInput = screen.getByLabelText(/email address/i);
-      
+
       await user.clear(emailInput);
       await user.type(emailInput, "user@");
-      
+
       // Trigger validation
       await user.tab();
 
       await waitFor(() => {
         expect(emailInput).toHaveAttribute("aria-invalid", "true");
       });
-      expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/please enter a valid email address/i)
+      ).toBeInTheDocument();
     });
 
     test("should show error for email with spaces", async () => {
       renderFormRequestDetails();
 
       const emailInput = screen.getByLabelText(/email address/i);
-      
+
       await user.clear(emailInput);
       await user.type(emailInput, "user name@example.com");
-      
+
       // Trigger validation
       await user.tab();
 
       await waitFor(() => {
         expect(emailInput).toHaveAttribute("aria-invalid", "true");
       });
-      expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/please enter a valid email address/i)
+      ).toBeInTheDocument();
     });
 
     test("should show error for email without extension", async () => {
       renderFormRequestDetails();
 
       const emailInput = screen.getByLabelText(/email address/i);
-      
+
       await user.clear(emailInput);
       await user.type(emailInput, "user@example");
-      
+
       // Trigger validation
       await user.tab();
 
       await waitFor(() => {
         expect(emailInput).toHaveAttribute("aria-invalid", "true");
       });
-      expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/please enter a valid email address/i)
+      ).toBeInTheDocument();
     });
   });
 
@@ -868,20 +891,20 @@ describe("FormRequestDetails", () => {
       renderFormRequestDetails();
 
       const phoneInput = screen.getByLabelText(/phone number/i);
-      
+
       // Type invalid characters
       await user.clear(phoneInput);
       await user.type(phoneInput, "abc");
-      
+
       // No error yet (validation happens on blur)
       expect(phoneInput).not.toHaveAttribute("aria-invalid", "true");
-      
+
       // Trigger validation
       await user.tab();
       await waitFor(() => {
         expect(phoneInput).toHaveAttribute("aria-invalid", "true");
       });
-      
+
       // Clear and type valid
       await user.clear(phoneInput);
       await user.type(phoneInput, "1234567890");
@@ -895,20 +918,20 @@ describe("FormRequestDetails", () => {
       renderFormRequestDetails();
 
       const emailInput = screen.getByLabelText(/email address/i);
-      
+
       // Type invalid format
       await user.clear(emailInput);
       await user.type(emailInput, "invalid");
-      
+
       // No error yet (validation happens on blur)
       expect(emailInput).not.toHaveAttribute("aria-invalid", "true");
-      
+
       // Trigger validation
       await user.tab();
       await waitFor(() => {
         expect(emailInput).toHaveAttribute("aria-invalid", "true");
       });
-      
+
       // Clear and type valid email
       await user.clear(emailInput);
       await user.type(emailInput, "user@example.com");
@@ -922,20 +945,161 @@ describe("FormRequestDetails", () => {
       renderFormRequestDetails();
 
       const phoneInput = screen.getByLabelText(/phone number/i);
-      
+
       // Type invalid and trigger validation
       await user.type(phoneInput, "invalid");
       await user.tab();
       await waitFor(() => {
         expect(phoneInput).toHaveAttribute("aria-invalid", "true");
       });
-      
+
       // Start typing - error should clear immediately
       await user.click(phoneInput);
       await user.type(phoneInput, "1");
       await waitFor(() => {
         expect(phoneInput).not.toHaveAttribute("aria-invalid", "true");
       });
+    });
+  });
+
+  describe("View Mode", () => {
+    const mockViewData = {
+      organization: "Army",
+      organizationOther: "",
+      pocName: "John Doe",
+      pocPhone: "555-1234",
+      pocEmail: "john.doe@example.com",
+      useCaseDescription: "Test use case description",
+    };
+
+    test("should render in view mode when mode='view' is passed", () => {
+      renderWithProviders(
+        <FormRequestDetails mode="view" viewData={mockViewData} />
+      );
+
+      // Should not render form controls
+      expect(
+        screen.queryByRole("combobox", { name: /organization/i })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("textbox", { name: /point of contact name/i })
+      ).not.toBeInTheDocument();
+
+      // Should render as text
+      expect(screen.getByText("Organization")).toBeInTheDocument();
+      expect(screen.getByText("Army")).toBeInTheDocument();
+    });
+
+    test("should display all view data as paragraphs", () => {
+      renderWithProviders(
+        <FormRequestDetails mode="view" viewData={mockViewData} />
+      );
+
+      expect(screen.getByText("Organization")).toBeInTheDocument();
+      expect(screen.getByText("Army")).toBeInTheDocument();
+
+      expect(screen.getByText("Point of Contact Name")).toBeInTheDocument();
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
+
+      expect(screen.getByText("Phone Number")).toBeInTheDocument();
+      expect(screen.getByText("555-1234")).toBeInTheDocument();
+
+      expect(screen.getByText("Email Address")).toBeInTheDocument();
+      expect(screen.getByText("john.doe@example.com")).toBeInTheDocument();
+
+      expect(screen.getByText("Use Case Description")).toBeInTheDocument();
+      expect(screen.getByText("Test use case description")).toBeInTheDocument();
+    });
+
+    test("should display 'Other Organization' when organization is 'Other'", () => {
+      const viewDataWithOther = {
+        ...mockViewData,
+        organization: "Other",
+        organizationOther: "Custom Organization",
+      };
+
+      renderWithProviders(
+        <FormRequestDetails mode="view" viewData={viewDataWithOther} />
+      );
+
+      expect(screen.getByText("Other Organization")).toBeInTheDocument();
+      expect(screen.getByText("Custom Organization")).toBeInTheDocument();
+    });
+
+    test("should not display 'Other Organization' section when organization is not 'Other'", () => {
+      renderWithProviders(
+        <FormRequestDetails mode="view" viewData={mockViewData} />
+      );
+
+      expect(screen.queryByText("Other Organization")).not.toBeInTheDocument();
+    });
+
+    test("should display 'N/A' for empty fields", () => {
+      const emptyViewData = {
+        organization: "",
+        organizationOther: "",
+        pocName: "",
+        pocPhone: "",
+        pocEmail: "",
+        useCaseDescription: "",
+      };
+
+      renderWithProviders(
+        <FormRequestDetails mode="view" viewData={emptyViewData} />
+      );
+
+      // Should show N/A for empty values
+      const naTexts = screen.getAllByText("N/A");
+      expect(naTexts.length).toBeGreaterThan(0);
+    });
+
+    test("should not show validation warnings in view mode", () => {
+      const viewDataWithEmptyOrg = {
+        ...mockViewData,
+        organization: "",
+      };
+
+      renderWithProviders(
+        <FormRequestDetails mode="view" viewData={viewDataWithEmptyOrg} />
+      );
+
+      // Should not show any alerts in view mode
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    test("should render accordion in view mode", () => {
+      renderWithProviders(
+        <FormRequestDetails mode="view" viewData={mockViewData} />
+      );
+
+      const accordion = screen.getByRole("button", {
+        name: /request details/i,
+      });
+      expect(accordion).toBeInTheDocument();
+      expect(accordion).toHaveAttribute("aria-expanded", "true");
+    });
+
+    test("should use viewData instead of form state in view mode", () => {
+      // Render with viewData that's different from any form state
+      const specificViewData = {
+        organization: "Navy",
+        organizationOther: "",
+        pocName: "Jane Smith",
+        pocPhone: "555-9999",
+        pocEmail: "jane.smith@navy.mil",
+        useCaseDescription: "Navy specific use case",
+      };
+
+      renderWithProviders(
+        <FormRequestDetails mode="view" viewData={specificViewData} />
+      );
+
+      // Should show viewData values, not form state
+      expect(screen.getByText("Navy")).toBeInTheDocument();
+      expect(screen.getByText("Jane Smith")).toBeInTheDocument();
+      expect(screen.getByText("555-9999")).toBeInTheDocument();
+      expect(screen.getByText("jane.smith@navy.mil")).toBeInTheDocument();
+      expect(screen.getByText("Navy specific use case")).toBeInTheDocument();
     });
   });
 });
