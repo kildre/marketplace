@@ -1,8 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
+import { Provider } from "react-redux";
+import { BrowserRouter } from "react-router-dom";
+import { ReduxCartProvider } from "../../contexts/ReduxCartContext";
+import { store } from "../../store/store";
 import { ProductCatalog } from "./product-catalog";
-import { CartProvider } from "../../contexts/CartContext";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
@@ -10,11 +12,13 @@ expect.extend(toHaveNoViolations);
 describe("ProductCatalog", () => {
   const renderProductCatalogWithRouter = () => {
     return render(
-      <BrowserRouter>
-        <CartProvider>
-          <ProductCatalog />
-        </CartProvider>
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ReduxCartProvider>
+            <ProductCatalog />
+          </ReduxCartProvider>
+        </BrowserRouter>
+      </Provider>
     );
   };
 

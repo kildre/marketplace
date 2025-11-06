@@ -1,25 +1,29 @@
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import { ApproverRedirectGuard } from "./components/auth/ApproverRedirectGuard";
+import { Footer } from "./components/footer/footer-component";
 import { GovernmentBanner } from "./components/government-banner/government-banner";
 import { Sidebar } from "./components/sidebar/sidebar";
-import { Footer } from "./components/footer/footer-component";
-import { ProductCatalog } from "./pages/product-catalog/product-catalog";
-import { Cart } from "./pages/cart/cart";
-import { Requests } from "./pages/requests/requests";
-import { RequestDetail } from "./pages/request-detail/request-detail";
-import { ApproverRedirectGuard } from "./components/auth/ApproverRedirectGuard";
-import { AuthStatusPage } from "./pages/auth-status/auth-status";
 import { useAuth } from "./hooks/useAuth";
+import { useCartUserSync } from "./hooks/useCartUserSync";
+import { AuthStatusPage } from "./pages/auth-status/auth-status";
+import { Cart } from "./pages/cart/cart";
+import { ProductCatalog } from "./pages/product-catalog/product-catalog";
+import { RequestDetail } from "./pages/request-detail/request-detail";
+import { Requests } from "./pages/requests/requests";
 import { AppRoles } from "./types/auth";
 // @ts-ignore
 import AdvanaMenu from "@advana/platform-ui/dist/AdvanaMenu";
-import CustomMenuLogoSection from "./components/CustomMenuLogoSection";
-import "./styles/main.scss";
-import CartOverlayButton from "./components/CartOverlayButton";
-import Metrics from "./pages/metrics/metrics";
 import { RoleGuard } from "./components/auth/RoleGuard";
+import CartOverlayButton from "./components/CartOverlayButton";
+import CustomMenuLogoSection from "./components/CustomMenuLogoSection";
+import Metrics from "./pages/metrics/metrics";
+import "./styles/main.scss";
 
 function App(): React.ReactElement {
   const { hasRole } = useAuth();
+  
+  // Automatically clear cart when user changes
+  useCartUserSync();
 
   // Role-based home component selection
   const getHomeComponent = () => {
