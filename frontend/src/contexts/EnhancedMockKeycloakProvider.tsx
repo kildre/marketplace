@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useState } from "react";
+import React, { createContext, ReactNode, useContext, useState } from "react";
 import { AuthService } from "../services/authService";
 
 // Mock role options for development testing
@@ -216,12 +216,9 @@ export const EnhancedMockKeycloakProvider: React.FC<
     // Update stored auth data to simulate real behavior
     const userData = mockUserConfigurations[userType];
     const mockTokenData = createMockToken(userData);
-    const mockJwtToken = `mock.${window.btoa(
-      JSON.stringify(mockTokenData)
-    )}.signature`;
 
-    // Store token and user info using AuthService
-    AuthService.storeTokens(mockJwtToken, "mock-refresh-token");
+    // SECURITY: In development, only store user info, not tokens
+    // This matches production behavior where tokens are managed by Keycloak in memory
     const userInfo = AuthService.createUserInfoFromToken(mockTokenData);
     AuthService.storeUserInfo(userInfo);
   };

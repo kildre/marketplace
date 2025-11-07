@@ -5,7 +5,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Button, Box, TextField } from "@mui/material";
-import { useCart } from "../../contexts/CartContext";
+import { useCart } from "../../contexts/ReduxCartContext";
 import { getIconPath, formatPrice } from "../../utils/helper-functions";
 import { FormSelectedApplicationsProps } from "../../interfaces";
 

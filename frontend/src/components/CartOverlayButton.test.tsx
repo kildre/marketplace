@@ -18,8 +18,8 @@ vi.mock("react-router-dom", async () => {
 
 // Mock cart context
 const mockUseCart = vi.fn();
-vi.mock("../contexts/CartContext", async () => {
-  const actual = await vi.importActual("../contexts/CartContext");
+vi.mock("../contexts/ReduxCartContext", async () => {
+  const actual = await vi.importActual("../contexts/ReduxCartContext");
   return {
     ...actual,
     useCart: () => mockUseCart(),

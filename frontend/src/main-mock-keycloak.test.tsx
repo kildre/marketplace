@@ -32,9 +32,9 @@ vi.mock("react-router-dom", () => ({
 }));
 
 // Mock the CartProvider
-vi.mock("./contexts/CartContext", () => ({
-  CartProvider: ({ children }: { children: React.ReactNode }) =>
-    React.createElement("div", { "data-testid": "cart-provider" }, children),
+vi.mock("./contexts/ReduxCartContext", () => ({
+  ReduxCartProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement("div", { "data-testid": "redux-cart-provider" }, children),
 }));
 
 // Mock the MockKeycloakProvider

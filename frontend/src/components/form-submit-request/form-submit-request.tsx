@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Checkbox from "@mui/material/Checkbox";
-import { useCart } from "../../contexts/CartContext";
+import { useCart } from "../../contexts/ReduxCartContext";
 import {
   useFormData,
   useSubmitRequest,

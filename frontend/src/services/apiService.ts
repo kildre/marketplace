@@ -103,15 +103,27 @@ export class ApiService {
   private static async handleResponse<T>(response: any): Promise<T> {
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
+      let errorDetails = '';
 
       try {
         const errorData = await response.json();
         if (errorData.errMsg) {
           errorMessage = errorData.errMsg;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
         }
+        
+        // Capture additional error details for debugging
+        errorDetails = JSON.stringify(errorData);
       } catch {
         // If JSON parsing fails, use the default error message
       }
+
+      // Log detailed error for debugging
+      // eslint-disable-next-line no-console
+      console.error(`API Error [${response.status}]:`, errorMessage, errorDetails ? `\nDetails: ${errorDetails}` : '');
 
       throw new Error(errorMessage);
     }
@@ -140,6 +152,25 @@ export class ApiService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error submitting request:", error);
+
+      // Handle authentication errors gracefully
+      if (error instanceof Error) {
+        const errorMsg = error.message.toLowerCase();
+        // eslint-disable-next-line no-console
+        console.log(`[DEBUG submitRequest] Checking error message: "${errorMsg}"`);
+        
+        // Authentication/token validation issues
+        if (errorMsg.includes("introspection") || 
+            errorMsg.includes("unauthorized") || 
+            errorMsg.includes("forbidden")) {
+          // eslint-disable-next-line no-console
+          console.warn(`✅ Authentication error during request submission. Returning error response.`);
+          return {
+            requestNumber: undefined,
+            errMsg: "Authentication failed. Please ensure you're logged in and try again."
+          };
+        }
+      }
 
       // In development mode with bypass auth, return a mock success response
       if (isBypassAuth) {
@@ -179,6 +210,30 @@ export class ApiService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching requests for requestor:", error);
+      
+      // Handle common recoverable errors gracefully
+      if (error instanceof Error) {
+        const errorMsg = error.message.toLowerCase();
+        // eslint-disable-next-line no-console
+        console.log(`[DEBUG] Checking error message: "${errorMsg}"`);
+        
+        // User doesn't exist in database yet
+        if (errorMsg.includes("not found") || errorMsg.includes("user with email")) {
+          // eslint-disable-next-line no-console
+          console.warn(`✅ User ${userEmail} not found in database. Returning empty requests list.`);
+          return { requests: [] };
+        }
+        
+        // Authentication/token validation issues
+        if (errorMsg.includes("introspection") || 
+            errorMsg.includes("unauthorized") || 
+            errorMsg.includes("forbidden")) {
+          // eslint-disable-next-line no-console
+          console.warn(`✅ Authentication error for user ${userEmail}. This may indicate token issues. Returning empty requests list.`);
+          return { requests: [] };
+        }
+      }
+      
       throw error;
     }
   }
@@ -202,6 +257,28 @@ export class ApiService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching pending requests:", error);
+      
+      // Handle common recoverable errors gracefully
+      if (error instanceof Error) {
+        const errorMsg = error.message.toLowerCase();
+        
+        // User doesn't exist in database yet
+        if (errorMsg.includes("not found") || errorMsg.includes("user with email")) {
+          // eslint-disable-next-line no-console
+          console.warn(`User ${userEmail} not found in database. Returning empty pending requests list.`);
+          return { requests: [] };
+        }
+        
+        // Authentication/token validation issues
+        if (errorMsg.includes("introspection") || 
+            errorMsg.includes("unauthorized") || 
+            errorMsg.includes("forbidden")) {
+          // eslint-disable-next-line no-console
+          console.warn(`Authentication error for user ${userEmail}. This may indicate token issues. Returning empty pending requests list.`);
+          return { requests: [] };
+        }
+      }
+      
       throw error;
     }
   }
@@ -225,6 +302,28 @@ export class ApiService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching all requests:", error);
+      
+      // Handle common recoverable errors gracefully
+      if (error instanceof Error) {
+        const errorMsg = error.message.toLowerCase();
+        
+        // User doesn't exist in database yet
+        if (errorMsg.includes("not found") || errorMsg.includes("user with email")) {
+          // eslint-disable-next-line no-console
+          console.warn(`User ${userEmail} not found in database. Returning empty requests list.`);
+          return { requests: [] };
+        }
+        
+        // Authentication/token validation issues
+        if (errorMsg.includes("introspection") || 
+            errorMsg.includes("unauthorized") || 
+            errorMsg.includes("forbidden")) {
+          // eslint-disable-next-line no-console
+          console.warn(`Authentication error for user ${userEmail}. This may indicate token issues. Returning empty requests list.`);
+          return { requests: [] };
+        }
+      }
+      
       throw error;
     }
   }

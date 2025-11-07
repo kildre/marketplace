@@ -3,7 +3,7 @@ import { PageTitle } from "../../components/page-title/page-title";
 import { ProductCard } from "../../components/card/product-card";
 import { mockProducts } from "../../data/mock-productData";
 import { Product } from "../../interfaces";
-import { useCart } from "../../contexts/CartContext";
+import { useCart } from "../../contexts/ReduxCartContext";
 
 export const ProductCatalog = (): React.ReactElement => {
   const { updateCartQuantity, getProductCartQuantity, isProductInCart } =

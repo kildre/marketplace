@@ -62,18 +62,19 @@ export const FormRequestDetails = ({
       updateValidationErrors({ phoneError: "" });
       return true; // Empty is valid (field is optional)
     }
-    
+
     // Phone number regex: supports various formats
     // Examples: (123) 456-7890, 123-456-7890, 123.456.7890, 1234567890, +1 123 456 7890
-    const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/;
-    
+    const phoneRegex =
+      /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/;
+
     if (!phoneRegex.test(phone)) {
       const errorMsg = "Please enter a valid phone number";
       setPhoneError(errorMsg);
       updateValidationErrors({ phoneError: errorMsg });
       return false;
     }
-    
+
     setPhoneError("");
     updateValidationErrors({ phoneError: "" });
     return true;
@@ -85,18 +86,18 @@ export const FormRequestDetails = ({
       updateValidationErrors({ emailError: "" });
       return true; // Empty is valid (field is optional)
     }
-    
+
     // Email regex: ReDoS-safe email validation using atomic grouping via possessive quantifiers
     // Uses character classes with specific length limits to prevent catastrophic backtracking
     const emailRegex = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/;
-    
+
     if (!emailRegex.test(email)) {
       const errorMsg = "Please enter a valid email address";
       setEmailError(errorMsg);
       updateValidationErrors({ emailError: errorMsg });
       return false;
     }
-    
+
     setEmailError("");
     updateValidationErrors({ emailError: "" });
     return true;
@@ -131,7 +132,7 @@ export const FormRequestDetails = ({
       const value = e.target.value;
       const update: Record<string, string> = { [fieldName]: value };
       updateRequestDetails(update);
-      
+
       // Clear error when user is typing (don't validate on every keystroke)
       if (fieldName === "pocPhone" && phoneError) {
         setPhoneError("");
@@ -177,134 +178,163 @@ export const FormRequestDetails = ({
         >
           <span>Request Details</span>
         </AccordionSummary>
-        <AccordionDetails className="form-request-details__accordion-details">
-          <FormControl fullWidth className="form-request-details__organization">
-            <label id="organization-label">
-              Organization{!isViewMode && <span>*</span>}
-            </label>
-            {!isViewMode && (
-              <p>Select the organization that this request is on behalf of</p>
-            )}
-            <Select
-              displayEmpty
-              required={!isViewMode}
-              disabled={isViewMode}
-              id="organization-select"
-              name="organization"
-              size="small"
-              value={data.organization}
-              onChange={isViewMode ? undefined : handleOrganizationChange}
-              labelId="organization-label"
-              inputProps={{ "aria-label": "Organization" }}
-              renderValue={(selected) => {
-                if (selected.length === 0) {
-                  return <em>- Select -</em>;
-                }
-                return selected;
-              }}
-            >
-              {organizationOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {data.organization === "Other" && (
+        <AccordionDetails
+          className={`form-request-details__accordion-details ${
+            isViewMode ? "view-mode" : "edit-mode"
+          }`}
+        >
+          {isViewMode ? (
             <>
-              <label htmlFor="organization-other">
-                {isViewMode
-                  ? "Other Organization"
-                  : "Please specify the organization you are requesting on behalf of"}
-                {!isViewMode && <span style={{ color: 'red', paddingLeft: '2px' }}>*</span>}
-              </label>
+              <div>
+                <label>Organization</label>
+                <p>{data.organization || "N/A"}</p>
+              </div>
+              {data.organization === "Other" && data.organizationOther && (
+                <div>
+                  <label>Other Organization</label>
+                  <p>{data.organizationOther}</p>
+                </div>
+              )}
+              <div>
+                <label>Point of Contact Name</label>
+                <p>{data.pocName || "N/A"}</p>
+              </div>
+              <div>
+                <label>Phone Number</label>
+                <p>{data.pocPhone || "N/A"}</p>
+              </div>
+              <div>
+                <label>Email Address</label>
+                <p>{data.pocEmail || "N/A"}</p>
+              </div>
+              <div>
+                <label>Use Case Description</label>
+                <p>{data.useCaseDescription || "N/A"}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <FormControl
+                fullWidth
+                className="form-request-details__organization"
+              >
+                <label id="organization-label">
+                  Organization<span>*</span>
+                </label>
+                <p>Select the organization that this request is on behalf of</p>
+                <Select
+                  displayEmpty
+                  required
+                  id="organization-select"
+                  name="organization"
+                  size="small"
+                  value={data.organization}
+                  onChange={handleOrganizationChange}
+                  labelId="organization-label"
+                  inputProps={{ "aria-label": "Organization" }}
+                  renderValue={(selected) => {
+                    if (selected.length === 0) {
+                      return <em>- Select -</em>;
+                    }
+                    return selected;
+                  }}
+                >
+                  {organizationOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              {data.organization === "Other" && (
+                <>
+                  <label htmlFor="organization-other">
+                    Please specify the organization you are requesting on behalf
+                    of
+                    <span style={{ color: "red", paddingLeft: "2px" }}>*</span>
+                  </label>
+                  <TextField
+                    required
+                    id="organization-other"
+                    name="organizationOther"
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    className="form-request-details__organization-other"
+                    value={data.organizationOther}
+                    error={
+                      data.organization === "Other" &&
+                      data.organizationOther === "" &&
+                      hasAttemptedSubmission
+                    }
+                    helperText={
+                      data.organization === "Other" &&
+                      data.organizationOther === "" &&
+                      hasAttemptedSubmission
+                        ? "This field is required when 'Other' is selected"
+                        : ""
+                    }
+                    onChange={handleOrganizationOtherChange}
+                  />
+                </>
+              )}
+              <div className="form-request-details__poc-details">
+                <div className="form-request-details__poc-detail-item">
+                  <label htmlFor="poc-name">Point of Contact Name</label>
+                  <TextField
+                    id="poc-name"
+                    name="pocName"
+                    variant="outlined"
+                    size="small"
+                    value={data.pocName}
+                    onChange={handleFieldChange("pocName")}
+                  />
+                </div>
+                <div className="form-request-details__poc-detail-item">
+                  <label htmlFor="poc-phone">Phone Number</label>
+                  <TextField
+                    id="poc-phone"
+                    name="pocPhone"
+                    variant="outlined"
+                    type="tel"
+                    size="small"
+                    value={data.pocPhone}
+                    error={!!phoneError}
+                    helperText={phoneError}
+                    onChange={handleFieldChange("pocPhone")}
+                    onBlur={handlePhoneBlur}
+                  />
+                </div>
+                <div className="form-request-details__poc-detail-item">
+                  <label htmlFor="poc-email">Email Address</label>
+                  <TextField
+                    id="poc-email"
+                    name="pocEmail"
+                    variant="outlined"
+                    type="email"
+                    size="small"
+                    value={data.pocEmail}
+                    error={!!emailError}
+                    helperText={emailError}
+                    onChange={handleFieldChange("pocEmail")}
+                    onBlur={handleEmailBlur}
+                  />
+                </div>
+              </div>
+              <label htmlFor="use-case-description">Use Case Description</label>
               <TextField
-                required={!isViewMode}
-                disabled={isViewMode}
-                id="organization-other"
-                name="organizationOther"
+                multiline
+                id="use-case-description"
+                name="useCaseDescription"
                 variant="outlined"
                 fullWidth
                 size="small"
-                className="form-request-details__organization-other"
-                value={data.organizationOther}
-                error={!isViewMode && data.organization === "Other" && data.organizationOther === "" && hasAttemptedSubmission}
-                helperText={
-                  !isViewMode && data.organization === "Other" && data.organizationOther === "" && hasAttemptedSubmission
-                    ? "This field is required when 'Other' is selected"
-                    : ""
-                }
-                onChange={
-                  isViewMode ? undefined : handleOrganizationOtherChange
-                }
+                value={data.useCaseDescription}
+                onChange={handleFieldChange("useCaseDescription")}
+                minRows={6}
               />
             </>
           )}
-          <div className="form-request-details__poc-details">
-            <div className="form-request-details__poc-detail-item">
-              <label htmlFor="poc-name">Point of Contact Name</label>
-              <TextField
-                disabled={isViewMode}
-                id="poc-name"
-                name="pocName"
-                variant="outlined"
-                size="small"
-                value={data.pocName}
-                onChange={isViewMode ? undefined : handleFieldChange("pocName")}
-              />
-            </div>
-            <div className="form-request-details__poc-detail-item">
-              <label htmlFor="poc-phone">Phone Number</label>
-              <TextField
-                disabled={isViewMode}
-                id="poc-phone"
-                name="pocPhone"
-                variant="outlined"
-                type="tel"
-                size="small"
-                value={data.pocPhone}
-                error={!isViewMode && !!phoneError}
-                helperText={!isViewMode ? phoneError : ""}
-                onChange={
-                  isViewMode ? undefined : handleFieldChange("pocPhone")
-                }
-                onBlur={isViewMode ? undefined : handlePhoneBlur}
-              />
-            </div>
-            <div className="form-request-details__poc-detail-item">
-              <label htmlFor="poc-email">Email Address</label>
-              <TextField
-                disabled={isViewMode}
-                id="poc-email"
-                name="pocEmail"
-                variant="outlined"
-                type="email"
-                size="small"
-                value={data.pocEmail}
-                error={!isViewMode && !!emailError}
-                helperText={!isViewMode ? emailError : ""}
-                onChange={
-                  isViewMode ? undefined : handleFieldChange("pocEmail")
-                }
-                onBlur={isViewMode ? undefined : handleEmailBlur}
-              />
-            </div>
-          </div>
-          <label htmlFor="use-case-description">Use Case Description</label>
-          <TextField
-            disabled={isViewMode}
-            multiline
-            id="use-case-description"
-            name="useCaseDescription"
-            variant="outlined"
-            fullWidth
-            size="small"
-            value={data.useCaseDescription}
-            onChange={
-              isViewMode ? undefined : handleFieldChange("useCaseDescription")
-            }
-            minRows={6}
-          />
         </AccordionDetails>
       </Accordion>
     </div>

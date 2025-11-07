@@ -5,7 +5,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { vi } from "vitest";
 import { Cart } from "./cart";
-import { CartProvider } from "../../contexts/CartContext";
+import { ReduxCartProvider } from "../../contexts/ReduxCartContext";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
@@ -73,12 +73,12 @@ vi.mock("../../components/form-submit-request/form-submit-request", () => ({
 
 // Mock the useCart hook to control cart state
 const mockUseCart = vi.fn();
-vi.mock("../../contexts/CartContext", async () => {
-  const actual = await vi.importActual("../../contexts/CartContext");
+vi.mock("../../contexts/ReduxCartContext", async () => {
+  const actual = await vi.importActual("../../contexts/ReduxCartContext");
   return {
     ...actual,
     useCart: () => mockUseCart(),
-    CartProvider: ({ children }: { children: React.ReactNode }) => (
+    ReduxCartProvider: ({ children }: { children: React.ReactNode }) => (
       <div>{children}</div>
     ),
   };
@@ -101,9 +101,9 @@ describe("Cart", () => {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <ThemeProvider theme={testTheme}>
-            <CartProvider>
+            <ReduxCartProvider>
               <Cart />
-            </CartProvider>
+            </ReduxCartProvider>
           </ThemeProvider>
         </BrowserRouter>
       </QueryClientProvider>

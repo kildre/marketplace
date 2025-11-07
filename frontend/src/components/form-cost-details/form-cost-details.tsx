@@ -1,5 +1,5 @@
 import React from "react";
-import { useCart } from "../../contexts/CartContext";
+import { useCart } from "../../contexts/ReduxCartContext";
 import { formatPrice } from "../../utils/helper-functions";
 import { FormCostDetailsProps } from "../../interfaces";
 

@@ -8,10 +8,10 @@ import CustomMenuLogoSection from "./CustomMenuLogoSection";
 expect.extend(toHaveNoViolations);
 
 // Mock cart context
-vi.mock("../contexts/CartContext", () => ({
-  useCart: () => ({
-    cartCount: 3,
-  }),
+vi.mock("../contexts/ReduxCartContext", () => ({
+  useCart: vi.fn(() => ({
+    cartCount: 0,
+  })),
 }));
 
 // Mock auth hook

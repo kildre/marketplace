@@ -118,14 +118,14 @@ export class KeycloakService {
   }
 
   /**
-   * Handle token updates (store tokens and user info)
+   * Handle token updates (store user info only, not tokens)
    */
   private handleTokenUpdate(): void {
     if (this.keycloak.token && this.keycloak.tokenParsed) {
-      // Store tokens
-      AuthService.storeTokens(this.keycloak.token, this.keycloak.refreshToken);
-
-      // Extract and store user information
+      // SECURITY: Do NOT store tokens in localStorage
+      // Keycloak manages tokens securely in memory
+      
+      // Extract and store only user information (no sensitive token data)
       const userInfo = AuthService.createUserInfoFromToken(
         this.keycloak.tokenParsed
       );
