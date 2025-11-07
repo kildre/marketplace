@@ -12,7 +12,7 @@ import { Product } from "../../interfaces";
 
 // Mock the CartContext before any imports
 const mockUseCart = vi.fn();
-vi.mock("../../contexts/CartContext", () => ({
+vi.mock("../../contexts/ReduxCartContext", () => ({
   useCart: () => mockUseCart(),
 }));
 

@@ -2,15 +2,18 @@ import { ReactKeycloakProvider } from "@react-keycloak/web";
 import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
+import { PersistGate } from "redux-persist/integration/react";
 import App from "./App";
-import { CartProvider } from "./contexts/CartContext";
 import {
   EnhancedMockKeycloakProvider,
   MockUserSwitcher,
 } from "./contexts/EnhancedMockKeycloakProvider";
+import { ReduxCartProvider } from "./contexts/ReduxCartContext";
 import { queryClient } from "./lib/queryClient";
 import { AuthService } from "./services/authService";
+import { persistor, store } from "./store/store";
 import "./styles/main.scss";
 import { getApiUrl, getEnvironmentInfo, logApiConfig } from "./utils/api-config";
 
@@ -22,6 +25,54 @@ if (typeof window !== "undefined") {
     getEnvironmentInfo,
     getApiUrl,
     env: import.meta.env,
+    
+    // Comprehensive debug function for authentication state
+    debugAuth: () => {
+      /* eslint-disable no-console */
+      // @ts-ignore - Accessing custom window properties
+      const debugAdvana = window.debugAdvana;
+      // @ts-ignore - Accessing custom window properties
+      const keycloak = window.keycloak;
+      
+      console.log("=== ADVANA MARKETPLACE DEBUG ===");
+      console.log("Environment:", debugAdvana.env?.VITE_ENVIRONMENT);
+      console.log("Bypass Auth:", debugAdvana.env?.VITE_BYPASS_AUTH);
+      console.log("Keycloak URL:", debugAdvana.env?.VITE_KEYCLOAK_URL);
+      console.log("Keycloak Realm:", debugAdvana.env?.VITE_KEYCLOAK_REALM);
+      
+      console.log("\n=== AUTHENTICATION STATE ===");
+      if (keycloak) {
+        console.log("✅ Keycloak found - Production mode");
+        console.log("Authenticated:", keycloak.authenticated);
+        console.log("Has token:", !!keycloak.token);
+        console.log("Token length:", keycloak.token?.length);
+        console.log("User email:", keycloak.tokenParsed?.email);
+        console.log("User roles:", keycloak.tokenParsed?.resource_access?.marketplace?.roles);
+      } else {
+        console.log("❌ Keycloak not found - Development mode or not loaded");
+      }
+      
+      console.log("\n=== LOCALSTORAGE ===");
+      const userInfo = window.localStorage.getItem('marketplace_user_info');
+      const cartData = window.localStorage.getItem('persist:cart');
+      console.log("User info:", userInfo ? JSON.parse(userInfo) : "Not found");
+      console.log("Cart items:", cartData ? JSON.parse(cartData)?.items : "No cart data");
+      
+      console.log("\n=== COOKIES ===");
+      const cookies = document.cookie.split(';').map(c => c.trim()).filter(c => c);
+      const keycloakCookies = cookies.filter(c => c.includes('KEYCLOAK') || c.includes('AUTH_SESSION'));
+      console.log("Total cookies:", cookies.length);
+      console.log("Keycloak cookies:", keycloakCookies.length);
+      if (keycloakCookies.length > 0) {
+        keycloakCookies.forEach(cookie => console.log("  -", cookie.split('=')[0]));
+      }
+      
+      console.log("\n=== QUICK COMMANDS ===");
+      console.log("Run 'window.debugAdvana.debugAuth()' to see this info again");
+      console.log("Run 'window.debugAdvana.logApiConfig()' to see API configuration");
+      console.log("Run 'window.debugAdvana.getEnvironmentInfo()' to see environment details");
+      /* eslint-enable no-console */
+    }
   };
 }
 
@@ -75,16 +126,20 @@ if (bypassAuth) {
   root.render(
     <React.StrictMode>
       {/* <DevBanner /> */}
-      <QueryClientProvider client={queryClient}>
-        <EnhancedMockKeycloakProvider>
-          <BrowserRouter>
-            <CartProvider>
-              <App />
-              <MockUserSwitcher />
-            </CartProvider>
-          </BrowserRouter>
-        </EnhancedMockKeycloakProvider>
-      </QueryClientProvider>
+      <Provider store={store}>
+        <PersistGate loading={<div>Loading cart...</div>} persistor={persistor}>
+          <QueryClientProvider client={queryClient}>
+            <EnhancedMockKeycloakProvider>
+              <BrowserRouter>
+                <ReduxCartProvider>
+                  <App />
+                  <MockUserSwitcher />
+                </ReduxCartProvider>
+              </BrowserRouter>
+            </EnhancedMockKeycloakProvider>
+          </QueryClientProvider>
+        </PersistGate>
+      </Provider>
     </React.StrictMode>
   );
 } else {
@@ -95,12 +150,12 @@ if (bypassAuth) {
       // We only need to store user info for quick access
       const handleTokens = (tokens: { token?: string; refreshToken?: string; idToken?: string }) => {
         if (tokens.token && keycloak.tokenParsed) {
-          // Extract and store user info from the token (for role checks)
+          // Extract and store ONLY user info from the token (for role checks and user ID)
           const userInfo = AuthService.createUserInfoFromToken(keycloak.tokenParsed);
           AuthService.storeUserInfo(userInfo);
           
-          // NOTE: We do NOT store the token in localStorage
-          // Keycloak manages tokens in memory and cookies automatically
+          // SECURITY: We explicitly do NOT store the token in localStorage
+          // Keycloak manages tokens securely in memory and httpOnly cookies
           // Always use keycloak.token to get the current (potentially refreshed) token
         } else {
           // eslint-disable-next-line no-console
@@ -110,20 +165,24 @@ if (bypassAuth) {
 
       root.render(
         <React.StrictMode>
-          <QueryClientProvider client={queryClient}>
-            <ReactKeycloakProvider
-              authClient={keycloak}
-              initOptions={keycloakInitOptions}
-              LoadingComponent={LoadingComponent}
-              onTokens={handleTokens}
-            >
-              <BrowserRouter>
-                <CartProvider>
-                  <App />
-                </CartProvider>
-              </BrowserRouter>
-            </ReactKeycloakProvider>
-          </QueryClientProvider>
+          <Provider store={store}>
+            <PersistGate loading={<div>Loading cart...</div>} persistor={persistor}>
+              <QueryClientProvider client={queryClient}>
+                <ReactKeycloakProvider
+                  authClient={keycloak}
+                  initOptions={keycloakInitOptions}
+                  LoadingComponent={LoadingComponent}
+                  onTokens={handleTokens}
+                >
+                  <BrowserRouter>
+                    <ReduxCartProvider>
+                      <App />
+                    </ReduxCartProvider>
+                  </BrowserRouter>
+                </ReactKeycloakProvider>
+              </QueryClientProvider>
+            </PersistGate>
+          </Provider>
         </React.StrictMode>
       );
     })
@@ -144,13 +203,17 @@ if (bypassAuth) {
           >
             ⚠️ Authentication Error: {error.message}
           </div>
-          <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-              <CartProvider>
-                <App />
-              </CartProvider>
-            </BrowserRouter>
-          </QueryClientProvider>
+          <Provider store={store}>
+            <PersistGate loading={<div>Loading cart...</div>} persistor={persistor}>
+              <QueryClientProvider client={queryClient}>
+                <BrowserRouter>
+                  <ReduxCartProvider>
+                    <App />
+                  </ReduxCartProvider>
+                </BrowserRouter>
+              </QueryClientProvider>
+            </PersistGate>
+          </Provider>
         </React.StrictMode>
       );
     });

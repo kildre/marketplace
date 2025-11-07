@@ -1,10 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
+import { Provider } from "react-redux";
+import { BrowserRouter } from "react-router-dom";
 import { vi } from "vitest";
 import App from "./App";
+import { ReduxCartProvider } from "./contexts/ReduxCartContext";
+import { store } from "./store/store";
 import { AppRoles } from "./types/auth";
-import { CartProvider } from "./contexts/CartContext";
 
 // Mock the useAuth hook
 const mockUseAuth = vi.fn();
@@ -126,6 +128,14 @@ describe("App", () => {
         roles: [userRole],
         permissions: ["READ", "WRITE"],
       },
+      getUserInfo: () => ({
+        id: "test-user-123",
+        username: "testuser",
+        email: "test@advana.mil",
+        firstName: "Test",
+        lastName: "User",
+        roles: [userRole],
+      }),
       keycloak: {},
       isAuthenticated: true,
       isRequestor: () => userRole === AppRoles.REQUESTOR,
@@ -138,11 +148,13 @@ describe("App", () => {
 
     window.history.pushState({}, "Test page", initialRoute);
     return render(
-      <BrowserRouter>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ReduxCartProvider>
+            <App />
+          </ReduxCartProvider>
+        </BrowserRouter>
+      </Provider>
     );
   };
 
@@ -389,6 +401,14 @@ describe("App", () => {
         roles: [],
         permissions: [],
       },
+      getUserInfo: () => ({
+        id: "test-user-123",
+        username: "testuser",
+        email: "test@advana.mil",
+        firstName: "Test",
+        lastName: "User",
+        roles: [],
+      }),
       keycloak: {},
       isAuthenticated: true,
       isRequestor: () => false,
@@ -401,9 +421,13 @@ describe("App", () => {
 
     window.history.pushState({}, "Test page", "/");
     render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ReduxCartProvider>
+            <App />
+          </ReduxCartProvider>
+        </BrowserRouter>
+      </Provider>
     );
 
     expect(screen.getByTestId("product-catalog")).toBeInTheDocument();

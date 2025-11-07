@@ -4,7 +4,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import { useCart } from "../../contexts/CartContext";
+import { useCart } from "../../contexts/ReduxCartContext";
 import { useAuth } from "../../hooks/useAuth";
 import { AppRoles } from "../../types/auth";
 import { useRequests } from "../../hooks/useRequests";

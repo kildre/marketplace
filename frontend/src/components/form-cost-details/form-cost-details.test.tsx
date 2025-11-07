@@ -9,7 +9,7 @@ expect.extend(toHaveNoViolations);
 
 // Mock the CartContext
 const mockUseCart = vi.fn();
-vi.mock("../../contexts/CartContext", () => ({
+vi.mock("../../contexts/ReduxCartContext", () => ({
   useCart: () => mockUseCart(),
 }));
 

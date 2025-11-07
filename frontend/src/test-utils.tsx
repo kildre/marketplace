@@ -1,9 +1,12 @@
-import React from "react";
-import { render, RenderOptions } from "@testing-library/react";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { render, RenderOptions } from "@testing-library/react";
+import React from "react";
+import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
-import { CartProvider } from "./contexts/CartContext";
+import { PersistGate } from "redux-persist/integration/react";
+import { ReduxCartProvider } from "./contexts/ReduxCartContext";
+import { persistor, store } from "./store/store";
 
 // Create a test theme for Material-UI components
 const testTheme = createTheme({
@@ -68,13 +71,17 @@ export function renderWithProviders(
 
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <ThemeProvider theme={testTheme}>
-            <CartProvider>{children}</CartProvider>
-          </ThemeProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
+      <Provider store={store}>
+        <PersistGate loading={<div>Loading...</div>} persistor={persistor}>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <ThemeProvider theme={testTheme}>
+                <ReduxCartProvider>{children}</ReduxCartProvider>
+              </ThemeProvider>
+            </BrowserRouter>
+          </QueryClientProvider>
+        </PersistGate>
+      </Provider>
     );
   }
 
@@ -83,3 +90,4 @@ export function renderWithProviders(
 
 export * from "@testing-library/react";
 export { renderWithProviders as render };
+

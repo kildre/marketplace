@@ -1,10 +1,12 @@
 import { render, screen } from "@testing-library/react";
-import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import { axe, toHaveNoViolations } from "jest-axe";
+import { Provider } from "react-redux";
+import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
-import { Sidebar } from "./sidebar";
-import { CartProvider } from "../../contexts/CartContext";
+import { ReduxCartProvider } from "../../contexts/ReduxCartContext";
+import { store } from "../../store/store";
 import { AppRoles } from "../../types/auth";
+import { Sidebar } from "./sidebar";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
@@ -64,11 +66,13 @@ describe("Sidebar", () => {
     });
 
     return render(
-      <MemoryRouter initialEntries={[initialRoute]}>
-        <CartProvider>
-          <Sidebar />
-        </CartProvider>
-      </MemoryRouter>
+      <Provider store={store}>
+        <MemoryRouter initialEntries={[initialRoute]}>
+          <ReduxCartProvider>
+            <Sidebar />
+          </ReduxCartProvider>
+        </MemoryRouter>
+      </Provider>
     );
   };
 
@@ -111,11 +115,13 @@ describe("Sidebar", () => {
     });
 
     return render(
-      <BrowserRouter>
-        <CartProvider>
-          <Sidebar />
-        </CartProvider>
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ReduxCartProvider>
+            <Sidebar />
+          </ReduxCartProvider>
+        </BrowserRouter>
+      </Provider>
     );
   };
 

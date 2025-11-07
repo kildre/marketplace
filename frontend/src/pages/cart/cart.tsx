@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { PageTitle } from "@/components/page-title/page-title";
-import { useCart } from "../../contexts/CartContext";
+import { useCart } from "../../contexts/ReduxCartContext";
 import { CartForm } from "@/components/cart-form/cart-form";
 import { FormPersonalInformation } from "@/components/form-personal-information/form-personal-information";
 import { FormSelectedApplications } from "@/components/form-selected-applications/form-selected-applications";
