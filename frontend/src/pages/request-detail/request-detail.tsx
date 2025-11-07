@@ -4,9 +4,9 @@ import { CartItemData, RequestData } from "@/interfaces/interfaceStore";
 import { ApiService } from "@/services/apiService";
 import { AppRoles } from "@/types/auth";
 import {
-    calculateEstimatedCost,
-    generateRequestId,
-    getUserNameFromEmail,
+  calculateEstimatedCost,
+  generateRequestId,
+  getUserNameFromEmail,
 } from "@/utils/helper-functions";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Button } from "@mui/material";
@@ -63,7 +63,7 @@ const transformApiRequestToRequestData = (
   const decision = apiRequest.decision as Record<string, unknown> | null;
   const decisionComments = decision?.comments as string;
   const hasDecision = decision !== null;
-  
+
   // Use decision.statusId if available, otherwise fall back to apiRequest.statusId
   const statusId = decision?.statusId || apiRequest.statusId;
 
@@ -152,8 +152,20 @@ export const RequestDetail = (): React.ReactElement => {
       setStatusReason(request.statusReason || "");
       // Check if decision exists based on decisionNumber presence
       setHasDecision(!!request.decisionNumber);
+
+      // Access control: Check if user can view this request
+      const userInfo = getUserInfo();
+      const isApprover = hasRole(AppRoles.APPROVER);
+      const isRequestOwner =
+        userInfo?.email?.toLowerCase() ===
+        request.personalData.email.toLowerCase();
+
+      // If user is neither an approver nor the request owner, deny access
+      if (!isApprover && !isRequestOwner) {
+        navigate("/403", { replace: true });
+      }
     }
-  }, [request]);
+  }, [request, hasRole, getUserInfo, navigate]);
 
   // Fetch request data from API
   useEffect(() => {
@@ -181,12 +193,20 @@ export const RequestDetail = (): React.ReactElement => {
         );
 
         if (requestData.request) {
-          const transformedRequest = transformApiRequestToRequestData(requestData.request as unknown as Record<string, unknown>);
+          const transformedRequest = transformApiRequestToRequestData(
+            requestData.request as unknown as Record<string, unknown>
+          );
           setRequest(transformedRequest);
         } else {
           setRequest(null);
         }
       } catch (err) {
+        const error = err as Error;
+        // Check if it's a 500-level server error
+        if (error.message?.includes("status: 5")) {
+          navigate("/500", { replace: true });
+          return;
+        }
         setError("Failed to fetch request data");
         // eslint-disable-next-line no-console
         console.error("Error fetching request:", err);
@@ -280,7 +300,7 @@ export const RequestDetail = (): React.ReactElement => {
     const updateRequest = async (statusId: number) => {
       const userInfo = getUserInfo();
       const computedDecisionNumber = generateRequestId(12);
-      
+
       const decisionData = {
         decisionNumber: computedDecisionNumber,
         requestNumber: request.requestId,
@@ -314,8 +334,16 @@ export const RequestDetail = (): React.ReactElement => {
         await updateRequest(2); // Send statusId 2 for approved
         // Navigate to home page after successful approval
         navigate("/");
-      } catch {
+      } catch (err) {
+        const error = err as Error;
+        // Check if it's a 500-level server error
+        if (error.message?.includes("status: 5")) {
+          navigate("/500", { replace: true });
+          return;
+        }
         // Handle error appropriately in your UI
+        // eslint-disable-next-line no-console
+        console.error("Error approving request:", error);
       }
     };
 
@@ -327,8 +355,16 @@ export const RequestDetail = (): React.ReactElement => {
         await updateRequest(3); // Send statusId 3 for denied
         // Navigate to home page after successful rejection
         navigate("/");
-      } catch {
+      } catch (err) {
+        const error = err as Error;
+        // Check if it's a 500-level server error
+        if (error.message?.includes("status: 5")) {
+          navigate("/500", { replace: true });
+          return;
+        }
         // Handle error appropriately in your UI
+        // eslint-disable-next-line no-console
+        console.error("Error rejecting request:", error);
       }
     };
 

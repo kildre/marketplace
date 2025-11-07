@@ -48,7 +48,12 @@ export const FormSubmitRequest = (): React.ReactElement => {
     }
 
     return true;
-  }, [checked, hasValidationErrors, formData.organization, formData.organizationOther]);
+  }, [
+    checked,
+    hasValidationErrors,
+    formData.organization,
+    formData.organizationOther,
+  ]);
 
   // Navigate to requests page on successful submission
   React.useEffect(() => {
@@ -63,6 +68,16 @@ export const FormSubmitRequest = (): React.ReactElement => {
       });
     }
   }, [submitMutation.isSuccess, submittedRequestId, navigate, clearCart]);
+
+  // Redirect to 500 page if there's a server error
+  React.useEffect(() => {
+    if (submitMutation.isError && submitMutation.error) {
+      const error = submitMutation.error as Error;
+      if (error.message?.includes("status: 5")) {
+        navigate("/500", { replace: true });
+      }
+    }
+  }, [submitMutation.isError, submitMutation.error, navigate]);
 
   const handleSubmit = (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();

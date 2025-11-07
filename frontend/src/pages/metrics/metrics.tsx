@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getApiUrl } from "@/utils/api-config";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { PageTitle } from "../../components/page-title/page-title";
 
 interface MetricsSummaryResponse {
@@ -21,14 +22,14 @@ interface PendingRequestsResponse {
  */
 const getAuthHeaders = async (): Promise<Record<string, string>> => {
   const headers: Record<string, string> = {
-    "Accept": "application/json",
+    Accept: "application/json",
     "Content-Type": "application/json",
   };
 
   try {
     // Import keycloak instance dynamically to avoid circular dependencies
     const { default: keycloak } = await import("../../keycloak");
-    
+
     // Check if keycloak is authenticated and has a valid token
     if (keycloak?.authenticated && keycloak.token) {
       // Ensure token is fresh before using it (refresh if expires within 30 seconds)
@@ -47,7 +48,7 @@ const getAuthHeaders = async (): Promise<Record<string, string>> => {
 const fetchMetricsSummary = async (): Promise<MetricsSummaryResponse> => {
   const endpoint = getApiUrl("/api/report/summary");
   const headers = await getAuthHeaders();
-  
+
   const res = await globalThis.fetch(endpoint, {
     headers,
     credentials: "include",
@@ -63,7 +64,7 @@ const fetchPendingRequestsCount = async (
 ): Promise<number> => {
   const endpoint = getApiUrl("/api/requests/viewPending");
   const headers = await getAuthHeaders();
-  
+
   const res = await globalThis.fetch(endpoint, {
     method: "POST",
     headers,
@@ -80,6 +81,7 @@ const fetchPendingRequestsCount = async (
 export const Metrics: React.FC = () => {
   const { getUserInfo } = useAuth();
   const userInfo = getUserInfo();
+  const navigate = useNavigate();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["metrics", "summary"],
@@ -98,6 +100,14 @@ export const Metrics: React.FC = () => {
     staleTime: 1000 * 60, // 1 minute
     enabled: !!userInfo?.email, // Only run if we have a user email
   });
+
+  // Redirect to 500 page if there's a server error
+  React.useEffect(() => {
+    const errorObj = error || pendingError;
+    if (errorObj && (errorObj as Error).message?.includes("status: 5")) {
+      navigate("/500", { replace: true });
+    }
+  }, [error, pendingError, navigate]);
 
   return (
     <div className="metrics-page marketplace-content">

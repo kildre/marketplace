@@ -3,7 +3,10 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import { RequestData, RequestsTableProps } from "../../interfaces/interfaceStore";
+import {
+  RequestData,
+  RequestsTableProps,
+} from "../../interfaces/interfaceStore";
 // import { RequestsDebugPanel } from "../debug/RequestsDebugPanel"; // Uncomment to use debug panel with userId and component
 import { ApiService } from "@/services/apiService";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -45,11 +48,12 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   // Fetch requests from API - memoized to prevent infinite loops
   const fetchData = React.useCallback(async () => {
     if (isLoading) return; // Prevent concurrent requests
-    
+
     setIsLoading(true);
     try {
       const userInfo = getUserInfo();
       if (!userInfo) {
+        // eslint-disable-next-line no-console
         console.error("User info not available");
         setAllRequests([]);
         return;
@@ -60,11 +64,20 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         // Cast the API response to the expected RequestData format
         setAllRequests((response.requests || []) as unknown as RequestData[]);
       } else {
-        const response = await ApiService.getRequestsForRequestor(userInfo.email);
+        const response = await ApiService.getRequestsForRequestor(
+          userInfo.email
+        );
         // Cast the API response to the expected RequestData format
         setAllRequests((response.requests || []) as unknown as RequestData[]);
       }
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
+      // Check if it's a 500-level server error
+      if (error.message?.includes("status: 5")) {
+        navigate("/500", { replace: true });
+        return;
+      }
+      // eslint-disable-next-line no-console
       console.error("Error fetching data:", error);
       setAllRequests([]);
     } finally {
@@ -97,10 +110,10 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
 
     // Show left fade if scrolled right
     setShowLeftFade(scrollLeft > 10);
-    
+
     // Show right fade if not at the end
     setShowRightFade(scrollLeft < scrollWidth - clientWidth - 10);
-    
+
     // Show reset button if scrolled or content is wider than container
     setShowResetButton(scrollLeft > 10 || scrollWidth > clientWidth);
   }, []);
@@ -114,7 +127,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       const scrollWidth = scrollContainer.scrollWidth;
       const clientWidth = scrollContainer.clientWidth;
       const hasOverflow = scrollWidth > clientWidth;
-      
+
       setShowRightFade(hasOverflow);
       setShowResetButton(hasOverflow || scrollContainer.scrollLeft > 10);
     };
@@ -123,10 +136,13 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
     checkOverflow();
 
     // Add scroll listener
-    scrollContainer.addEventListener('scroll', handleScroll as globalThis.EventListener);
+    scrollContainer.addEventListener(
+      "scroll",
+      handleScroll as globalThis.EventListener
+    );
 
     // Add resize listener
-    window.addEventListener('resize', checkOverflow);
+    window.addEventListener("resize", checkOverflow);
 
     // Use MutationObserver to detect when table content changes (e.g., column resize)
     const observer = new globalThis.MutationObserver(checkOverflow);
@@ -134,12 +150,15 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['style'],
+      attributeFilter: ["style"],
     });
 
     return () => {
-      scrollContainer.removeEventListener('scroll', handleScroll as globalThis.EventListener);
-      window.removeEventListener('resize', checkOverflow);
+      scrollContainer.removeEventListener(
+        "scroll",
+        handleScroll as globalThis.EventListener
+      );
+      window.removeEventListener("resize", checkOverflow);
       observer.disconnect();
     };
   }, [handleScroll]);
@@ -147,19 +166,19 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   // Reset table view - reset column widths and scroll position
   const handleResetView = () => {
     // Reset the DataGrid by changing the key, which forces a remount
-    setResetKey(prev => prev + 1);
-    
+    setResetKey((prev) => prev + 1);
+
     // Also reset scroll position
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
-      scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+      scrollContainer.scrollTo({ left: 0, behavior: "smooth" });
       window.setTimeout(() => {
         if (scrollContainer.scrollLeft !== 0) {
           scrollContainer.scrollLeft = 0;
         }
       }, 100);
     }
-    
+
     // Hide the reset button temporarily
     setShowResetButton(false);
   };
@@ -375,13 +394,14 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
             top: 0,
             bottom: 0,
             width: "60px",
-            background: "linear-gradient(to right, rgba(255,255,255,0.95), transparent)",
+            background:
+              "linear-gradient(to right, rgba(255,255,255,0.95), transparent)",
             pointerEvents: "none",
             zIndex: 10,
           }}
         />
       )}
-      
+
       {/* Right fade gradient */}
       {showRightFade && (
         <Box
@@ -391,7 +411,8 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
             top: 0,
             bottom: 0,
             width: "60px",
-            background: "linear-gradient(to left, rgba(255,255,255,0.95), transparent)",
+            background:
+              "linear-gradient(to left, rgba(255,255,255,0.95), transparent)",
             pointerEvents: "none",
             zIndex: 10,
           }}
@@ -422,9 +443,9 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         </Tooltip>
       )}
 
-      <Paper 
+      <Paper
         ref={scrollContainerRef}
-        sx={{ 
+        sx={{
           width: "100%",
           overflowX: "auto",
           position: "relative",

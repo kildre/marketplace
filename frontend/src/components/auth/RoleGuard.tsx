@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { AppRoles, Resources, Actions } from "../../types/auth";
 
@@ -7,6 +8,7 @@ interface RoleGuardProps {
   roles?: AppRoles[];
   requireAll?: boolean;
   fallback?: ReactNode;
+  redirectTo?: string;
 }
 
 /**
@@ -17,6 +19,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   roles = [],
   requireAll = false,
   fallback = null,
+  redirectTo,
 }) => {
   const { hasAnyRole, hasAllRoles, isAuthenticated } = useAuth();
 
@@ -29,6 +32,10 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   }
 
   const hasAccess = requireAll ? hasAllRoles(roles) : hasAnyRole(roles);
+
+  if (!hasAccess && redirectTo) {
+    return <Navigate to={redirectTo} replace />;
+  }
 
   return hasAccess ? <>{children}</> : <>{fallback}</>;
 };
