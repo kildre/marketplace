@@ -10,13 +10,16 @@ import { renderWithProviders } from "../../test-utils";
 import { AppRoles } from "../../types/auth";
 import { RequestDetail } from "./request-detail";
 
+// Create mock navigate function
+const mockNavigate = vi.fn();
+
 // Mock react-router-dom
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useSearchParams: vi.fn(),
-    useNavigate: vi.fn(),
+    useNavigate: () => mockNavigate,
   };
 });
 
@@ -61,7 +64,9 @@ vi.mock("@/services/apiService", () => ({
 // Mock API config
 vi.mock("@/utils/api-config", () => ({
   getApiUrl: vi.fn((path: string) => `http://localhost:8082${path}`),
-  getEndpointUrl: vi.fn((endpoint: string) => `http://localhost:8082/api/${endpoint.toLowerCase()}`),
+  getEndpointUrl: vi.fn(
+    (endpoint: string) => `http://localhost:8082/api/${endpoint.toLowerCase()}`
+  ),
 }));
 
 // Mock helper functions
@@ -205,6 +210,9 @@ describe("RequestDetail", () => {
   const mockApiService = vi.mocked(ApiService);
 
   beforeEach(() => {
+    // Clear the mock navigate function
+    mockNavigate.mockClear();
+
     // Reset to default (no search params) before each test
     mockUseSearchParams.mockReturnValue([
       new window.URLSearchParams(),
@@ -339,7 +347,7 @@ describe("RequestDetail", () => {
     mockApiService.getAllRequests.mockClear();
     mockApiService.getRequestsForRequestor.mockClear();
     mockApiService.makeDecision.mockClear();
-    
+
     // Restore all mocks
     vi.restoreAllMocks();
   });
@@ -355,6 +363,10 @@ describe("RequestDetail", () => {
       ]);
     }
 
+    // For REQUESTOR role, use the same email as the request owner to pass access control
+    const userEmail =
+      role === AppRoles.REQUESTOR ? "joe.snuffy.ctr@mil.gov" : "test@test.com";
+
     // Set up role-specific mock
     mockUseAuth.mockReturnValue({
       hasRole: vi.fn((checkRole: AppRoles) => checkRole === role),
@@ -362,7 +374,7 @@ describe("RequestDetail", () => {
       getUserInfo: vi.fn(() => ({
         id: "test-user",
         username: "test",
-        email: "test@test.com",
+        email: userEmail,
         firstName: "Test",
         lastName: "User",
         designation: "Test Designation",
@@ -868,7 +880,7 @@ describe("RequestDetail", () => {
 
   describe("Authorization Header Tests", () => {
     const validRequestId = "123"; // Using the ID from our mock data
-    
+
     beforeEach(() => {
       mockGetStoredToken.mockClear();
       mockFetch.mockReset(); // Reset instead of clear to remove implementation
@@ -962,7 +974,7 @@ describe("RequestDetail", () => {
       // ApiService handles authentication internally - still mocked to return empty results
       mockApiService.getRequestByNumber.mockResolvedValue({
         request: undefined,
-        errMsg: ""
+        errMsg: "",
       });
 
       await renderAndWaitForLoad(`?id=${validRequestId}`, AppRoles.APPROVER);

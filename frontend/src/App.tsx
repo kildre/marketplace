@@ -10,6 +10,9 @@ import { Cart } from "./pages/cart/cart";
 import { ProductCatalog } from "./pages/product-catalog/product-catalog";
 import { RequestDetail } from "./pages/request-detail/request-detail";
 import { Requests } from "./pages/requests/requests";
+import { Error403 } from "./pages/error-403/error-403";
+import { Error404 } from "./pages/error-404/error-404";
+import { Error500 } from "./pages/error-500/error-500";
 import { AppRoles } from "./types/auth";
 // @ts-ignore
 import AdvanaMenu from "@advana/platform-ui/dist/AdvanaMenu";
@@ -21,7 +24,7 @@ import "./styles/main.scss";
 
 function App(): React.ReactElement {
   const { hasRole } = useAuth();
-  
+
   // Automatically clear cart when user changes
   useCartUserSync();
 
@@ -76,7 +79,7 @@ function App(): React.ReactElement {
           <Route
             path="/metrics"
             element={
-              <RoleGuard roles={[AppRoles.APPROVER]}>
+              <RoleGuard roles={[AppRoles.APPROVER]} redirectTo="/403">
                 <Metrics />
               </RoleGuard>
             }
@@ -85,6 +88,12 @@ function App(): React.ReactElement {
           {import.meta.env.DEV && (
             <Route path="/auth-status" element={<AuthStatusPage />} />
           )}
+          {/* Error pages */}
+          <Route path="/403" element={<Error403 />} />
+          <Route path="/404" element={<Error404 />} />
+          <Route path="/500" element={<Error500 />} />
+          {/* Catch-all route for unmatched paths */}
+          <Route path="*" element={<Error404 />} />
         </Routes>
       </main>
       <Footer />

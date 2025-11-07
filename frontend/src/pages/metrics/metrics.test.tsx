@@ -2,11 +2,24 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
 import React from "react";
+import { BrowserRouter } from "react-router-dom";
 import { vi } from "vitest";
 import { Metrics } from "./metrics";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
+
+// Mock navigate function
+const mockNavigate = vi.fn();
+
+// Mock react-router-dom
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
 // Mock the useAuth hook
 const mockGetUserInfo = vi.fn();
@@ -16,7 +29,7 @@ vi.mock("@/hooks/useAuth", () => ({
   }),
 }));
 
-// Mock Keycloak 
+// Mock Keycloak
 const mockKeycloak = {
   authenticated: true,
   token: "mock-bearer-token",
@@ -84,19 +97,22 @@ describe("Metrics", () => {
     });
 
     return render(
-      <QueryClientProvider client={queryClient}>
-        {component}
-      </QueryClientProvider>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          {component}
+        </QueryClientProvider>
+      </BrowserRouter>
     );
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockNavigate.mockClear();
     mockGetUserInfo.mockReturnValue(defaultUserInfo);
     mockGetApiUrl.mockImplementation(
       (path: string) => `http://localhost:3000${path}`
     );
-    
+
     // Reset keycloak mock state
     mockKeycloak.authenticated = true;
     mockKeycloak.token = "mock-bearer-token";
@@ -165,7 +181,7 @@ describe("Metrics", () => {
 
       // Override for pending requests endpoint specifically
       mockFetch.mockImplementation((url) => {
-        if (url.includes('/api/requests/viewPending')) {
+        if (url.includes("/api/requests/viewPending")) {
           return Promise.resolve({
             ok: true,
             json: () => Promise.resolve(defaultPendingRequestsData),
@@ -188,7 +204,9 @@ describe("Metrics", () => {
       // Then check that loading is hidden
       await waitFor(
         () => {
-          expect(screen.queryByText("Loading metrics…")).not.toBeInTheDocument();
+          expect(
+            screen.queryByText("Loading metrics…")
+          ).not.toBeInTheDocument();
         },
         { timeout: 2000 }
       );
@@ -414,10 +432,10 @@ describe("Metrics", () => {
         expect(mockFetch).toHaveBeenCalledWith(
           "http://localhost:3000/api/report/summary",
           {
-            headers: { 
+            headers: {
               Accept: "application/json",
               "Content-Type": "application/json",
-              Authorization: "Bearer mock-bearer-token"
+              Authorization: "Bearer mock-bearer-token",
             },
             credentials: "include",
           }
@@ -435,7 +453,9 @@ describe("Metrics", () => {
 
       await waitFor(
         () => {
-          expect(mockGetApiUrl).toHaveBeenCalledWith("/api/requests/viewPending");
+          expect(mockGetApiUrl).toHaveBeenCalledWith(
+            "/api/requests/viewPending"
+          );
           expect(mockFetch).toHaveBeenCalledWith(
             "http://localhost:3000/api/requests/viewPending",
             expect.objectContaining({

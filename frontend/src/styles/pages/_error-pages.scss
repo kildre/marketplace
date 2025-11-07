@@ -1,0 +1,82 @@
+@use "../globals/colors" as *;
+
+// Error Pages Styles
+// Generic Styles
+.error-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30vh;
+  padding: 2rem;
+  width: 100%;
+
+  .error-content {
+    text-align: center;
+    max-width: 600px;
+
+    .error-code {
+      font-size: 8rem;
+      font-weight: bold;
+      color: $button-denied-color;
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .error-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: $product-card-dark-gray;
+      margin-bottom: 1rem;
+    }
+
+    .error-message {
+      font-size: 1.25rem;
+      color: $product-card-quantity-color;
+      margin-bottom: 1rem;
+    }
+
+    .error-description {
+      font-size: 1rem;
+      color: $text-base-gray;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+
+      &__button {
+        border-radius: 16px;
+        font-weight: 700;
+        text-transform: none;
+        width: 150px;
+
+        &--left {
+          background-color: white;
+          border: 1px solid $product-card-primary;
+          color: $product-card-primary;
+
+          &:hover {
+            background-color: $product-card-primary;
+            color: white;
+          }
+        }
+
+        &--right {
+          background-color: $product-card-primary;
+          border: none;
+          color: white;
+
+          &:hover {
+            background-color: white;
+            border: 1px solid $product-card-primary;
+            color: $product-card-primary;
+          }
+        }
+      }
+    }
+  }
+}
