@@ -1,7 +1,7 @@
 import { mockProducts } from "@/data/mock-productData";
 import { useAuth } from "@/hooks/useAuth";
 import { CartItemData, RequestData } from "@/interfaces/interfaceStore";
-import { ApiService } from "@/services/apiService";
+import { ApiError, ApiService } from "@/services/apiService";
 import { AppRoles } from "@/types/auth";
 import {
   calculateEstimatedCost,
@@ -201,9 +201,12 @@ export const RequestDetail = (): React.ReactElement => {
           setRequest(null);
         }
       } catch (err) {
-        const error = err as Error;
+        const error = err as Error | ApiError;
         // Check if it's a 500-level server error
-        if (error.message?.includes("status: 5")) {
+        if (
+          ("name" in error && error.name === "ServerError") ||
+          ("statusCode" in error && error.statusCode >= 500)
+        ) {
           navigate("/500", { replace: true });
           return;
         }
@@ -335,9 +338,12 @@ export const RequestDetail = (): React.ReactElement => {
         // Navigate to home page after successful approval
         navigate("/");
       } catch (err) {
-        const error = err as Error;
+        const error = err as Error | ApiError;
         // Check if it's a 500-level server error
-        if (error.message?.includes("status: 5")) {
+        if (
+          ("name" in error && error.name === "ServerError") ||
+          ("statusCode" in error && error.statusCode >= 500)
+        ) {
           navigate("/500", { replace: true });
           return;
         }
@@ -356,9 +362,12 @@ export const RequestDetail = (): React.ReactElement => {
         // Navigate to home page after successful rejection
         navigate("/");
       } catch (err) {
-        const error = err as Error;
+        const error = err as Error | ApiError;
         // Check if it's a 500-level server error
-        if (error.message?.includes("status: 5")) {
+        if (
+          ("name" in error && error.name === "ServerError") ||
+          ("statusCode" in error && error.statusCode >= 500)
+        ) {
           navigate("/500", { replace: true });
           return;
         }

@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { ApiError } from "@/services/apiService";
 import { getApiUrl } from "@/utils/api-config";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
@@ -104,8 +105,14 @@ export const Metrics: React.FC = () => {
   // Redirect to 500 page if there's a server error
   React.useEffect(() => {
     const errorObj = error || pendingError;
-    if (errorObj && (errorObj as Error).message?.includes("status: 5")) {
-      navigate("/500", { replace: true });
+    if (errorObj) {
+      const err = errorObj as Error | ApiError;
+      if (
+        ("name" in err && err.name === "ServerError") ||
+        ("statusCode" in err && err.statusCode >= 500)
+      ) {
+        navigate("/500", { replace: true });
+      }
     }
   }, [error, pendingError, navigate]);
 

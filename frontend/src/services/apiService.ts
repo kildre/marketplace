@@ -1,5 +1,24 @@
 import { getEndpointUrl, isBypassAuth } from "../utils/api-config";
 
+// Custom error class for API errors
+export class ApiError extends Error {
+  statusCode: number;
+  details?: string;
+
+  constructor(message: string, statusCode: number, details?: string) {
+    super(message);
+    this.name =
+      statusCode >= 500 && statusCode < 600 ? "ServerError" : "ApiError";
+    this.statusCode = statusCode;
+    this.details = details;
+
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ApiError);
+    }
+  }
+}
+
 // Interface definitions for API requests and responses
 export interface SubmitRequestApiRequest {
   requestNumber: string;
@@ -80,7 +99,7 @@ export class ApiService {
     try {
       // Import keycloak instance dynamically to avoid circular dependencies
       const { default: keycloak } = await import("../keycloak");
-      
+
       // Check if keycloak is authenticated and has a valid token
       if (keycloak?.authenticated && keycloak.token) {
         // Ensure token is fresh before using it (refresh if expires within 30 seconds)
@@ -103,7 +122,7 @@ export class ApiService {
   private static async handleResponse<T>(response: any): Promise<T> {
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
-      let errorDetails = '';
+      let errorDetails = "";
 
       try {
         const errorData = await response.json();
@@ -114,7 +133,7 @@ export class ApiService {
         } else if (errorData.error) {
           errorMessage = errorData.error;
         }
-        
+
         // Capture additional error details for debugging
         errorDetails = JSON.stringify(errorData);
       } catch {
@@ -123,9 +142,14 @@ export class ApiService {
 
       // Log detailed error for debugging
       // eslint-disable-next-line no-console
-      console.error(`API Error [${response.status}]:`, errorMessage, errorDetails ? `\nDetails: ${errorDetails}` : '');
+      console.error(
+        `API Error [${response.status}]:`,
+        errorMessage,
+        errorDetails ? `\nDetails: ${errorDetails}` : ""
+      );
 
-      throw new Error(errorMessage);
+      // Throw structured error with status code
+      throw new ApiError(errorMessage, response.status, errorDetails);
     }
 
     return response.json();
@@ -157,17 +181,24 @@ export class ApiService {
       if (error instanceof Error) {
         const errorMsg = error.message.toLowerCase();
         // eslint-disable-next-line no-console
-        console.log(`[DEBUG submitRequest] Checking error message: "${errorMsg}"`);
-        
+        console.log(
+          `[DEBUG submitRequest] Checking error message: "${errorMsg}"`
+        );
+
         // Authentication/token validation issues
-        if (errorMsg.includes("introspection") || 
-            errorMsg.includes("unauthorized") || 
-            errorMsg.includes("forbidden")) {
+        if (
+          errorMsg.includes("introspection") ||
+          errorMsg.includes("unauthorized") ||
+          errorMsg.includes("forbidden")
+        ) {
           // eslint-disable-next-line no-console
-          console.warn(`✅ Authentication error during request submission. Returning error response.`);
+          console.warn(
+            `✅ Authentication error during request submission. Returning error response.`
+          );
           return {
             requestNumber: undefined,
-            errMsg: "Authentication failed. Please ensure you're logged in and try again."
+            errMsg:
+              "Authentication failed. Please ensure you're logged in and try again.",
           };
         }
       }
@@ -210,30 +241,39 @@ export class ApiService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching requests for requestor:", error);
-      
+
       // Handle common recoverable errors gracefully
       if (error instanceof Error) {
         const errorMsg = error.message.toLowerCase();
         // eslint-disable-next-line no-console
         console.log(`[DEBUG] Checking error message: "${errorMsg}"`);
-        
+
         // User doesn't exist in database yet
-        if (errorMsg.includes("not found") || errorMsg.includes("user with email")) {
+        if (
+          errorMsg.includes("not found") ||
+          errorMsg.includes("user with email")
+        ) {
           // eslint-disable-next-line no-console
-          console.warn(`✅ User ${userEmail} not found in database. Returning empty requests list.`);
+          console.warn(
+            `✅ User ${userEmail} not found in database. Returning empty requests list.`
+          );
           return { requests: [] };
         }
-        
+
         // Authentication/token validation issues
-        if (errorMsg.includes("introspection") || 
-            errorMsg.includes("unauthorized") || 
-            errorMsg.includes("forbidden")) {
+        if (
+          errorMsg.includes("introspection") ||
+          errorMsg.includes("unauthorized") ||
+          errorMsg.includes("forbidden")
+        ) {
           // eslint-disable-next-line no-console
-          console.warn(`✅ Authentication error for user ${userEmail}. This may indicate token issues. Returning empty requests list.`);
+          console.warn(
+            `✅ Authentication error for user ${userEmail}. This may indicate token issues. Returning empty requests list.`
+          );
           return { requests: [] };
         }
       }
-      
+
       throw error;
     }
   }
@@ -257,28 +297,37 @@ export class ApiService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching pending requests:", error);
-      
+
       // Handle common recoverable errors gracefully
       if (error instanceof Error) {
         const errorMsg = error.message.toLowerCase();
-        
+
         // User doesn't exist in database yet
-        if (errorMsg.includes("not found") || errorMsg.includes("user with email")) {
+        if (
+          errorMsg.includes("not found") ||
+          errorMsg.includes("user with email")
+        ) {
           // eslint-disable-next-line no-console
-          console.warn(`User ${userEmail} not found in database. Returning empty pending requests list.`);
+          console.warn(
+            `User ${userEmail} not found in database. Returning empty pending requests list.`
+          );
           return { requests: [] };
         }
-        
+
         // Authentication/token validation issues
-        if (errorMsg.includes("introspection") || 
-            errorMsg.includes("unauthorized") || 
-            errorMsg.includes("forbidden")) {
+        if (
+          errorMsg.includes("introspection") ||
+          errorMsg.includes("unauthorized") ||
+          errorMsg.includes("forbidden")
+        ) {
           // eslint-disable-next-line no-console
-          console.warn(`Authentication error for user ${userEmail}. This may indicate token issues. Returning empty pending requests list.`);
+          console.warn(
+            `Authentication error for user ${userEmail}. This may indicate token issues. Returning empty pending requests list.`
+          );
           return { requests: [] };
         }
       }
-      
+
       throw error;
     }
   }
@@ -302,28 +351,37 @@ export class ApiService {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error fetching all requests:", error);
-      
+
       // Handle common recoverable errors gracefully
       if (error instanceof Error) {
         const errorMsg = error.message.toLowerCase();
-        
+
         // User doesn't exist in database yet
-        if (errorMsg.includes("not found") || errorMsg.includes("user with email")) {
+        if (
+          errorMsg.includes("not found") ||
+          errorMsg.includes("user with email")
+        ) {
           // eslint-disable-next-line no-console
-          console.warn(`User ${userEmail} not found in database. Returning empty requests list.`);
+          console.warn(
+            `User ${userEmail} not found in database. Returning empty requests list.`
+          );
           return { requests: [] };
         }
-        
+
         // Authentication/token validation issues
-        if (errorMsg.includes("introspection") || 
-            errorMsg.includes("unauthorized") || 
-            errorMsg.includes("forbidden")) {
+        if (
+          errorMsg.includes("introspection") ||
+          errorMsg.includes("unauthorized") ||
+          errorMsg.includes("forbidden")
+        ) {
           // eslint-disable-next-line no-console
-          console.warn(`Authentication error for user ${userEmail}. This may indicate token issues. Returning empty requests list.`);
+          console.warn(
+            `Authentication error for user ${userEmail}. This may indicate token issues. Returning empty requests list.`
+          );
           return { requests: [] };
         }
       }
-      
+
       throw error;
     }
   }
@@ -337,9 +395,9 @@ export class ApiService {
     requestNumber: string
   ): Promise<ViewRequestByNumberApiResponse> {
     try {
-      const requestData: ViewRequestByNumberApiRequest = { 
-        userEmail, 
-        requestNumber 
+      const requestData: ViewRequestByNumberApiRequest = {
+        userEmail,
+        requestNumber,
       };
 
       const response = await window.fetch(
@@ -354,67 +412,78 @@ export class ApiService {
       // Temporary fallback for local development until backend is updated
       if (response.status === 501) {
         // eslint-disable-next-line no-console
-        console.warn("⚠️ Local backend not updated yet, falling back to getAllRequests");
-        
+        console.warn(
+          "⚠️ Local backend not updated yet, falling back to getAllRequests"
+        );
+
         // Fall back to getAllRequests and filter client-side
         const allRequestsResponse = await this.getAllRequests(userEmail);
-        
+
         if (allRequestsResponse.requests) {
           const foundRequest = allRequestsResponse.requests.find(
-            (req: UseCaseRequestApiDto) => req.requestNumber?.toString() === requestNumber
+            (req: UseCaseRequestApiDto) =>
+              req.requestNumber?.toString() === requestNumber
           );
-          
+
           return {
             request: foundRequest || undefined,
-            errMsg: foundRequest ? "" : "Request not found"
+            errMsg: foundRequest ? "" : "Request not found",
           };
         }
-        
+
         return {
           request: undefined,
-          errMsg: "No requests found"
+          errMsg: "No requests found",
         };
       }
 
       // Handle the actual API response structure
-      const responseData = await this.handleResponse<UseCaseRequestApiDto>(response);
-      
+      const responseData = await this.handleResponse<UseCaseRequestApiDto>(
+        response
+      );
+
       // The API returns the request data directly, not wrapped in a "request" property
       return {
         request: responseData,
-        errMsg: ""
+        errMsg: "",
       };
     } catch (error) {
       // Check if this is an authorization error and fall back to existing endpoints
-      if (error instanceof Error && error.message.includes("UnauthorizedAdjudicatorError")) {
+      if (
+        error instanceof Error &&
+        error.message.includes("UnauthorizedAdjudicatorError")
+      ) {
         // eslint-disable-next-line no-console
-        console.warn("⚠️ User not authorized as adjudicator for new endpoint, falling back to existing endpoints");
-        
+        console.warn(
+          "⚠️ User not authorized as adjudicator for new endpoint, falling back to existing endpoints"
+        );
+
         try {
           // Try requestor-specific endpoint first, then fall back to getAllRequests
           let allRequestsResponse: ViewRequestsApiResponse;
-          
+
           try {
             allRequestsResponse = await this.getRequestsForRequestor(userEmail);
           } catch {
             // If requestor endpoint fails, try getAllRequests
             allRequestsResponse = await this.getAllRequests(userEmail);
           }
-          
+
           if (allRequestsResponse.requests) {
             const foundRequest = allRequestsResponse.requests.find(
-              (req: UseCaseRequestApiDto) => req.requestNumber?.toString() === requestNumber
+              (req: UseCaseRequestApiDto) =>
+                req.requestNumber?.toString() === requestNumber
             );
-            
+
             return {
               request: foundRequest || undefined,
-              errMsg: foundRequest ? "" : "Request not found"
+              errMsg: foundRequest ? "" : "Request not found",
             };
           }
-          
+
           return {
             request: undefined,
-            errMsg: "No requests found"
+            errMsg: "No requests found",
           };
         } catch (fallbackError) {
           // eslint-disable-next-line no-console
@@ -422,7 +491,7 @@ export class ApiService {
           throw fallbackError;
         }
       }
-      
+
       // eslint-disable-next-line no-console
       console.error("Error fetching request by number:", error);
       throw error;
@@ -432,9 +501,7 @@ export class ApiService {
   /**
    * Make a decision on a request (approve/reject)
    */
-  static async makeDecision(
-    decisionData: unknown
-  ): Promise<unknown> {
+  static async makeDecision(decisionData: unknown): Promise<unknown> {
     try {
       const response = await window.fetch(getEndpointUrl("DECISIONS"), {
         method: "POST",

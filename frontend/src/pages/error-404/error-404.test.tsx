@@ -100,6 +100,14 @@ describe("Error404 Component", () => {
     });
 
     it("should navigate back when 'Go Back' button is clicked", () => {
+      // Mock window.history.length to simulate having history
+      const originalHistoryLength = window.history.length;
+      Object.defineProperty(window.history, "length", {
+        configurable: true,
+        writable: true,
+        value: 3, // Simulate having meaningful history
+      });
+
       renderError404();
 
       const backButton = screen.getByRole("button", { name: /go back/i });
@@ -107,6 +115,38 @@ describe("Error404 Component", () => {
 
       expect(mockNavigate).toHaveBeenCalledWith(-1);
       expect(mockNavigate).toHaveBeenCalledTimes(1);
+
+      // Restore original history length
+      Object.defineProperty(window.history, "length", {
+        configurable: true,
+        writable: true,
+        value: originalHistoryLength,
+      });
+    });
+
+    it("should navigate to home when 'Go Back' is clicked with insufficient history", () => {
+      // Mock window.history.length to simulate no history
+      const originalHistoryLength = window.history.length;
+      Object.defineProperty(window.history, "length", {
+        configurable: true,
+        writable: true,
+        value: 1,
+      });
+
+      renderError404();
+
+      const backButton = screen.getByRole("button", { name: /go back/i });
+      fireEvent.click(backButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith("/", { replace: true });
+      expect(mockNavigate).toHaveBeenCalledTimes(1);
+
+      // Restore original history length
+      Object.defineProperty(window.history, "length", {
+        configurable: true,
+        writable: true,
+        value: originalHistoryLength,
+      });
     });
   });
 

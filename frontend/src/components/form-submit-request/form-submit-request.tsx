@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Checkbox from "@mui/material/Checkbox";
+import { ApiError } from "@/services/apiService";
 import { useCart } from "../../contexts/ReduxCartContext";
 import {
   useFormData,
@@ -72,8 +73,11 @@ export const FormSubmitRequest = (): React.ReactElement => {
   // Redirect to 500 page if there's a server error
   React.useEffect(() => {
     if (submitMutation.isError && submitMutation.error) {
-      const error = submitMutation.error as Error;
-      if (error.message?.includes("status: 5")) {
+      const error = submitMutation.error as Error | ApiError;
+      if (
+        ("name" in error && error.name === "ServerError") ||
+        ("statusCode" in error && error.statusCode >= 500)
+      ) {
         navigate("/500", { replace: true });
       }
     }

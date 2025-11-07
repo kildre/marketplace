@@ -8,7 +8,7 @@ import {
   RequestsTableProps,
 } from "../../interfaces/interfaceStore";
 // import { RequestsDebugPanel } from "../debug/RequestsDebugPanel"; // Uncomment to use debug panel with userId and component
-import { ApiService } from "@/services/apiService";
+import { ApiError, ApiService } from "@/services/apiService";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { mockProducts } from "../../data/mock-productData";
 import { calculateEstimatedCost } from "../../utils/helper-functions";
@@ -71,9 +71,12 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         setAllRequests((response.requests || []) as unknown as RequestData[]);
       }
     } catch (err) {
-      const error = err as Error;
+      const error = err as Error | ApiError;
       // Check if it's a 500-level server error
-      if (error.message?.includes("status: 5")) {
+      if (
+        ("name" in error && error.name === "ServerError") ||
+        ("statusCode" in error && error.statusCode >= 500)
+      ) {
         navigate("/500", { replace: true });
         return;
       }

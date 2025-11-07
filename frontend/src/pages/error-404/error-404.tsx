@@ -9,7 +9,13 @@ export const Error404 = (): React.ReactElement => {
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    // Check if there's meaningful history to go back to
+    // If history length is 1 or 2, we likely can't go back meaningfully
+    if (window.history.length <= 2) {
+      navigate("/", { replace: true });
+    } else {
+      navigate(-1);
+    }
   };
 
   return (
