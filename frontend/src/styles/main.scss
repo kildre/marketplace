@@ -16,10 +16,12 @@
 @use "components/form-selected-applications";
 @use "components/form-submit-request";
 @use "components/toast-notification";
+@use "components/notification-bell";
 
 // Use page styles
 @use "pages/cart";
 @use "pages/error-pages";
+@use "pages/notifications";
 @use "pages/request-detail";
 
 /* Metrics page lightweight styles */
