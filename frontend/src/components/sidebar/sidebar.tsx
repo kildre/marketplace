@@ -8,6 +8,7 @@ import { useCart } from "../../contexts/ReduxCartContext";
 import { useAuth } from "../../hooks/useAuth";
 import { AppRoles } from "../../types/auth";
 import { useRequests } from "../../hooks/useRequests";
+import { useNotificationContext } from "../../contexts/NotificationContext";
 
 export const Sidebar = (): React.ReactElement => {
   const location = useLocation();
@@ -23,6 +24,9 @@ export const Sidebar = (): React.ReactElement => {
   // Fetch requests for sidebar counter - always enabled to ensure counter updates
   const { requestsCount } = useRequests(currentUserId, true);
 
+  // Get notifications count from context
+  const { unreadCount } = useNotificationContext();
+
   const isActive = (path: string): boolean => {
     // Handle requests page with or without user parameters
     if (path === "/requests") {
@@ -30,6 +34,10 @@ export const Sidebar = (): React.ReactElement => {
         location.pathname === "/requests" ||
         location.pathname.startsWith("/requests/")
       );
+    }
+    // Handle notifications page
+    if (path === "/notifications") {
+      return location.pathname === "/notifications";
     }
     // For approvers, the home page (/) should be active when on /requests too
     if (path === "/" && hasRole(AppRoles.APPROVER)) {
@@ -61,6 +69,25 @@ export const Sidebar = (): React.ReactElement => {
                 Requests{" "}
                 <span className="sidebar__requests-count">
                   ({requestsCount})
+                </span>
+              </Link>
+            </li>
+            {/* Notifications link visible to all users */}
+            <li
+              className={
+                isActive("/notifications")
+                  ? "sidebar-nav__item active"
+                  : "sidebar-nav__item"
+              }
+            >
+              <Link
+                to="/notifications"
+                aria-label="Go to notifications page"
+                aria-current={isActive("/notifications") ? "page" : undefined}
+              >
+                Notifications{" "}
+                <span className="sidebar__notifications-count">
+                  ({unreadCount})
                 </span>
               </Link>
             </li>
@@ -158,6 +185,25 @@ export const Sidebar = (): React.ReactElement => {
                 Requests{" "}
                 <span className="sidebar__requests-count">
                   ({requestsCount})
+                </span>
+              </Link>
+            </li>
+            {/* Notifications link visible to all users */}
+            <li
+              className={
+                isActive("/notifications")
+                  ? "sidebar-nav__item active"
+                  : "sidebar-nav__item"
+              }
+            >
+              <Link
+                to="/notifications"
+                aria-label="Go to notifications page"
+                aria-current={isActive("/notifications") ? "page" : undefined}
+              >
+                Notifications{" "}
+                <span className="sidebar__notifications-count">
+                  ({unreadCount})
                 </span>
               </Link>
             </li>

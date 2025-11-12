@@ -1,0 +1,129 @@
+{
+  "notifications": [
+    {
+      "id": "notif-001",
+      "type": "request_approved",
+      "priority": "high",
+      "title": "Request Approved",
+      "message": "Your request for Tableau Desktop (req-001) has been approved by Joanna Ramsey.",
+      "read": false,
+      "createdAt": "2025-11-10T10:00:00Z",
+      "actionUrl": "/request-detail?requestId=req-001",
+      "requestId": "req-001",
+      "requestorEmail": "vinoth.jagannathan.civ@mail.mil",
+      "approverEmail": "joanna.c.ramsey.civ@mail.mil",
+      "recipientEmails": [
+        "vinoth.jagannathan.civ@mail.mil",
+        "joanna.c.ramsey.civ@mail.mil"
+      ],
+      "metadata": {
+        "requestStatus": "Approved",
+        "approverName": "Joanna Ramsey",
+        "requestorName": "Vinoth Jagannathan"
+      }
+    },
+    {
+      "id": "notif-002",
+      "type": "request_rejected",
+      "priority": "medium",
+      "title": "Request Rejected",
+      "message": "Your request for Power BI License (req-005) has been rejected by Jennifer Cowley.",
+      "read": false,
+      "createdAt": "2025-11-10T07:00:00Z",
+      "actionUrl": "/request-detail?requestId=req-005",
+      "requestId": "req-005",
+      "requestorEmail": "elizabeth.y.ahn.civ@mail.mil",
+      "approverEmail": "jennifer.a.cowley.civ@mail.mil",
+      "recipientEmails": [
+        "elizabeth.y.ahn.civ@mail.mil",
+        "jennifer.a.cowley.civ@mail.mil"
+      ],
+      "metadata": {
+        "requestStatus": "Rejected",
+        "approverName": "Jennifer Cowley",
+        "requestorName": "Elizabeth Ahn",
+        "rejectionReason": "Insufficient justification for license requirement."
+      }
+    },
+    {
+      "id": "notif-004",
+      "type": "system_alert",
+      "priority": "urgent",
+      "title": "System Maintenance Scheduled",
+      "message": "The Advana Marketplace will be undergoing maintenance on Nov 15, 2025 from 2:00 AM - 6:00 AM EST.",
+      "read": false,
+      "createdAt": "2025-11-10T06:00:00Z",
+      "recipientEmails": [],
+      "metadata": {
+        "maintenanceStart": "2025-11-15T02:00:00Z",
+        "maintenanceEnd": "2025-11-15T06:00:00Z"
+      }
+    }
+  ],
+  "mockUsers": {
+    "approvers": [
+      {
+        "email": "joanna.c.ramsey.civ@mail.mil",
+        "name": "Joanna Ramsey",
+        "role": "marketplace-approver"
+      },
+      {
+        "email": "jennifer.a.cowley.civ@mail.mil",
+        "name": "Jennifer Cowley",
+        "role": "marketplace-approver"
+      },
+      {
+        "email": "jane.f.roberts.civ@mail.mil",
+        "name": "Jane Roberts",
+        "role": "marketplace-approver"
+      }
+    ],
+    "requestors": [
+      {
+        "email": "vinoth.jagannathan.civ@mail.mil",
+        "name": "Vinoth Jagannathan",
+        "role": "marketplace-requestor"
+      },
+      {
+        "email": "elizabeth.y.ahn.civ@mail.mil",
+        "name": "Elizabeth Ahn",
+        "role": "marketplace-requestor"
+      },
+      {
+        "email": "daniel.e.allen.civ@mail.mil",
+        "name": "Daniel Allen",
+        "role": "marketplace-requestor"
+      }
+    ]
+  },
+  "schema": {
+    "Notification": {
+      "id": "string (unique identifier)",
+      "type": "request_submitted | request_approved | request_rejected | request_updated | system_alert | general",
+      "priority": "low | medium | high | urgent",
+      "title": "string (notification title)",
+      "message": "string (notification message)",
+      "read": "boolean (read status)",
+      "createdAt": "string (ISO 8601 timestamp)",
+      "actionUrl": "string (optional - URL to navigate to)",
+      "requestId": "string (optional - associated request ID)",
+      "requestorEmail": "string (optional - email of requestor)",
+      "approverEmail": "string (optional - email of approver)",
+      "recipientEmails": "array of strings (emails of users who can see this notification, empty array = all users for system_alert/general)",
+      "metadata": "object (optional - additional data)"
+    }
+  },
+  "accessRules": {
+    "description": "Users can only see notifications where:",
+    "rules": [
+      "1. They are the requestor (requestorEmail matches their email)",
+      "2. They are the approver (approverEmail matches their email)",
+      "3. They are in the recipientEmails list",
+      "4. The notification is system_alert or general type with empty recipientEmails (visible to all)"
+    ]
+  },
+  "helperFunctions": {
+    "getNotificationsForUser": "Returns only notifications visible to the specified user email",
+    "getUnreadNotificationsForUser": "Returns only unread notifications visible to the specified user email"
+  }
+}

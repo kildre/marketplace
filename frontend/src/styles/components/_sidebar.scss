@@ -38,4 +38,12 @@
       }
     }
   }
+
+  // Count badges for cart, requests, and notifications
+  &__cart-count,
+  &__requests-count,
+  &__notifications-count {
+    font-size: 14px;
+    opacity: 0.8;
+  }
 }

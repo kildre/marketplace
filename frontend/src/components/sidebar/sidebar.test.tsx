@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
 import { ReduxCartProvider } from "../../contexts/ReduxCartContext";
+import { NotificationProvider } from "../../contexts/NotificationContext";
 import { store } from "../../store/store";
 import { AppRoles } from "../../types/auth";
 import { Sidebar } from "./sidebar";
@@ -69,7 +70,9 @@ describe("Sidebar", () => {
       <Provider store={store}>
         <MemoryRouter initialEntries={[initialRoute]}>
           <ReduxCartProvider>
-            <Sidebar />
+            <NotificationProvider>
+              <Sidebar />
+            </NotificationProvider>
           </ReduxCartProvider>
         </MemoryRouter>
       </Provider>
@@ -118,7 +121,9 @@ describe("Sidebar", () => {
       <Provider store={store}>
         <BrowserRouter>
           <ReduxCartProvider>
-            <Sidebar />
+            <NotificationProvider>
+              <Sidebar />
+            </NotificationProvider>
           </ReduxCartProvider>
         </BrowserRouter>
       </Provider>
@@ -220,7 +225,7 @@ describe("Sidebar", () => {
 
     expect(nav).toBeInTheDocument();
     expect(list).toBeInTheDocument();
-    expect(listItems).toHaveLength(3);
+    expect(listItems).toHaveLength(4);
   });
 
   test("should have proper semantic structure for APPROVER role", () => {
@@ -232,7 +237,7 @@ describe("Sidebar", () => {
 
     expect(nav).toBeInTheDocument();
     expect(list).toBeInTheDocument();
-    expect(listItems).toHaveLength(2);
+    expect(listItems).toHaveLength(3);
   });
 
   test("should display cart and requests counters for REQUESTOR role", () => {
@@ -275,7 +280,7 @@ describe("Sidebar", () => {
 
     expect(sidebar).toHaveClass("sidebar");
     expect(nav).toHaveClass("sidebar-nav");
-    expect(listItems).toHaveLength(3);
+    expect(listItems).toHaveLength(4);
     listItems.forEach((item) => {
       expect(item).toHaveClass("sidebar-nav__item");
     });
@@ -290,7 +295,7 @@ describe("Sidebar", () => {
 
     expect(sidebar).toHaveClass("sidebar");
     expect(nav).toHaveClass("sidebar-nav");
-    expect(listItems).toHaveLength(2);
+    expect(listItems).toHaveLength(3);
     listItems.forEach((item) => {
       expect(item).toHaveClass("sidebar-nav__item");
     });
@@ -343,7 +348,7 @@ describe("Sidebar", () => {
         ".sidebar-nav__item.active"
       );
 
-      expect(listItems).toHaveLength(3);
+      expect(listItems).toHaveLength(4);
       expect(activeItems).toHaveLength(1);
       expect(listItems[expectedActiveIndex]).toHaveClass("active");
     });
@@ -354,7 +359,7 @@ describe("Sidebar", () => {
     const listItems = container.querySelectorAll(".sidebar-nav__item");
     const activeItems = container.querySelectorAll(".sidebar-nav__item.active");
 
-    expect(listItems).toHaveLength(2);
+    expect(listItems).toHaveLength(3);
     expect(activeItems).toHaveLength(1);
     expect(listItems[0]).toHaveClass("active");
   });
@@ -373,22 +378,22 @@ describe("Sidebar", () => {
 
     const listItems = container.querySelectorAll(".sidebar-nav__item");
     const activeItems = container.querySelectorAll(".sidebar-nav__item.active");
-    expect(listItems).toHaveLength(2);
+    expect(listItems).toHaveLength(3);
     expect(activeItems).toHaveLength(1);
-    // metrics is the second li under approver sidebar
-    expect(listItems[1]).toHaveClass("active");
+    // metrics is the third li under approver sidebar (Home, Notifications, Metrics)
+    expect(listItems[2]).toHaveClass("active");
   });
 
-  test("should handle router context properly for REQUESTOR", () => {
+  it("should handle router context properly for REQUESTOR", () => {
     const { container } = renderSidebarWithBrowserRouter(AppRoles.REQUESTOR);
     expect(container.querySelector(".sidebar")).toBeInTheDocument();
-    expect(container.querySelectorAll("a")).toHaveLength(3);
+    expect(container.querySelectorAll("a")).toHaveLength(4);
   });
 
-  test("should handle router context properly for APPROVER", () => {
+  it("should handle router context properly for APPROVER", () => {
     const { container } = renderSidebarWithBrowserRouter(AppRoles.APPROVER);
     expect(container.querySelector(".sidebar")).toBeInTheDocument();
-    expect(container.querySelectorAll("a")).toHaveLength(2);
+    expect(container.querySelectorAll("a")).toHaveLength(3);
   });
 
   test("should have proper DOM structure for REQUESTOR", () => {
@@ -403,7 +408,7 @@ describe("Sidebar", () => {
     expect(nav).toBeInTheDocument();
     expect(nav?.parentElement).toBe(sidebar);
     expect(ul?.parentElement).toBe(nav);
-    expect(listItems).toHaveLength(3);
+    expect(listItems).toHaveLength(4);
 
     // Check that each list item contains a link
     listItems.forEach((item) => {
@@ -425,7 +430,7 @@ describe("Sidebar", () => {
     expect(nav).toBeInTheDocument();
     expect(nav?.parentElement).toBe(sidebar);
     expect(ul?.parentElement).toBe(nav);
-    expect(listItems).toHaveLength(2);
+    expect(listItems).toHaveLength(3);
 
     // Check each list item contains a link
     listItems.forEach((item) => {
@@ -475,7 +480,7 @@ describe("Sidebar", () => {
 
     // Test link accessibility
     const links = container.querySelectorAll("a");
-    expect(links).toHaveLength(3);
+    expect(links).toHaveLength(4);
 
     links.forEach((link) => {
       expect(link).toHaveAttribute("href");
@@ -497,7 +502,7 @@ describe("Sidebar", () => {
 
     // Test link accessibility
     const links = container.querySelectorAll("a");
-    expect(links).toHaveLength(2);
+    expect(links).toHaveLength(3);
 
     links.forEach((link) => {
       expect(link).toHaveAttribute("href");
@@ -521,7 +526,7 @@ describe("Sidebar", () => {
 
     // Check for proper list items
     const listItems = screen.getAllByRole("listitem");
-    expect(listItems).toHaveLength(3);
+    expect(listItems).toHaveLength(4);
 
     // Check that each list item contains a link
     listItems.forEach((item) => {
@@ -547,7 +552,7 @@ describe("Sidebar", () => {
 
     // Check for proper list items
     const listItems = screen.getAllByRole("listitem");
-    expect(listItems).toHaveLength(2);
+    expect(listItems).toHaveLength(3);
 
     // Check that each list item contains a link
     listItems.forEach((item) => {
@@ -571,7 +576,7 @@ describe("Sidebar", () => {
     // Cart and requests list items should not have active class
     const allListItems = container.querySelectorAll(".sidebar-nav__item");
     const activeItems = container.querySelectorAll(".sidebar-nav__item.active");
-    expect(allListItems).toHaveLength(3);
+    expect(allListItems).toHaveLength(4);
     expect(activeItems).toHaveLength(1);
 
     // Cart and requests links should not have aria-current
@@ -597,7 +602,7 @@ describe("Sidebar", () => {
     // Should have two list items (Requests + Metrics) for APPROVER
     const allListItems = container.querySelectorAll(".sidebar-nav__item");
     const activeItems = container.querySelectorAll(".sidebar-nav__item.active");
-    expect(allListItems).toHaveLength(2);
+    expect(allListItems).toHaveLength(3);
     expect(activeItems).toHaveLength(1);
   });
 
@@ -761,7 +766,7 @@ describe("Sidebar", () => {
           ".sidebar-nav__item.active"
         );
 
-        expect(requestsNavItems).toHaveLength(3);
+        expect(requestsNavItems).toHaveLength(4);
         expect(activeItems).toHaveLength(1);
 
         const requestsLinks = container.querySelectorAll(

@@ -331,3 +331,48 @@ export interface ImportMetaEnv {
 export interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+// ============================================================================
+// NOTIFICATION INTERFACES
+// ============================================================================
+
+export type NotificationType =
+  | "request_submitted"
+  | "request_approved"
+  | "request_rejected"
+  | "request_updated"
+  | "system_alert"
+  | "general";
+
+export type NotificationPriority = "low" | "medium" | "high" | "urgent";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  priority: NotificationPriority;
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string; // ISO 8601 timestamp
+  actionUrl?: string; // Optional URL to navigate to when notification is clicked
+  requestId?: string; // Associated request ID if applicable
+  // User associations - determines who can see this notification
+  requestorEmail?: string; // Email of the person who submitted the request
+  approverEmail?: string; // Email of the approver (for approval/rejection notifications)
+  recipientEmails?: string[]; // List of user emails who should see this notification
+  metadata?: {
+    requestStatus?: string;
+    approverName?: string;
+    requestorName?: string;
+    rejectionReason?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface NotificationBellProps {
+  notifications?: Notification[];
+  onNotificationClick?: (notification: Notification) => void;
+  onMarkAsRead?: (notificationId: string) => void;
+  onMarkAllAsRead?: () => void;
+  onClearAll?: () => void;
+}
