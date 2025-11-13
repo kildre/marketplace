@@ -11,10 +11,18 @@
     "docker:prune": "docker system prune -af",
     "docker:stop": "docker-compose stop",
     "docker:kill": "docker-compose kill",
-    "sonar": "./run-sonar-analysis.sh",
-    "sonar:analyze": "npx sonarqube-scanner"
+    "sonar": "npx sonarqube-scanner",
+    "sonar:check": "node -e \"process.env.SONAR_TOKEN ? console.log('✅ SONAR_TOKEN is set') : (console.error('❌ SONAR_TOKEN not found. Run: source .env.sonar'), process.exit(1))\"",
+    "sonar:validate": "./sonar-token-check.sh",
+    "sonar:local": "bash -c '[ -f .env.sonar ] && source .env.sonar && npx sonarqube-scanner -Dsonar.token=${SONAR_TOKEN} || (echo \"❌ .env.sonar not found\" && exit 1)'",
+    "sonar:branch": "bash -c '[ -f .env.sonar ] && source .env.sonar; npx sonarqube-scanner -Dsonar.branch.name=$(git rev-parse --abbrev-ref HEAD) -Dsonar.token=${SONAR_TOKEN}'",
+    "sonar:report": "bash -c '[ -f .env.sonar ] && source .env.sonar; npx sonar-report --sonarurl=https://sonarqube.cdao.us --sonarcomponent=tenant-metrostar-advana-marketplace --sonarorganization=CDAO --sonartoken=${SONAR_TOKEN} --output=reports/sonarqube-report.html'",
+    "sonar:report:pdf": "echo '⚠️  PDF generation requires additional setup (wkhtmltopdf). Generating HTML report instead...' && npm run sonar:report",
+    "sonar:full": "cd frontend && npm run test:coverage -- --passWithNoTests || true && cd .. && npm run sonar:local && echo '⏳ Waiting for SonarQube to process results...' && sleep 10 && npm run sonar:report",
+    "sonar:full:unit": "cd frontend && npm run test:coverage && cd .. && npm run sonar:local && sleep 10 && npm run sonar:report"
   },
   "devDependencies": {
+    "sonar-report": "^2.1.0",
     "sonarqube-scanner": "^4.3.2"
   }
 }

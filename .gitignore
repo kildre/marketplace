@@ -35,6 +35,9 @@ coverage/
 # SonarQube scanner working directory
 .scannerwork/
 
+# SonarQube reports
+reports/
+
 # ESLint cache
 .eslintcache
 

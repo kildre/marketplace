@@ -11,30 +11,23 @@ const keycloakConfig: KeycloakConfig = {
   clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID, // e.g., react-app
 };
 
+// Helper function to validate required configuration field
+function validateConfigField(
+  value: string | undefined,
+  fieldName: string,
+  envVar: string
+): void {
+  if (!value) {
+    throw new Error(
+      `Keycloak configuration missing '${fieldName}'. Check ${envVar} environment variable. Current value: ${value}`
+    );
+  }
+}
+
 // Validate required configuration
-if (!keycloakConfig.url) {
-  throw new Error(
-    `Keycloak configuration missing 'url'. Check VITE_KEYCLOAK_URL environment variable. Current value: ${
-      import.meta.env.VITE_KEYCLOAK_URL
-    }`
-  );
-}
-
-if (!keycloakConfig.realm) {
-  throw new Error(
-    `Keycloak configuration missing 'realm'. Check VITE_KEYCLOAK_REALM environment variable. Current value: ${
-      import.meta.env.VITE_KEYCLOAK_REALM
-    }`
-  );
-}
-
-if (!keycloakConfig.clientId) {
-  throw new Error(
-    `Keycloak configuration missing 'clientId'. Check VITE_KEYCLOAK_CLIENT_ID environment variable. Current value: ${
-      import.meta.env.VITE_KEYCLOAK_CLIENT_ID
-    }`
-  );
-}
+validateConfigField(keycloakConfig.url, 'url', 'VITE_KEYCLOAK_URL');
+validateConfigField(keycloakConfig.realm, 'realm', 'VITE_KEYCLOAK_REALM');
+validateConfigField(keycloakConfig.clientId, 'clientId', 'VITE_KEYCLOAK_CLIENT_ID');
 
 const keycloak = new Keycloak(keycloakConfig);
 
