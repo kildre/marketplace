@@ -238,8 +238,11 @@ describe("Metrics", () => {
       await waitFor(() => {
         expect(screen.getByRole("alert")).toBeInTheDocument();
         expect(screen.getByRole("alert")).toHaveTextContent(
-          "Failed to fetch pending requests"
+          "Metrics could not be loaded at this time."
         );
+        // The error code shows "errorCode" because neither error.message nor statusCode is displayed in the error-code div
+        // when pendingError is present but error is not
+        expect(screen.getByText("errorCode")).toBeInTheDocument();
       });
     });
 
@@ -267,8 +270,9 @@ describe("Metrics", () => {
       await waitFor(() => {
         expect(screen.getByRole("alert")).toBeInTheDocument();
         expect(screen.getByRole("alert")).toHaveTextContent(
-          "Error loading metrics"
+          "Metrics could not be loaded at this time."
         );
+        expect(screen.getByText("errorCode")).toBeInTheDocument();
       });
     });
 
@@ -279,7 +283,8 @@ describe("Metrics", () => {
 
       await waitFor(() => {
         const errorElement = screen.getByRole("alert");
-        expect(errorElement).toHaveStyle({ color: "#b91c1c" });
+        expect(errorElement).toHaveClass("metrics-page__error");
+        expect(screen.getByText("Test error")).toBeInTheDocument();
       });
     });
   });

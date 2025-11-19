@@ -104,16 +104,17 @@ export const Metrics: React.FC = () => {
 
   // Redirect to 500 page if there's a server error
   React.useEffect(() => {
-    const errorObj = error || pendingError;
-    if (errorObj) {
-      const err = errorObj as Error | ApiError;
-      if (
-        ("name" in err && err.name === "ServerError") ||
-        ("statusCode" in err && err.statusCode >= 500)
-      ) {
-        navigate("/500", { replace: true });
-      }
-    }
+    // TODO: REMOVE - Commented out for testing error UI
+    // const errorObj = error || pendingError;
+    // if (errorObj) {
+    //   const err = errorObj as Error | ApiError;
+    //   if (
+    //     ("name" in err && err.name === "ServerError") ||
+    //     ("statusCode" in err && err.statusCode >= 500)
+    //   ) {
+    //     navigate("/500", { replace: true });
+    //   }
+    // }
   }, [error, pendingError, navigate]);
 
   return (
@@ -122,10 +123,22 @@ export const Metrics: React.FC = () => {
 
       {(isLoading || isPendingLoading) && <div>Loading metrics…</div>}
       {(isError || isPendingError) && (
-        <div role="alert" style={{ color: "#b91c1c" }}>
-          {(error as Error)?.message ||
-            (pendingError as Error)?.message ||
-            "Error loading metrics"}
+        <div role="alert" className="metrics-page__error">
+          <h2 className="metrics-page__error-title">
+            Metrics could not be loaded at this time.
+          </h2>
+          <div className="metrics-page__error-code">
+            {(error as Error)?.message ||
+              (pendingError as ApiError)?.statusCode ||
+              "errorCode"}
+          </div>
+          <p className="metrics-page__error-helper-text">
+            Please try again later or and include this code so our team can
+            investigate.
+          </p>
+          <a href="#support-ticket" className="metrics-page__support-button">
+            Submit a Support Ticket
+          </a>
         </div>
       )}
 
@@ -151,35 +164,18 @@ export const Metrics: React.FC = () => {
               // { label: "Orders", value: data.totalOrders, color: "#f59e0b" },
             ];
             return (
-              <ul
-                role="list"
-                style={{
-                  padding: 0,
-                  margin: 0,
-                  listStyle: "none",
-                  maxWidth: 420,
-                }}
-              >
+              <ul role="list" className="metrics-page__metrics-list">
                 {items.map((item) => {
                   return (
                     <li
                       key={item.label}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "200px 1fr 50px",
-                        alignItems: "center",
-                        gap: 12,
-                        margin: "12px 0",
-                      }}
+                      className="metrics-page__metric-item"
                       aria-label={`${item.label}: ${item.value}`}
                     >
-                      <div style={{ fontWeight: 600 }}>{item.label}</div>
-                      <div
-                        style={{
-                          textAlign: "right",
-                          fontVariantNumeric: "tabular-nums",
-                        }}
-                      >
+                      <div className="metrics-page__metric-label">
+                        {item.label}
+                      </div>
+                      <div className="metrics-page__metric-value">
                         {item.value}
                       </div>
                     </li>

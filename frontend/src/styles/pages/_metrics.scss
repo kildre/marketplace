@@ -1,0 +1,71 @@
+// Metrics Page Styles
+@use "../globals/colors" as *;
+
+.metrics-page {
+  &__error {
+    max-width: 800px;
+    margin: 80px auto;
+    text-align: center;
+  }
+
+  &__error-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: black;
+  }
+
+  &__error-code {
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 32px;
+  }
+
+  &__error-helper-text {
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  &__support-button {
+    display: inline-block;
+    padding: 12px 32px;
+    background-color: $product-card-primary;
+    color: $secondary-color;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: darken($product-card-primary, 10%);
+    }
+  }
+
+  &__metrics-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    max-width: 420px;
+  }
+
+  &__metric-item {
+    display: grid;
+    grid-template-columns: 200px 1fr 50px;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+  }
+
+  &__metric-label {
+    font-weight: 600;
+  }
+
+  &__metric-value {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}

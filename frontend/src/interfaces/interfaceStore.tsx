@@ -252,7 +252,8 @@ export interface FormSubmitRequestProps {
 export interface RequestDetailViewProps {
   request: RequestData;
   statusReason: string;
-  onReasoningChange?: (event: React.ChangeEvent<{ value: string }>) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onReasoningChange?: (event: React.ChangeEvent<any>) => void;
   onAccept?: () => void;
   onReject?: () => void;
   buttonClass: string;
