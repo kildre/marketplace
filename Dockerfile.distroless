@@ -13,7 +13,7 @@ RUN mkdir -p "${APP_FRONTEND_DIR}"
 RUN node -v
 RUN npm -v
 RUN npm config set strict-ssl=false
-RUN npm set @advana:registry=https://nexus.cdao.us/repository/advana-npm-group/
+RUN npm set @advana:registry=https://nexus.cdao.us/repository/npm-all/
 # Keycloak build arguments
 ARG VITE_KEYCLOAK_URL="https://keycloak.cdao.us/auth"
 ARG VITE_KEYCLOAK_REALM="baby-yoda"
@@ -26,6 +26,7 @@ ARG VITE_API_BASE_URL="https://advana-marketplace-monolith-node.dev.mtt.cdao.us"
 # note on copy+chown: do not use $USER var, it will - surprisingly - be root
 COPY --chmod=775 ./frontend/ "${APP_FRONTEND_DIR}/"
 RUN cd "${APP_FRONTEND_DIR}" \
+    && rm -f package-lock.json \
     && npm install \
     && VITE_KEYCLOAK_URL="${VITE_KEYCLOAK_URL}" \
     VITE_KEYCLOAK_REALM="${VITE_KEYCLOAK_REALM}" \

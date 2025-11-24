@@ -73,6 +73,9 @@ deployment:
       # maxUnavailable: "50%"
     podAnnotations:
       iam.amazonaws.com/role: aws-role-arn
+      prometheus.io/scrape: "true"
+      prometheus.io/path: "/metrics"
+      prometheus.io/port: "8080"
     serviceAccountName: "{{ $.Release.Name }}"
 
     container:
@@ -177,6 +180,9 @@ secret:
           REACT_APP_MEGA_MENU_BASE_DOMAIN: "https://{{ $.Values.global.baseDomain }}"
           REACT_APP_MEGA_MENU_HEADER_SORT_ORDER: "Domains,Tools,Communities,Help,About"
           REACT_APP_MEGA_MENU_HIGHLIGHT_COLOR: "#56B1AC"
+
+          OTLP_ENDPOINT: 'otel-collector-splunk-otel-collector.otel-collector.svc.cluster.local:4317'
+
   volume:
     secret:
       "secret-volume-ca-bundle-crt":
