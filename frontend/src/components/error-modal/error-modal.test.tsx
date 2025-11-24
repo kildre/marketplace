@@ -15,7 +15,7 @@ describe("ErrorModal", () => {
     );
 
     expect(screen.getByText(/Test error message/i)).toBeInTheDocument();
-    expect(screen.getByText("{404}")).toBeInTheDocument();
+    expect(screen.getByText("Error Code: 404")).toBeInTheDocument();
   });
 
   it("does not render when open is false", () => {
@@ -89,27 +89,20 @@ describe("ErrorModal", () => {
     expect(onSubmitTicketMock).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onSubmitTicket when submit ticket link is clicked", async () => {
-    const user = userEvent.setup();
-    const onSubmitTicketMock = vi.fn();
-
+  it("renders help text when onSubmitTicket is provided", () => {
     render(
       <ErrorModal
         open={true}
         onClose={vi.fn()}
         errorCode="403"
         errorMessage="Forbidden"
-        onSubmitTicket={onSubmitTicketMock}
+        onSubmitTicket={vi.fn()}
       />
     );
 
-    // Get the inline text link button
-    const buttons = screen.getAllByText(/submit a support ticket/i);
-    // The inline link should be the first one
-    const submitLink = buttons[0];
-    await user.click(submitLink);
-
-    expect(onSubmitTicketMock).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByText(/Please try again later or submit a support ticket/i)
+    ).toBeInTheDocument();
   });
 
   it("renders with default error message when no message is provided", () => {
