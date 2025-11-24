@@ -146,13 +146,18 @@ export const RequestDetail = (): React.ReactElement => {
   // Create the back link URL - preserve userId if it exists
   const backToRequestsUrl = userId ? `/requests?userId=${userId}` : "/requests";
 
-  // Update statusReason and hasDecision when request changes
+  // Initialize statusReason and hasDecision only when request ID changes
   useEffect(() => {
     if (request) {
       setStatusReason(request.statusReason || "");
       // Check if decision exists based on decisionNumber presence
       setHasDecision(!!request.decisionNumber);
+    }
+  }, [request?.requestId]);
 
+  // Separate useEffect for access control
+  useEffect(() => {
+    if (request) {
       // Access control: Check if user can view this request
       const userInfo = getUserInfo();
       const isApprover = hasRole(AppRoles.APPROVER);
@@ -323,9 +328,8 @@ export const RequestDetail = (): React.ReactElement => {
       return result;
     };
 
-    const handleReasoningChange = (
-      event: React.ChangeEvent<{ value: string }>
-    ) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleReasoningChange = (event: React.ChangeEvent<any>) => {
       setStatusReason(event.target.value);
     };
 

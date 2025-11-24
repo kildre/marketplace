@@ -82,8 +82,8 @@ export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
             fullWidth
             size="small"
             minRows={6}
-            value={statusReason}
-            onChange={isReadOnly ? undefined : onReasoningChange}
+            value={statusReason || ""}
+            onChange={onReasoningChange}
           />
           {showActionButtons && (
             <>
