@@ -11,11 +11,17 @@ import {
 } from "../../hooks/useFormQueries";
 import { SubmissionData } from "../../interfaces";
 import { generateRequestId } from "../../utils/helper-functions";
+import { ErrorModal } from "../error-modal/error-modal";
 
 export const FormSubmitRequest = (): React.ReactElement => {
   const [checked, setChecked] = React.useState(false);
   const [submittedRequestId, setSubmittedRequestId] =
     React.useState<string>("");
+  const [errorModalOpen, setErrorModalOpen] = React.useState(false);
+  const [errorDetails, setErrorDetails] = React.useState<{
+    code?: string;
+    message?: string;
+  }>({});
   const navigate = useNavigate();
   const { cartItems, clearCart } = useCart();
   const formData = useFormData();
@@ -70,7 +76,7 @@ export const FormSubmitRequest = (): React.ReactElement => {
     }
   }, [submitMutation.isSuccess, submittedRequestId, navigate, clearCart]);
 
-  // Redirect to 500 page if there's a server error
+  // Redirect to 500 page if there's a server error, otherwise show error modal
   React.useEffect(() => {
     if (submitMutation.isError && submitMutation.error) {
       const error = submitMutation.error as Error | ApiError;
@@ -79,6 +85,18 @@ export const FormSubmitRequest = (): React.ReactElement => {
         ("statusCode" in error && error.statusCode >= 500)
       ) {
         navigate("/500", { replace: true });
+      } else {
+        // Show error modal for non-500 errors
+        const errorCode =
+          "statusCode" in error ? error.statusCode.toString() : "errorCode";
+        const errorMessage =
+          error.message || "Your request could not be submitted at this time.";
+
+        setErrorDetails({
+          code: errorCode,
+          message: errorMessage,
+        });
+        setErrorModalOpen(true);
       }
     }
   }, [submitMutation.isError, submitMutation.error, navigate]);
@@ -90,6 +108,20 @@ export const FormSubmitRequest = (): React.ReactElement => {
     markSubmissionAttempt();
 
     if (!isFormValid) return;
+
+    // DEV ONLY: Check if error simulation is enabled
+    if (import.meta.env.DEV && typeof window !== "undefined") {
+      const simulateError = window.localStorage.getItem("simulateSubmitError");
+      if (simulateError) {
+        const errorData = JSON.parse(simulateError);
+        setErrorDetails({
+          code: errorData.code || "400",
+          message: errorData.message || "Simulated error for testing",
+        });
+        setErrorModalOpen(true);
+        return;
+      }
+    }
 
     const estimatedRom =
       document.getElementById("estimatedRom")?.innerHTML || "$0";
@@ -142,35 +174,53 @@ export const FormSubmitRequest = (): React.ReactElement => {
     submitMutation.mutate(submitData);
   };
 
+  const handleCloseErrorModal = () => {
+    setErrorModalOpen(false);
+  };
+
+  const handleSubmitSupportTicket = () => {
+    // Close the modal
+    setErrorModalOpen(false);
+    // You can add navigation to a support ticket page or open an external link
+    // For now, we'll just close the modal
+    // Example: navigate("/support");
+    // Example: window.open("https://support.example.com", "_blank");
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="form-submit-request__checkbox">
-        <Checkbox
-          checked={checked}
-          onChange={(e) => setChecked(e.target.checked)}
-        />
-        <p>
-          I understand that the Total does not include products that require
-          additional review.
-        </p>
-      </div>
-      <button
-        id="submit-request-button"
-        type="submit"
-        disabled={!isFormValid || submitMutation.isPending}
-        className={
-          isFormValid && !submitMutation.isPending
-            ? "button--submit button"
-            : "button--submit button button--disabled"
-        }
-      >
-        {submitMutation.isPending ? "Submitting..." : "Submit Request"}
-      </button>
-      {submitMutation.isError && (
-        <div className="error-message">
-          <p>Error submitting request. Please try again.</p>
+    <>
+      <form onSubmit={handleSubmit}>
+        <div className="form-submit-request__checkbox">
+          <Checkbox
+            checked={checked}
+            onChange={(e) => setChecked(e.target.checked)}
+          />
+          <p>
+            I understand that the Total does not include products that require
+            additional review.
+          </p>
         </div>
-      )}
-    </form>
+        <button
+          id="submit-request-button"
+          type="submit"
+          disabled={!isFormValid || submitMutation.isPending}
+          className={
+            isFormValid && !submitMutation.isPending
+              ? "button--submit button"
+              : "button--submit button button--disabled"
+          }
+        >
+          {submitMutation.isPending ? "Submitting..." : "Submit Request"}
+        </button>
+      </form>
+
+      <ErrorModal
+        open={errorModalOpen}
+        onClose={handleCloseErrorModal}
+        errorCode={errorDetails.code}
+        errorMessage={errorDetails.message}
+        onSubmitTicket={handleSubmitSupportTicket}
+      />
+    </>
   );
 };

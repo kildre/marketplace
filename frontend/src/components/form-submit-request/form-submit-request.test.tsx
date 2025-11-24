@@ -286,9 +286,9 @@ describe("FormSubmitRequest", () => {
       renderFormSubmitRequest(
         { organization: "Army" },
         {},
-        { 
+        {
           phoneError: "Please enter a valid phone number",
-          hasValidationErrors: true 
+          hasValidationErrors: true,
         }
       );
 
@@ -306,9 +306,9 @@ describe("FormSubmitRequest", () => {
       renderFormSubmitRequest(
         { organization: "Army" },
         {},
-        { 
+        {
           emailError: "Please enter a valid email address",
-          hasValidationErrors: true 
+          hasValidationErrors: true,
         }
       );
 
@@ -326,10 +326,10 @@ describe("FormSubmitRequest", () => {
       renderFormSubmitRequest(
         { organization: "Army" },
         {},
-        { 
+        {
           phoneError: "Please enter a valid phone number",
           emailError: "Please enter a valid email address",
-          hasValidationErrors: true 
+          hasValidationErrors: true,
         }
       );
 
@@ -545,42 +545,53 @@ describe("FormSubmitRequest", () => {
       expect(submitButton).toHaveClass("button--disabled");
     });
 
-    test("should show error message on submission error", () => {
-      renderFormSubmitRequest(
+    test("should show error modal on submission error", async () => {
+      // Create an API error with status code
+      const apiError = new Error("Submission failed");
+      (apiError as any).statusCode = 400;
+
+      const { unmount } = renderFormSubmitRequest(
         { organization: "Army" },
-        { isError: true, error: new Error("Submission failed") }
+        { isError: true, error: apiError }
       );
 
-      expect(
-        screen.getByText(/error submitting request\. please try again\./i)
-      ).toBeInTheDocument();
-      expect(
-        screen
-          .getByText(/error submitting request\. please try again\./i)
-          .closest("div")
-      ).toHaveClass("error-message");
-    });
-
-    test("should clear error when submission state changes", () => {
-      const { rerender } = renderFormSubmitRequest(
-        { organization: "Army" },
-        { isError: true }
-      );
-
-      expect(screen.getByText(/error submitting request/i)).toBeInTheDocument();
-
-      // Change to success state
-      mockUseSubmitRequest.mockReturnValue({
-        ...mockSubmitMutation,
-        isError: false,
-        isSuccess: true,
+      // Wait for the modal to appear
+      await waitFor(() => {
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
       });
 
-      rerender(<FormSubmitRequest />);
+      expect(screen.getByText("Submission failed")).toBeInTheDocument();
 
-      expect(
-        screen.queryByText(/error submitting request/i)
-      ).not.toBeInTheDocument();
+      // Clean up
+      unmount();
+    });
+
+    test("should close error modal when close button is clicked", async () => {
+      // Create an API error with status code
+      const apiError = new Error("Submission failed");
+      (apiError as any).statusCode = 400;
+
+      const { unmount } = renderFormSubmitRequest(
+        { organization: "Army" },
+        { isError: true, error: apiError }
+      );
+
+      // Error modal should be visible
+      await waitFor(() => {
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
+      });
+
+      // Click close button
+      const closeButton = screen.getByLabelText("close");
+      await userEvent.click(closeButton);
+
+      // Modal should close
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      });
+
+      // Clean up
+      unmount();
     });
 
     test("should disable button during submission", () => {
