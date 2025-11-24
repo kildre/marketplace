@@ -1,0 +1,117 @@
+@use "../globals/colors" as *;
+
+.MuiDialog-container {
+  .error-modal {
+    &__paper {
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
+    }
+
+    &__close-button {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      color: $product-card-quantity-color;
+
+      &:hover {
+        background-color: $notification-unread-bg;
+      }
+    }
+
+    &__content {
+      text-align: center;
+      padding: 40px 24px 24px !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    @keyframes pulse {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    &__message {
+      font-size: 22px;
+      font-weight: 700;
+      color: $product-card-dark-gray;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    &__code {
+      font-size: 14px;
+      color: $type-chip-text-color;
+      margin-top: 8px;
+      font-family: monospace;
+    }
+
+    &__help-text {
+      font-size: 16px;
+      color: $sidebar-text-color;
+      line-height: 1.6;
+      max-width: 480px;
+    }
+
+    &__link-button {
+      background: none;
+      border: none;
+      color: $product-card-primary;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+      font-size: 14px;
+      font-family: inherit;
+
+      &:hover {
+        color: $notification-medium-color;
+      }
+
+      &:focus {
+        outline: 2px solid $breadcrumb-text-color;
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+    }
+
+    &__actions {
+      padding: 16px 24px 24px !important;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    &__button {
+      min-width: 140px;
+      padding: 10px 24px;
+      text-transform: none;
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 6px;
+
+      &--close {
+        border-color: $product-card-primary;
+        color: $product-card-primary;
+
+        &:hover {
+          background-color: $gray-banner;
+          border-color: $disabled-color;
+        }
+      }
+
+      &--submit {
+        background-color: $product-card-primary;
+
+        &:hover {
+          background-color: $notification-medium-color;
+        }
+      }
+    }
+  }
+}

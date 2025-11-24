@@ -1,5 +1,6 @@
 // Metrics Page Styles
 @use "../globals/colors" as *;
+@use "sass:color";
 
 .metrics-page {
   &__error {
@@ -41,7 +42,7 @@
     transition: background-color 0.2s;
 
     &:hover {
-      background-color: darken($product-card-primary, 10%);
+      background-color: color.adjust($product-card-primary, $lightness: -10%);
     }
   }
 
