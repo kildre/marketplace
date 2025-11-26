@@ -2,6 +2,10 @@
 
 A React-based marketplace application served with nginx.
 
+## 📚 Documentation
+
+- [Architecture Decision Records (ADRs)](docs/adr/README.md) - Key architectural decisions and their context
+
 ## Architecture
 
 This application uses:
