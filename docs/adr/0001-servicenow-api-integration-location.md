@@ -87,6 +87,7 @@ Backend integration:
 
 1. Should Marketplace support integrations with additional ITSM tools?  
 2. Should a reusable service-to-service HTTP integration pattern be formalized (timeouts, retries, circuit breaking)?  
+   - **Note:** Istio is enabled in all K8s environments in ADVANA and handles these cross-cutting concerns (timeouts, retries, circuit breaking). Once the API integration is enabled, the next effort should be to integrate Istio to the services so that it can take care of these patterns.
 3. Is caching needed for specific ServiceNow endpoints?  
 
 ---
