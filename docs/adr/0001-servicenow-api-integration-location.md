@@ -8,9 +8,10 @@
 
 ## Context
 
-The Marketplace requires integration with ServiceNow to support catalog retrieval, request submission, updates, and comments. The engineering team needed to determine whether the ServiceNow integration should occur in the **frontend (React)** or **backend (Node.js/Express)**.  
+The Marketplace requires integration with ServiceNow to support catalog retrieval, request submission, updates, and comments. The engineering team needed to determine whether the ServiceNow integration should occur in the **frontend (React)** or **backend (Node.js/Express)**.
 
 The backend stack includes:
+
 - Node.js / Express  
 - Sequelize ORM  
 - PostgreSQL  
@@ -31,14 +32,16 @@ The frontend must never directly call ServiceNow APIs or handle OAuth credential
 
 ## Options Considered
 
-### **Option A — Frontend Integration**  
+### **Option A — Frontend Integration**
+
 Browser directly calls ServiceNow APIs.
 
 | Pros | Cons |
 |------|------|
 | Simplifies backend; Faster UI prototyping | Exposes OAuth tokens; Harder error handling; CORS issues; UI tightly coupled to SNOW schema; Likely fails Advana cybersecurity review |
 
-### **Option B — Backend Integration (Chosen)**  
+### **Option B — Backend Integration (Chosen)**
+
 Backend acts as proxy for all ServiceNow API calls.
 
 | Pros | Cons |
@@ -50,6 +53,7 @@ Backend acts as proxy for all ServiceNow API calls.
 ## Rationale
 
 Backend integration:
+
 - Ensures OAuth tokens and credentials never reach the client.  
 - Aligns with Keycloak introspection-based backend architecture.  
 - Centralizes error handling, logging, transformation, and retries.  
@@ -95,8 +99,7 @@ Backend integration:
 ## Next Steps
 
 - Implement backend ServiceNow client  
-- Add backend routes for SNOW products, requests, updates, and comments  
-- Define transformation and error-handling layer  
-- Conduct cybersecurity review  
-- Publish this ADR in the GitHub ADR folder structure  
-
+- Add backend routes for SNOW products, requests, updates, and comments
+- Define transformation and error-handling layer
+- Conduct cybersecurity review
+- Publish this ADR in the GitHub ADR folder structure
