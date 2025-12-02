@@ -1,0 +1,242 @@
+{
+  "ADR Context Section": {
+    "prefix": "adr-context",
+    "body": [
+      "## Context",
+      "",
+      "$1",
+      "",
+      "---"
+    ],
+    "description": "Insert ADR Context section"
+  },
+  "ADR Decision Section": {
+    "prefix": "adr-decision",
+    "body": [
+      "## Decision",
+      "",
+      "$1",
+      "",
+      "---"
+    ],
+    "description": "Insert ADR Decision section"
+  },
+  "ADR Options Section": {
+    "prefix": "adr-options",
+    "body": [
+      "## Options Considered",
+      "",
+      "### **Option A — ${1:Option Name}**  ",
+      "${2:Brief description}",
+      "",
+      "| Pros | Cons |",
+      "|------|------|",
+      "| ${3:List advantages} | ${4:List disadvantages} |",
+      "",
+      "### **Option B — ${5:Option Name} (Chosen)**  ",
+      "${6:Brief description}",
+      "",
+      "| Pros | Cons |",
+      "|------|------|",
+      "| ${7:List advantages} | ${8:List disadvantages} |",
+      "",
+      "---"
+    ],
+    "description": "Insert ADR Options Considered section with pros/cons tables"
+  },
+  "ADR Rationale Section": {
+    "prefix": "adr-rationale",
+    "body": [
+      "## Rationale",
+      "",
+      "$1",
+      "",
+      "---"
+    ],
+    "description": "Insert ADR Rationale section"
+  },
+  "ADR Consequences Section": {
+    "prefix": "adr-consequences",
+    "body": [
+      "## Consequences",
+      "",
+      "| Category | Details |",
+      "|----------|---------|",
+      "| **Positive** | ${1:List positive outcomes} |",
+      "| **Negative** | ${2:List negative outcomes or tradeoffs} |",
+      "",
+      "---"
+    ],
+    "description": "Insert ADR Consequences section"
+  },
+  "ADR Compliance Section": {
+    "prefix": "adr-compliance",
+    "body": [
+      "## Compliance & Traceability",
+      "",
+      "- Related tickets: ${1:e.g., CA-XXX – Description}",
+      "- Architecture discussions: ${2:Reference meetings, documents, or conversations}",
+      "- Aligns with: ${3:Reference relevant policies, playbooks, or standards}",
+      "",
+      "---"
+    ],
+    "description": "Insert ADR Compliance & Traceability section"
+  },
+  "ADR Risks Section": {
+    "prefix": "adr-risks",
+    "body": [
+      "## Risks",
+      "",
+      "- ${1:Risk 1 and mitigation strategy}",
+      "- ${2:Risk 2 and mitigation strategy}",
+      "- ${3:Risk 3 and mitigation strategy}",
+      "",
+      "---"
+    ],
+    "description": "Insert ADR Risks section"
+  },
+  "ADR Open Questions Section": {
+    "prefix": "adr-questions",
+    "body": [
+      "## Open Questions",
+      "",
+      "1. ${1:Question 1}",
+      "2. ${2:Question 2}",
+      "3. ${3:Question 3}",
+      "",
+      "---"
+    ],
+    "description": "Insert ADR Open Questions section"
+  },
+  "ADR Next Steps Section": {
+    "prefix": "adr-nextsteps",
+    "body": [
+      "## Next Steps",
+      "",
+      "- ${1:Action item 1}",
+      "- ${2:Action item 2}",
+      "- ${3:Action item 3}"
+    ],
+    "description": "Insert ADR Next Steps section"
+  },
+  "ADR Full Template": {
+    "prefix": "adr-full",
+    "body": [
+      "# ADR ${1:XXXX}: ${2:Title}",
+      "",
+      "**Date:** ${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}  ",
+      "**Status:** ${3|Proposed,Accepted,Deprecated,Superseded|}  ",
+      "**Author:** Advana Marketplace Team  ",
+      "",
+      "---",
+      "",
+      "## Context",
+      "",
+      "${4:Describe the context and background}",
+      "",
+      "---",
+      "",
+      "## Decision",
+      "",
+      "${5:State the decision clearly}",
+      "",
+      "---",
+      "",
+      "## Options Considered",
+      "",
+      "### **Option A — ${6:Option Name}**  ",
+      "${7:Brief description}",
+      "",
+      "| Pros | Cons |",
+      "|------|------|",
+      "| ${8:List advantages} | ${9:List disadvantages} |",
+      "",
+      "### **Option B — ${10:Option Name} (Chosen)**  ",
+      "${11:Brief description}",
+      "",
+      "| Pros | Cons |",
+      "|------|------|",
+      "| ${12:List advantages} | ${13:List disadvantages} |",
+      "",
+      "---",
+      "",
+      "## Rationale",
+      "",
+      "${14:Explain why this decision was made}",
+      "",
+      "---",
+      "",
+      "## Consequences",
+      "",
+      "| Category | Details |",
+      "|----------|---------|",
+      "| **Positive** | ${15:List positive outcomes} |",
+      "| **Negative** | ${16:List negative outcomes or tradeoffs} |",
+      "",
+      "---",
+      "",
+      "## Compliance & Traceability",
+      "",
+      "- Related tickets: ${17:e.g., CA-XXX – Description}",
+      "- Architecture discussions: ${18:Reference meetings, documents, or conversations}",
+      "- Aligns with: ${19:Reference relevant policies, playbooks, or standards}",
+      "",
+      "---",
+      "",
+      "## Risks",
+      "",
+      "- ${20:Risk 1 and mitigation strategy}",
+      "- ${21:Risk 2 and mitigation strategy}",
+      "- ${22:Risk 3 and mitigation strategy}",
+      "",
+      "---",
+      "",
+      "## Open Questions",
+      "",
+      "1. ${23:Question 1}",
+      "2. ${24:Question 2}",
+      "3. ${25:Question 3}",
+      "",
+      "---",
+      "",
+      "## Next Steps",
+      "",
+      "- ${26:Action item 1}",
+      "- ${27:Action item 2}",
+      "- ${28:Action item 3}"
+    ],
+    "description": "Insert complete ADR template for Advana Marketplace"
+  },
+  "ADR Header": {
+    "prefix": "adr-header",
+    "body": [
+      "# ADR ${1:XXXX}: ${2:Title}",
+      "",
+      "**Date:** ${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}  ",
+      "**Status:** ${3|Proposed,Accepted,Deprecated,Superseded|}  ",
+      "**Author:** Advana Marketplace Team  ",
+      "",
+      "---",
+      ""
+    ],
+    "description": "Insert ADR header with date, status, and author"
+  },
+  "ADR Pros/Cons Table": {
+    "prefix": "adr-proscons",
+    "body": [
+      "| Pros | Cons |",
+      "|------|------|",
+      "| ${1:List advantages} | ${2:List disadvantages} |"
+    ],
+    "description": "Insert pros/cons comparison table"
+  },
+  "ADR Superseded Notice": {
+    "prefix": "adr-superseded",
+    "body": [
+      "> **⚠️ SUPERSEDED by [ADR ${1:XXXX}: ${2:Title}](${3:filename}.md)**  ",
+      "> ${4:Reason for supersession}",
+      ""
+    ],
+    "description": "Insert superseded notice banner"
+  }
+}
