@@ -1,3 +1,143 @@
+# Application Configuration Guide
+
+This section provides detailed instructions and references for configuring the application, as required for deployment, security, and operational best practices.
+
+---
+
+## Configuration Topics
+
+- **Encryption Settings:**
+   - Data in transit: TLS 1.2+ required, TLS 1.3 preferred, FIPS-approved ciphers, Istio STRICT mTLS enforced. Backend DB connections require `PG_SSL_REQUIRE=true` and `NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-bundle.crt`.
+   - Data at rest: AWS RDS encryption via AWS KMS (AES-256).
+
+- **PKI Certificate Configuration Settings:**
+   - TLS certificates are stored in the Kubernetes secret `advana-marketplace-tls` and mounted to `/etc/pki/tls/certs/tls.crt`, `/etc/pki/tls/private/tls.key`, and `/etc/ssl/certs/ca-bundle.crt`.
+   - Certificates must be DoD CA-signed, RSA 2048-bit or ECC equivalent, with SAN entries required.
+
+- **Password Settings:**
+   - Human passwords are managed by Keycloak IdP with policies: 15+ characters, upper/lower/number/symbol, MFA if required.
+   - System passwords are generated via Terraform and stored only in AWS Secrets Manager.
+
+- **Auditing Configuration:**
+   - Backend uses Winston JSON logs with 30-day rolling retention.
+   - Audit events include authentication failures, authorization denials, admin actions, and token introspection failures.
+   - SQL logging is enabled in DEV only.
+
+- **Active Directory (AD) Configuration:**
+   - DoD AD Group → Keycloak Role → Application Role mapping.
+   - Keycloak OIDC Authorization Code Flow is used for authentication.
+
+- **Backup and Disaster Recovery Settings:**
+   - AWS RDS automated backups with PITR enabled.
+   - Stateless containers are redeployed via CI/CD.
+   - RTO: < 1 hour; RPO: RDS-defined (typically minutes).
+
+- **Hosting Enclaves & Network Requirements:**
+   - Environments: Development, Staging, Production (IL2 & IL5) in AWS GovCloud (us-gov-west-1).
+   - Inbound: 443 → ALB → Istio ingress → Application Pods.
+   - Outbound: Keycloak (443), PostgreSQL (5432), AWS Secrets Manager, AWS ECR.
+
+- **Deployment Configuration Settings:**
+   - Kubernetes: Rolling deployments, non-root UID, read-only filesystem, resource requests & limits.
+   - Environment variables (backend): `KEYCLOAK_BASE_URL`, `KEYCLOAK_REALM`, `PG_HOST`, `PG_SSL_REQUIRE`.
+   - Environment variables (frontend): `VITE_API_BASE_URL`, `VITE_KEYCLOAK_URL`, `VITE_KEYCLOAK_REALM`.
+   - Container security: Distroless images, FIPS compliant, no shell.
+   - See also: `docker-compose.yml`, `nginx.conf`, and Helm charts in `chart/` directory.
+
+- **Security Assumptions, Implications, and Best Practices:**
+   - TLS required for all connections, FIPS runtime, Pod Security Standards (Restricted).
+   - Known security assumptions: All secrets are managed in AWS Secrets Manager; all traffic is encrypted in transit and at rest; only approved DoD CA certificates are used.
+
+## Development, Build, and Test Systems
+
+- **List of Systems:**
+   - Development: macOS/Linux, Node.js 20+, Docker, VS Code.
+   - Build: GitLab CI/CD, kaniko image build, SAST scanning.
+   - Testing: Vitest, Playwright, review environments.
+
+- **Compiler and Build Tool Versions:**
+   - Node.js 20+
+   - Vite (frontend build)
+   - Docker (container build)
+   - kaniko (CI/CD image build)
+
+- **Build Options:**
+   - Rolling deployments, non-root UID, read-only filesystem, resource requests & limits (Kubernetes).
+   - SAST scanning enabled in CI/CD.
+
+- **COTS Software Versions:**
+   - AWS RDS PostgreSQL (managed service)
+   - Keycloak (IdP)
+   - NGINX (FIPS)
+
+- **Operating Systems and Versions:**
+   - macOS/Linux for development
+   - AWS EKS (Amazon Linux) for hosting
+
+- **Supported Browsers (for Web Applications):**
+   - Chrome (latest)
+   - Edge (latest)
+   - Firefox (latest)
+   - Safari (latest)
+
+## Configuration Topics
+
+- **Encryption Settings:**
+   - _[Document encryption algorithms, keys, and storage locations here. Add references to any relevant scripts or configuration files.]_
+
+- **PKI Certificate Configuration Settings:**
+   - _[Describe how to configure PKI certificates, including file locations and renewal procedures.]_
+
+- **Password Settings:**
+   - _[List password policies, storage mechanisms, and rotation procedures.]_
+
+- **Auditing Configuration:**
+   - _[Explain how auditing is enabled, what is logged, and where logs are stored.]_
+
+- **Active Directory (AD) Configuration:**
+   - _[Describe AD integration, including connection settings and required permissions.]_
+
+- **Backup and Disaster Recovery Settings:**
+   - _[Document backup schedules, storage locations, and recovery procedures.]_
+
+- **Hosting Enclaves & Network Requirements:**
+   - _[List hosting environments, network zones, firewall rules, and connection requirements.]_
+
+- **Deployment Configuration Settings:**
+   - _[Summarize deployment options, environment variables, and configuration files. See also: `docker-compose.yml`, `nginx.conf`, and Helm charts in `chart/` directory.]_
+
+- **Security Assumptions, Implications, and Best Practices:**
+   - _[Document known security assumptions, system-level protections, and required permissions.]_
+
+## Development, Build, and Test Systems
+
+- **List of Systems:**
+   - _[Document development, build, and test environments, including hostnames or descriptions.]_
+
+- **Compiler and Build Tool Versions:**
+   - _[List compilers, build tools, and their versions used in the project.]_
+
+- **Build Options:**
+   - _[Document build options and flags used for application and component creation.]_
+
+- **COTS Software Versions:**
+   - _[List commercial off-the-shelf software and versions used as part of the application.]_
+
+- **Operating Systems and Versions:**
+   - _[Document supported operating systems and their versions.]_
+
+- **Supported Browsers (for Web Applications):**
+   - _[List supported browsers and versions.]_
+
+## Additional References
+
+- [API Configuration Guide](frontend/API_CONFIG_GUIDE.md)
+- [Environment Validation Guide](frontend/ENVIRONMENT_VALIDATION_GUIDE.md)
+- [Production Authentication Setup](frontend/PRODUCTION_AUTH_SETUP.md)
+- [Token Passing Guide](frontend/TOKEN_PASSING_GUIDE.md)
+- [User Roles Setup](frontend/USER_ROLES_SETUP.md)
+
+> **Note:** This guide is a living document. Please update with additional configuration details as they become available or as the application evolves.
 # Advana-Marketplace
 
 A React-based marketplace application served with nginx.
