@@ -120,6 +120,21 @@ export const useSubmitRequest = () => {
 
   return useMutation({
     mutationFn: async (submissionData: SubmissionData) => {
+      // Validate cart items before submission
+      if (!submissionData.cartItems || submissionData.cartItems.length === 0) {
+        throw new Error("Cannot submit request: Cart is empty");
+      }
+
+      // Validate each cart item
+      const invalidItems = submissionData.cartItems.filter(
+        (item) => !item.product.name || !item.product.name.trim()
+      );
+      if (invalidItems.length > 0) {
+        throw new Error(
+          "Cannot submit request: Some cart items have invalid names"
+        );
+      }
+
       // Transform frontend data to backend format
       const apiRequest = {
         requestNumber: submissionData.requestId,
@@ -136,10 +151,16 @@ export const useSubmitRequest = () => {
         requestedToolName: "", // This might need to be computed from cart items
         description: submissionData.requestDetails.useCaseDescription,
         cartItems: submissionData.cartItems.map((item) => ({
-          name: item.product.name,
-          quantity: item.quantity,
+          name: item.product.name?.trim() || "",
+          quantity: Math.floor(Number(item.quantity)) || 1,
         })),
       };
+
+      // Log the request payload for debugging (only in development)
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.log("[useFormQueries] Submitting request:", apiRequest);
+      }
 
       // Submit to backend API
       return await ApiService.submitRequest(apiRequest);
@@ -197,9 +218,7 @@ export const useFormData = () => {
 export const useSubmissionAttempts = () => {
   const queryClient = useQueryClient();
 
-  const {
-    data: submissionData = { hasAttempted: false },
-  } = useQuery({
+  const { data: submissionData = { hasAttempted: false } } = useQuery({
     queryKey: formKeys.submissionAttempts,
     queryFn: () => ({ hasAttempted: false }),
     staleTime: Infinity,
@@ -230,13 +249,12 @@ export const useSubmissionAttempts = () => {
 export const useValidationErrors = () => {
   const queryClient = useQueryClient();
 
-  const {
-    data: validationData = { phoneError: "", emailError: "" },
-  } = useQuery({
-    queryKey: formKeys.validationErrors,
-    queryFn: () => ({ phoneError: "", emailError: "" }),
-    staleTime: Infinity,
-  });
+  const { data: validationData = { phoneError: "", emailError: "" } } =
+    useQuery({
+      queryKey: formKeys.validationErrors,
+      queryFn: () => ({ phoneError: "", emailError: "" }),
+      staleTime: Infinity,
+    });
 
   const updateValidationErrors = useMutation({
     mutationFn: async (data: { phoneError?: string; emailError?: string }) => {
@@ -258,7 +276,8 @@ export const useValidationErrors = () => {
     },
   });
 
-  const hasValidationErrors = validationData.phoneError !== "" || validationData.emailError !== "";
+  const hasValidationErrors =
+    validationData.phoneError !== "" || validationData.emailError !== "";
 
   return {
     phoneError: validationData.phoneError,

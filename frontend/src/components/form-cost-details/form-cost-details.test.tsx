@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { vi } from "vitest";
 import { FormCostDetails } from "./form-cost-details";
-import { Product } from "../../types/products";
+import { Product } from "../../interfaces";
 
 // Extend Jest matchers for accessibility testing
 expect.extend(toHaveNoViolations);
