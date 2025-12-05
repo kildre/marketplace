@@ -1,4 +1,6 @@
 import Keycloak, { KeycloakConfig, KeycloakInitOptions } from "keycloak-js";
+import { clearCart } from "../store/cartSlice";
+import { store } from "../store/store";
 import { AuthService } from "./authService";
 
 // Debug environment variables in development - uncomment for debugging
@@ -99,9 +101,12 @@ export class KeycloakService {
     };
 
     // Listen for logout
+    // STIG V-222578: Clear application session data on logout
     this.keycloak.onAuthLogout = () => {
       AuthService.clearStoredAuth();
       this.clearRefreshTimer();
+      // Clear cart data when Keycloak triggers logout
+      store.dispatch(clearCart());
     };
 
     // Listen for token expiration
