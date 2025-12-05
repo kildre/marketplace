@@ -16,6 +16,10 @@ import { AuthService } from "./services/authService";
 import { persistor, store } from "./store/store";
 import "./styles/main.scss";
 import { getApiUrl, getEnvironmentInfo, logApiConfig } from "./utils/api-config";
+import { initInstrumentation } from './instrumentation';
+
+// Initialize OpenTelemetry before anything else
+initInstrumentation();
 
 // Expose debugging utilities to window for browser console access
 if (typeof window !== "undefined") {
