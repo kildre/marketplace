@@ -164,6 +164,15 @@ export class ApiService {
     try {
       const headers = await this.getAuthHeaders();
 
+      // Log request payload in development mode
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.log(
+          "[ApiService] submitRequest payload:",
+          JSON.stringify(requestData, null, 2)
+        );
+      }
+
       const response = await window.fetch(getEndpointUrl("SUBMIT_REQUEST"), {
         method: "POST",
         headers: headers,
@@ -171,6 +180,15 @@ export class ApiService {
         mode: "cors",
         credentials: "omit",
       });
+
+      // Log response status in development mode
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.log(
+          "[ApiService] submitRequest response status:",
+          response.status
+        );
+      }
 
       return this.handleResponse<SubmitRequestApiResponse>(response);
     } catch (error) {
