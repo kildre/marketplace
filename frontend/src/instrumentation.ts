@@ -11,7 +11,8 @@ import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
 import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { logs, metrics, trace } from '@opentelemetry/api';
+import { metrics } from '@opentelemetry/api';
+import { logs } from '@opentelemetry/api-logs';
 
 // Configuration from environment variables
 const OTLP_ENDPOINT = import.meta.env.VITE_OTLP_ENDPOINT || 'http://localhost:4318';
@@ -50,12 +51,11 @@ export const initInstrumentation = () => {
     readers: [
       new PeriodicExportingMetricReader({
         exporter: metricExporter,
-        exportIntervalMillis: 10000, // Export every 10 seconds
+        exportIntervalMillis: 10000,
       }),
     ],
   });
   
-  // Set global meter provider
   metrics.setGlobalMeterProvider(meterProvider);
 
   // 3. Logs Setup
@@ -66,7 +66,6 @@ export const initInstrumentation = () => {
   const loggerProvider = new LoggerProvider({ resource });
   loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(logExporter));
   
-  // Set global logger provider
   logs.setGlobalLoggerProvider(loggerProvider);
 
   // 4. Auto-instrumentation
@@ -78,7 +77,6 @@ export const initInstrumentation = () => {
       }),
       new FetchInstrumentation({
         propagateTraceHeaderCorsUrls: [
-          // Add your backend URL here to connect frontend traces to backend traces
           new RegExp(import.meta.env.VITE_API_BASE_URL || '.*'),
         ],
         clearTimingResources: true,
