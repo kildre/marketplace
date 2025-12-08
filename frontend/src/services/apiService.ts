@@ -97,14 +97,58 @@ export class ApiService {
     };
 
     try {
-      // Import keycloak instance dynamically to avoid circular dependencies
-      const { default: keycloak } = await import("../keycloak");
+      // Check if we're in bypass auth mode (development with mock Keycloak)
+      const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
 
-      // Check if keycloak is authenticated and has a valid token
-      if (keycloak?.authenticated && keycloak.token) {
-        // Ensure token is fresh before using it (refresh if expires within 30 seconds)
-        await keycloak.updateToken(30);
-        headers["Authorization"] = `Bearer ${keycloak.token}`;
+      // Debug logging
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.log("[ApiService] getAuthHeaders debug:", {
+          bypassAuth,
+          VITE_BYPASS_AUTH: import.meta.env.VITE_BYPASS_AUTH,
+          // @ts-ignore
+          hasWindowKeycloak: !!window.keycloak,
+          // @ts-ignore
+          isAuthenticated: window.keycloak?.authenticated,
+          // @ts-ignore
+          hasToken: !!window.keycloak?.token,
+        });
+      }
+
+      if (bypassAuth) {
+        // In bypass mode, get token from window.keycloak (mock Keycloak instance)
+        // @ts-ignore - window.keycloak is set by EnhancedMockKeycloakProvider
+        const keycloak = window.keycloak;
+        if (keycloak?.authenticated && keycloak.token) {
+          headers["Authorization"] = `Bearer ${keycloak.token}`;
+          // eslint-disable-next-line no-console
+          if (import.meta.env.DEV) {
+            // eslint-disable-next-line no-console
+            console.log(
+              "[ApiService] Added Authorization header (bypass mode)"
+            );
+          }
+        } else {
+          // eslint-disable-next-line no-console
+          console.warn(
+            "[ApiService] Bypass auth enabled but no valid keycloak token found!",
+            {
+              keycloakExists: !!keycloak,
+              authenticated: keycloak?.authenticated,
+              hasToken: !!keycloak?.token,
+            }
+          );
+        }
+      } else {
+        // In production mode, import real keycloak instance
+        const { default: keycloak } = await import("../keycloak");
+
+        // Check if keycloak is authenticated and has a valid token
+        if (keycloak?.authenticated && keycloak.token) {
+          // Ensure token is fresh before using it (refresh if expires within 30 seconds)
+          await keycloak.updateToken(30);
+          headers["Authorization"] = `Bearer ${keycloak.token}`;
+        }
       }
     } catch (error) {
       // eslint-disable-next-line no-console
