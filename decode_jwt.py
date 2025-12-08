@@ -66,17 +66,36 @@ def pretty_print_payload(payload: Dict[str, Any], token_type: str):
         else:
             print(f"{key:20}: {value}")
 
-# The token response from your request
+# To use this script for debugging:
+# 1. Login to your application in the browser
+# 2. Open browser DevTools > Network tab
+# 3. Find the Keycloak token response (look for requests to /protocol/openid-connect/token)
+# 4. Copy the response JSON and paste it below, replacing the empty token_response dictionary
+# 5. Run: python3 decode_jwt.py
+#
+# Example token_response structure:
+# token_response = {
+#     "access_token": "eyJhbGci...",
+#     "expires_in": 1800,
+#     "refresh_expires_in": 3600,
+#     "refresh_token": "eyJhbGci...",
+#     "token_type": "Bearer",
+#     "id_token": "eyJhbGci...",
+#     "not-before-policy": 0,
+#     "session_state": "uuid-here",
+#     "scope": "openid email profile"
+# }
+
 token_response = {
-    "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJOQWlSNVRiUnNVWER4eTRhWHE2b3Z5VGJ3TmdNZWFvWjdybTAwaFlvRnJVIn0.eyJleHAiOjE3NTQwODI0NDAsImlhdCI6MTc1NDA4MDY0MCwiYXV0aF90aW1lIjoxNzU0MDgwNjM5LCJqdGkiOiJmOTcwZWVkNy1kODZlLTRjNTQtYTYwYy1iNzEwYmYyZDFjYjMiLCJpc3MiOiJodHRwczovL2tleWNsb2FrLmNkYW8udXMvYXV0aC9yZWFsbXMvYmFieS15b2RhIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjQ3Y2E4YjA2LTBkZjYtNDlmMy05NzJjLTRiYTlkOWZmMzI1ZSIsInR5cCI6IkJlYXJlciIsImF6cCI6Im1hcmtldHBsYWNlIiwic2lkIjoiNWIwNTc4ZjUtMWZhYi00MGE0LTg0NWQtOTA1MWRjZjAxNDg2IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwczovL2FkdmFuYS1tYXJrZXRwbGFjZS5hcHAuYWR2YW5hLmNkYW8udXMiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtYmFieS15b2RhIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibWFya2V0cGxhY2UiOnsicm9sZXMiOlsibWFya2V0cGxhY2UtcmVxdWVzdG9yIl19LCJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoiS2lsaWFuIEJlcnJlcyIsInByZWZlcnJlZF91c2VybmFtZSI6ImtiZXJyZXMiLCJnaXZlbl9uYW1lIjoiS2lsaWFuIiwiZmFtaWx5X25hbWUiOiJCZXJyZXMiLCJlbWFpbCI6ImtiZXJyZXNAbWV0cm9zdGFyLmNvbSJ9.oZEpWCTXoLfU7_X4U8EdQ9_K3xKR40VaxN1fMvA810xdOnXFBc9Ok5ufyIvGK0jn6EsF-_u5VqBZrb_ffH-dSI2reO-CXJz8IsUhNCwqe8HNcdSv0DoOB0Ffb3nxCB38A8v8r4-bTyK6wL8dc43JsFuqAbJb3bEot_U_sxhjYv4Yut9lWcfzXXMHsYzM-DITaGwHio5nT58Ipd5qk6HZLVmB_7GUYnhWtB7migEKimOxBVtndrbnCN-JjwgYPsCSAzyvV2eXj9exoVl8zQO9chr-KUuR6zTz7lkcMcaKQSyPCBfztJoJTzawiT9m6j1t1KQSb4_p6rzZJOwjulHOPA",
-    "expires_in": 1800,
-    "refresh_expires_in": 3600,
-    "refresh_token": "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI2Mjc1NGJkMS0zZGYwLTQ3NGMtYTA3Ni1iNmQ2YmI5YjRjODMifQ.eyJleHAiOjE3NTQwODQyNDAsImlhdCI6MTc1NDA4MDY0MCwianRpIjoiMjNiNzEyZWYtYjdhOS00YzBmLWFmYWMtMDk5OTc2YmNjMDgwIiwiaXNzIjoiaHR0cHM6Ly9rZXljbG9hay5jZGFvLnVzL2F1dGgvcmVhbG1zL2JhYnkteW9kYSIsImF1ZCI6Imh0dHBzOi8va2V5Y2xvYWsuY2Rhby51cy9hdXRoL3JlYWxtcy9iYWJ5LXlvZGEiLCJzdWIiOiI0N2NhOGIwNi0wZGY2LTQ5ZjMtOTcyYy00YmE5ZDlmZjMyNWUiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoibWFya2V0cGxhY2UiLCJzaWQiOiI1YjA1NzhmNS0xZmFiLTQwYTQtODQ1ZC05MDUxZGNmMDE0ODYiLCJzY29wZSI6Im9wZW5pZCB3ZWItb3JpZ2lucyBlbWFpbCBiYXNpYyByb2xlcyBwcm9maWxlIGFjciJ9.CzlRamsTtF4sxsJaU6ymk9hMHPb2Le-rF-yaSzlWh_SuyCxxe75grLIHJP6ZByqIo7zRPfoO7kfx0IM-sgtU3Q",
+    "access_token": "",
+    "expires_in": 0,
+    "refresh_expires_in": 0,
+    "refresh_token": "",
     "token_type": "Bearer",
-    "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJOQWlSNVRiUnNVWER4eTRhWHE2b3Z5VGJ3TmdNZWFvWjdybTAwaFlvRnJVIn0.eyJleHAiOjE3NTQwODI0NDAsImlhdCI6MTc1NDA4MDY0MCwiYXV0aF90aW1lIjoxNzU0MDgwNjM5LCJqdGkiOiIxZWU2NWEyYi1hMzRhLTQ0YTEtYmQxMC0zOTk5ZTE0NDY1NGYiLCJpc3MiOiJodHRwczovL2tleWNsb2FrLmNkYW8udXMvYXV0aC9yZWFsbXMvYmFieS15b2RhIiwiYXVkIjoibWFya2V0cGxhY2UiLCJzdWIiOiI0N2NhOGIwNi0wZGY2LTQ5ZjMtOTcyYy00YmE5ZDlmZjMyNWUiLCJ0eXAiOiJJRCIsImF6cCI6Im1hcmtldHBsYWNlIiwibm9uY2UiOiI3ZDU1MzczYS04Y2M5LTQ1Y2EtYjI2Yi0yYThkNmUxNjcxOWQiLCJzaWQiOiI1YjA1NzhmNS0xZmFiLTQwYTQtODQ1ZC05MDUxZGNmMDE0ODYiLCJhdF9oYXNoIjoiU3BUZTBVT0pNbUVwenF0ZU5fTmhFUSIsImFjciI6IjEiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJLaWxpYW4gQmVycmVzIiwicHJlZmVycmVkX3VzZXJuYW1lIjoia2JlcnJlcyIsImdpdmVuX25hbWUiOiJLaWxpYW4iLCJmYW1pbHlfbmFtZSI6IkJlcnJlcyIsImVtYWlsIjoia2JlcnJlc0BtZXRyb3N0YXIuY29tIn0.LynciNQVzT2GmeBEosSVar-lPufNVOZnu5efsRzMsFJ8XD3Hpo4xRjrOOoKOwv23r1BODKjuzeZr_AA8YdOdTyV_L0X9rli46TQvMEIaB0P3EHiRffUKCFgXZCLLb2N-EqgH2NrI3tVA9Q5bHFCXise6V_h6vfiQvDejqBaPvtaTk9W-wxBIRYpXbKFoUjj68H-1GSy4dq4xVdfnTNXJdza3WbkRaKhLkC-DYyC-D8AhoeSDeyJEVssT64i0KfPihM3MeyLwQbi-o5KQ5T3h83yLTwdJsL0r85Q1v_baOJ-_omJsfDF9JH11qCqvq21JqQSGRBEf09YS7kkHsef8Og",
+    "id_token": "",
     "not-before-policy": 0,
-    "session_state": "5b0578f5-1fab-40a4-845d-9051dcf01486",
-    "scope": "openid email profile"
+    "session_state": "",
+    "scope": ""
 }
 
 def main():
