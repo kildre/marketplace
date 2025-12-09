@@ -181,8 +181,6 @@ secret:
           REACT_APP_MEGA_MENU_HEADER_SORT_ORDER: "Domains,Tools,Communities,Help,About"
           REACT_APP_MEGA_MENU_HIGHLIGHT_COLOR: "#56B1AC"
 
-          OTLP_ENDPOINT: 'otel-collector-splunk-otel-collector.otel-collector.svc.cluster.local:4317'
-
   volume:
     secret:
       "secret-volume-ca-bundle-crt":
