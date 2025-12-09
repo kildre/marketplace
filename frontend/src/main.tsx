@@ -15,13 +15,6 @@ import { queryClient } from "./lib/queryClient";
 import { AuthService } from "./services/authService";
 import { persistor, store } from "./store/store";
 import "./styles/main.scss";
-<<<<<<< HEAD
-import {
-  getApiUrl,
-  getEnvironmentInfo,
-  logApiConfig,
-} from "./utils/api-config";
-=======
 import { getApiUrl, getEnvironmentInfo, logApiConfig } from "./utils/api-config";
 import { initInstrumentation } from './instrumentation';
 
