@@ -35,7 +35,8 @@ export interface ExpireSessionResponse {
  */
 export class SessionService {
   private static readonly SESSION_ID_KEY = "marketplace_session_id";
-  private static readonly SESSION_VALIDATED_KEY = "marketplace_session_validated";
+  private static readonly SESSION_VALIDATED_KEY =
+    "marketplace_session_validated";
 
   /**
    * Generate a unique session ID (UUID v4)
@@ -46,7 +47,7 @@ export class SessionService {
 
   /**
    * Register a new session with the backend using Keycloak access token
-   * 
+   *
    * @param accessToken - The Keycloak access token from authentication
    * @param refreshToken - Optional Keycloak refresh token
    * @returns Promise resolving to the registration response with sessionId
@@ -57,9 +58,15 @@ export class SessionService {
     refreshToken?: string
   ): Promise<RegisterSessionResponse> {
     try {
-      // eslint-disable-next-line no-console
-      console.log("SessionService.registerSession called with token:", accessToken ? `${accessToken.substring(0, 20)}...` : "MISSING");
-      
+      // SECURITY: Only log token substring in development with debug flag
+      if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_AUTH === "true") {
+        // eslint-disable-next-line no-console
+        console.log(
+          "SessionService.registerSession called with token:",
+          accessToken ? `${accessToken.substring(0, 20)}...` : "MISSING"
+        );
+      }
+
       if (!accessToken) {
         throw new Error("Access token is required for session registration");
       }
@@ -92,7 +99,7 @@ export class SessionService {
       }
 
       const data = await response.json();
-      
+
       // Store the sessionId on successful registration
       if (data.stored) {
         this.storeSessionId(data.sessionId);
@@ -109,7 +116,7 @@ export class SessionService {
 
   /**
    * Validate the stored session with the backend
-   * 
+   *
    * @param sessionId - The session ID to validate
    * @returns Promise resolving to true if session is valid, false otherwise
    */
@@ -136,7 +143,7 @@ export class SessionService {
       }
 
       const data: SessionStatusResponse = await response.json();
-      
+
       // Session is valid if we get a valid response with a token
       return !!data.token;
     } catch (error) {
@@ -148,7 +155,7 @@ export class SessionService {
 
   /**
    * Expire/revoke a session with the backend
-   * 
+   *
    * @param sessionId - The session ID to expire
    * @returns Promise resolving to the expiration response
    */
@@ -238,7 +245,10 @@ export class SessionService {
     if (typeof window === "undefined" || !window.localStorage) return;
 
     try {
-      window.localStorage.setItem(this.SESSION_VALIDATED_KEY, Date.now().toString());
+      window.localStorage.setItem(
+        this.SESSION_VALIDATED_KEY,
+        Date.now().toString()
+      );
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Failed to mark session as validated:", error);
@@ -253,7 +263,9 @@ export class SessionService {
     if (typeof window === "undefined" || !window.localStorage) return false;
 
     try {
-      const validatedAt = window.localStorage.getItem(this.SESSION_VALIDATED_KEY);
+      const validatedAt = window.localStorage.getItem(
+        this.SESSION_VALIDATED_KEY
+      );
       if (!validatedAt) return false;
 
       const validatedTime = parseInt(validatedAt, 10);

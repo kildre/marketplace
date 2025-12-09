@@ -53,12 +53,15 @@ export const useSessionManagement = () => {
       registrationAttemptedRef.current = true;
       setSessionError(null);
 
-      // eslint-disable-next-line no-console
-      console.log("Registering session with backend...");
-      // eslint-disable-next-line no-console
-      console.log("Keycloak token available:", !!keycloak.token);
-      // eslint-disable-next-line no-console
-      console.log("Keycloak token length:", keycloak.token?.length || 0);
+      // SECURITY: Only log session details in development with debug flag
+      if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_AUTH === "true") {
+        // eslint-disable-next-line no-console
+        console.log("Registering session with backend...");
+        // eslint-disable-next-line no-console
+        console.log("Keycloak token available:", !!keycloak.token);
+        // eslint-disable-next-line no-console
+        console.log("Keycloak token length:", keycloak.token?.length || 0);
+      }
 
       // Call backend to register session with Keycloak access token
       const response = await SessionService.registerSession(
@@ -68,13 +71,17 @@ export const useSessionManagement = () => {
 
       if (response.stored) {
         setIsSessionRegistered(true);
-        // eslint-disable-next-line no-console
-        console.log(
-          "✅ SESSION REGISTERED SUCCESSFULLY",
-          "\n  sessionId:", response.sessionId,
-          "\n  Backend verified token and stored session",
-          "\n  Stored in localStorage: marketplace_session_id"
-        );
+        // SECURITY: Only log session ID in development with debug flag
+        if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_AUTH === "true") {
+          // eslint-disable-next-line no-console
+          console.log(
+            "✅ SESSION REGISTERED SUCCESSFULLY",
+            "\n  sessionId:",
+            response.sessionId,
+            "\n  Backend verified token and stored session",
+            "\n  Stored in localStorage: marketplace_session_id"
+          );
+        }
       } else {
         throw new Error("Session registration failed - not stored");
       }
@@ -118,15 +125,21 @@ export const useSessionManagement = () => {
       setIsSessionValidating(true);
       setSessionError(null);
 
-      // eslint-disable-next-line no-console
-      console.log("Validating stored session...");
+      // SECURITY: Only log in development with debug flag
+      if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_AUTH === "true") {
+        // eslint-disable-next-line no-console
+        console.log("Validating stored session...");
+      }
 
       const isValid = await SessionService.validateSession(storedSessionId);
 
       if (isValid) {
         setIsSessionRegistered(true);
-        // eslint-disable-next-line no-console
-        console.log("Session is valid");
+        // SECURITY: Only log in development with debug flag
+        if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_AUTH === "true") {
+          // eslint-disable-next-line no-console
+          console.log("Session is valid");
+        }
       } else {
         // Session is expired or invalid
         // eslint-disable-next-line no-console
@@ -167,8 +180,14 @@ export const useSessionManagement = () => {
       if (sessionId) {
         try {
           await SessionService.expireSession(sessionId);
-          // eslint-disable-next-line no-console
-          console.log("Session expired on backend");
+          // SECURITY: Only log in development with debug flag
+          if (
+            import.meta.env.DEV &&
+            import.meta.env.VITE_DEBUG_AUTH === "true"
+          ) {
+            // eslint-disable-next-line no-console
+            console.log("Session expired on backend");
+          }
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error("Failed to expire session on backend:", error);
@@ -178,11 +197,11 @@ export const useSessionManagement = () => {
 
       // Clear stored session
       SessionService.clearStoredSessionId();
-      
+
       // STIG V-222578 Compliance: Clear cart data on logout
       // Cart is considered application session data and must be destroyed
       dispatch(clearCart());
-      
+
       setIsSessionRegistered(false);
       setSessionError(null);
       registrationAttemptedRef.current = false;
@@ -202,7 +221,12 @@ export const useSessionManagement = () => {
     if (keycloak.authenticated && keycloak.token && !isSessionRegistered) {
       registerSession();
     }
-  }, [keycloak.authenticated, keycloak.token, isSessionRegistered, registerSession]);
+  }, [
+    keycloak.authenticated,
+    keycloak.token,
+    isSessionRegistered,
+    registerSession,
+  ]);
 
   /**
    * Effect: Validate session on component mount (page load/refresh)
