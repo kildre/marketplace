@@ -27,7 +27,6 @@ import { initInstrumentation } from './instrumentation';
 
 // Initialize OpenTelemetry before anything else
 initInstrumentation();
->>>>>>> 09fdf3c (Added OTEL instrumentation, metrics, and logging. Added packages and dependencies.)
 
 // Expose debugging utilities to window for browser console access
 if (typeof window !== "undefined") {
