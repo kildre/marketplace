@@ -275,6 +275,7 @@ export const FormRequestDetails = ({
                         : ""
                     }
                     onChange={handleOrganizationOtherChange}
+                    inputProps={{ maxLength: 255 }}
                   />
                 </>
               )}
@@ -288,6 +289,7 @@ export const FormRequestDetails = ({
                     size="small"
                     value={data.pocName}
                     onChange={handleFieldChange("pocName")}
+                    inputProps={{ maxLength: 255 }}
                   />
                 </div>
                 <div className="form-request-details__poc-detail-item">
@@ -303,6 +305,7 @@ export const FormRequestDetails = ({
                     helperText={phoneError}
                     onChange={handleFieldChange("pocPhone")}
                     onBlur={handlePhoneBlur}
+                    inputProps={{ maxLength: 50 }}
                   />
                 </div>
                 <div className="form-request-details__poc-detail-item">
@@ -318,6 +321,7 @@ export const FormRequestDetails = ({
                     helperText={emailError}
                     onChange={handleFieldChange("pocEmail")}
                     onBlur={handleEmailBlur}
+                    inputProps={{ maxLength: 255 }}
                   />
                 </div>
               </div>
@@ -332,6 +336,10 @@ export const FormRequestDetails = ({
                 value={data.useCaseDescription}
                 onChange={handleFieldChange("useCaseDescription")}
                 minRows={6}
+                inputProps={{ maxLength: 10000 }}
+                helperText={`${
+                  data.useCaseDescription?.length || 0
+                }/10000 characters`}
               />
             </>
           )}

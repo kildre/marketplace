@@ -372,6 +372,7 @@ export interface Notification {
 
 export interface NotificationBellProps {
   notifications?: Notification[];
+  totalUnreadCount?: number;
   onNotificationClick?: (notification: Notification) => void;
   onMarkAsRead?: (notificationId: string) => void;
   onMarkAllAsRead?: () => void;

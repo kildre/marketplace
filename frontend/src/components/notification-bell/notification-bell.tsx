@@ -26,15 +26,19 @@ import "@/styles/components/_notification-bell.scss";
  */
 export const NotificationBell: React.FC<NotificationBellProps> = ({
   notifications = [],
+  totalUnreadCount,
   onNotificationClick,
   onMarkAsRead,
   onMarkAllAsRead,
 }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
   const open = Boolean(anchorEl);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  // Use totalUnreadCount if provided, otherwise calculate from notifications array
+  const unreadCount =
+    totalUnreadCount ?? notifications.filter((n) => !n.read).length;
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -66,6 +70,23 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     if (onMarkAllAsRead) {
       onMarkAllAsRead();
     }
+  };
+
+  const handleMarkAsRead = (notificationId: string) => {
+    // Add to removing set to trigger animation
+    setRemovingIds((prev) => new Set(prev).add(notificationId));
+
+    // Wait for animation to complete before actually marking as read
+    window.setTimeout(() => {
+      if (onMarkAsRead) {
+        onMarkAsRead(notificationId);
+      }
+      setRemovingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(notificationId);
+        return newSet;
+      });
+    }, 300); // Match animation duration
   };
 
   const formatTimeAgo = (timestamp: string): string => {
@@ -123,7 +144,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
           <Box className="notification-bell__empty">
             <NotificationsNoneIcon className="notification-bell__empty-icon" />
             <Typography variant="body2" color="text.secondary">
-              No notifications
+              No unread notifications
             </Typography>
           </Box>
         ) : (
@@ -136,6 +157,10 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
               } ${
                 !notification.read
                   ? `notification-bell__item--${notification.priority}`
+                  : ""
+              } ${
+                removingIds.has(notification.id)
+                  ? "notification-bell__item--removing"
                   : ""
               }`}
             >
@@ -157,9 +182,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                         className="notification-bell__unread-dot"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (onMarkAsRead) {
-                            onMarkAsRead(notification.id);
-                          }
+                          handleMarkAsRead(notification.id);
                         }}
                         role="button"
                         aria-label="Mark as read"
@@ -168,9 +191,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
                             e.stopPropagation();
-                            if (onMarkAsRead) {
-                              onMarkAsRead(notification.id);
-                            }
+                            handleMarkAsRead(notification.id);
                           }
                         }}
                       />
