@@ -32,6 +32,19 @@ http {
     keepalive_timeout 65;
     types_hash_max_size 2048;
 
+    # Request size and buffer limits to prevent overflow attacks
+    client_max_body_size 10m;
+    client_body_buffer_size 128k;
+    
+    # Timeout protections against slowloris attacks
+    client_body_timeout 12;
+    client_header_timeout 12;
+    send_timeout 10;
+    
+    # Rate limiting zones
+    limit_req_zone $binary_remote_addr zone=api_limit:10m rate=100r/m;
+    limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
+
     server {
         listen 8080;
         server_name localhost;
@@ -44,6 +57,13 @@ http {
 
         # Handle client-side routing for SPA
         location / {
+            try_files $uri $uri/ /index.html;
+        }
+        
+        # Apply rate limiting to API proxy (if applicable)
+        location /api/ {
+            limit_req zone=api_limit burst=20 nodelay;
+            limit_conn conn_limit 10;
             try_files $uri $uri/ /index.html;
         }
 

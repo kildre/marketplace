@@ -129,9 +129,20 @@ export class ApiService {
             );
           }
         } else {
+          // If window.keycloak isn't ready yet, provide a dummy bypass token
+          // This ensures the backend bypass logic still works
+          const dummyToken = `mock.${window.btoa(
+            JSON.stringify({
+              sub: "bypass-user",
+              email: "bypass@local.dev",
+              preferred_username: "bypass-user",
+              roles: [],
+            })
+          )}.signature`;
+          headers["Authorization"] = `Bearer ${dummyToken}`;
           // eslint-disable-next-line no-console
           console.warn(
-            "[ApiService] Bypass auth enabled but no valid keycloak token found!",
+            "[ApiService] Using dummy bypass token (window.keycloak not ready yet)",
             {
               keycloakExists: !!keycloak,
               authenticated: keycloak?.authenticated,
