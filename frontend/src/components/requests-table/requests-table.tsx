@@ -371,7 +371,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           "Denied",
           "ROM Generated",
           "MIPR Needed",
-          "Procuring",
+          "Procuring Products",
           "Allocation Pending",
           "Complete",
         ],
