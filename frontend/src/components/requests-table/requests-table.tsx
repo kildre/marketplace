@@ -267,6 +267,16 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
             ? "Approved"
             : (statusId as number) === 3
             ? "Denied"
+            : (statusId as number) === 4
+            ? "ROM Generated"
+            : (statusId as number) === 5
+            ? "MIPR Needed"
+            : (statusId as number) === 6
+            ? "Procuring"
+            : (statusId as number) === 7
+            ? "Allocation Pending"
+            : (statusId as number) === 8
+            ? "Complete"
             : "Unknown";
         })(),
       };
@@ -352,10 +362,19 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       {
         field: "status",
         headerName: "Status",
-        width: 100,
+        width: 150,
         filterable: true,
         type: "singleSelect",
-        valueOptions: ["Pending", "Approved", "Denied"],
+        valueOptions: [
+          "Pending",
+          "Approved",
+          "Denied",
+          "ROM Generated",
+          "MIPR Needed",
+          "Procuring",
+          "Allocation Pending",
+          "Complete",
+        ],
         renderCell: (params) => (
           <Chip
             label={params.value}

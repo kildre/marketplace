@@ -52,7 +52,19 @@ const transformApiRequestToRequestData = (
         ? "PENDING"
         : apiRequest.statusId === 2
         ? "APPROVED"
-        : "REJECTED",
+        : apiRequest.statusId === 3
+        ? "REJECTED"
+        : apiRequest.statusId === 4
+        ? "ROM Generated"
+        : apiRequest.statusId === 5
+        ? "MIPR Needed"
+        : apiRequest.statusId === 6
+        ? "Procuring Products"
+        : apiRequest.statusId === 7
+        ? "Allocation Pending"
+        : apiRequest.statusId === 8
+        ? "Complete"
+        : "Unknown",
     statusReason: "",
     createdAt: apiRequest.createdAt,
     updatedAt: apiRequest.updatedAt,
