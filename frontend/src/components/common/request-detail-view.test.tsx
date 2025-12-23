@@ -99,6 +99,11 @@ describe("RequestDetailView", () => {
   const mockOnReasoningChange = vi.fn();
   const mockOnAccept = vi.fn();
   const mockOnReject = vi.fn();
+  const mockOnStatusRomGenerated = vi.fn();
+  const mockOnStatusMiprNeeded = vi.fn();
+  const mockOnStatusProcuringProducts = vi.fn();
+  const mockOnStatusAllocationPending = vi.fn();
+  const mockOnStatusComplete = vi.fn();
 
   const defaultProps: RequestDetailViewProps = {
     request: mockRequest,
@@ -106,6 +111,11 @@ describe("RequestDetailView", () => {
     onReasoningChange: mockOnReasoningChange,
     onAccept: mockOnAccept,
     onReject: mockOnReject,
+    onStatusRomGenerated: mockOnStatusRomGenerated,
+    onStatusMiprNeeded: mockOnStatusMiprNeeded,
+    onStatusProcuringProducts: mockOnStatusProcuringProducts,
+    onStatusAllocationPending: mockOnStatusAllocationPending,
+    onStatusComplete: mockOnStatusComplete,
     buttonClass: "button--pending",
     mode: "view",
   };
@@ -393,6 +403,72 @@ describe("RequestDetailView", () => {
         "button--denied"
       );
     });
+
+    test("should show additional status buttons in development mode", () => {
+      // In test environment, import.meta.env.DEV is true by default
+      renderRequestDetailView({ mode: "approve" });
+
+      expect(
+        screen.getByRole("button", { name: "ROM Generated" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "MIPR Needed" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Procuring Products" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Allocation Pending" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Complete" })
+      ).toBeInTheDocument();
+    });
+
+    test("should handle ROM Generated button click", async () => {
+      renderRequestDetailView({ mode: "approve" });
+
+      const button = screen.getByRole("button", { name: "ROM Generated" });
+      await user.click(button);
+
+      expect(mockOnStatusRomGenerated).toHaveBeenCalledTimes(1);
+    });
+
+    test("should handle MIPR Needed button click", async () => {
+      renderRequestDetailView({ mode: "approve" });
+
+      const button = screen.getByRole("button", { name: "MIPR Needed" });
+      await user.click(button);
+
+      expect(mockOnStatusMiprNeeded).toHaveBeenCalledTimes(1);
+    });
+
+    test("should handle Procuring Products button click", async () => {
+      renderRequestDetailView({ mode: "approve" });
+
+      const button = screen.getByRole("button", { name: "Procuring Products" });
+      await user.click(button);
+
+      expect(mockOnStatusProcuringProducts).toHaveBeenCalledTimes(1);
+    });
+
+    test("should handle Allocation Pending button click", async () => {
+      renderRequestDetailView({ mode: "approve" });
+
+      const button = screen.getByRole("button", { name: "Allocation Pending" });
+      await user.click(button);
+
+      expect(mockOnStatusAllocationPending).toHaveBeenCalledTimes(1);
+    });
+
+    test("should handle Complete button click", async () => {
+      renderRequestDetailView({ mode: "approve" });
+
+      const button = screen.getByRole("button", { name: "Complete" });
+      await user.click(button);
+
+      expect(mockOnStatusComplete).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("Event Handler Integration", () => {
@@ -430,6 +506,11 @@ describe("RequestDetailView", () => {
         onReasoningChange: undefined,
         onAccept: undefined,
         onReject: undefined,
+        onStatusRomGenerated: undefined,
+        onStatusMiprNeeded: undefined,
+        onStatusProcuringProducts: undefined,
+        onStatusAllocationPending: undefined,
+        onStatusComplete: undefined,
       };
 
       expect(() => renderRequestDetailView(propsWithoutHandlers)).not.toThrow();

@@ -119,6 +119,16 @@ const transformApiRequestToRequestData = (
         ? "Approved"
         : (statusId as number) === 3
         ? "Denied"
+        : (statusId as number) === 4
+        ? "ROM Generated"
+        : (statusId as number) === 5
+        ? "MIPR Needed"
+        : (statusId as number) === 6
+        ? "Procuring Products"
+        : (statusId as number) === 7
+        ? "Allocation Pending"
+        : (statusId as number) === 8
+        ? "Complete"
         : "Unknown",
     statusReason: hasDecision
       ? decisionComments || ""
@@ -333,17 +343,19 @@ export const RequestDetail = (): React.ReactElement => {
       setStatusReason(event.target.value);
     };
 
-    const handleAccept = async () => {
-      // Logic to handle accept action
-      request.status = "Approved";
-      request.statusReason = statusReason || "Request accepted.";
+    // Generic handler for status updates
+    const handleStatusUpdate = async (
+      statusId: number,
+      statusLabel: string,
+      defaultReason: string
+    ) => {
+      request.status = statusLabel;
+      request.statusReason = statusReason || defaultReason;
       try {
-        await updateRequest(2); // Send statusId 2 for approved
-        // Navigate to home page after successful approval
+        await updateRequest(statusId);
         navigate("/");
       } catch (err) {
         const error = err as Error | ApiError;
-        // Check if it's a 500-level server error
         if (
           ("name" in error && error.name === "ServerError") ||
           ("statusCode" in error && error.statusCode >= 500)
@@ -351,35 +363,33 @@ export const RequestDetail = (): React.ReactElement => {
           navigate("/500", { replace: true });
           return;
         }
-        // Handle error appropriately in your UI
         // eslint-disable-next-line no-console
-        console.error("Error approving request:", error);
+        console.error(
+          `Error updating request status to ${statusLabel}:`,
+          error
+        );
       }
     };
 
-    const handleReject = async () => {
-      // Logic to handle reject action
-      request.status = "Denied";
-      request.statusReason = statusReason || "Request denied.";
-      try {
-        await updateRequest(3); // Send statusId 3 for denied
-        // Navigate to home page after successful rejection
-        navigate("/");
-      } catch (err) {
-        const error = err as Error | ApiError;
-        // Check if it's a 500-level server error
-        if (
-          ("name" in error && error.name === "ServerError") ||
-          ("statusCode" in error && error.statusCode >= 500)
-        ) {
-          navigate("/500", { replace: true });
-          return;
-        }
-        // Handle error appropriately in your UI
-        // eslint-disable-next-line no-console
-        console.error("Error rejecting request:", error);
-      }
-    };
+    // Specific status handlers using the generic function
+    const handleAccept = () =>
+      handleStatusUpdate(2, "Approved", "Request accepted.");
+    const handleReject = () =>
+      handleStatusUpdate(3, "Denied", "Request denied.");
+    const handleStatusRomGenerated = () =>
+      handleStatusUpdate(4, "ROM Generated", "ROM has been generated.");
+    const handleStatusMiprNeeded = () =>
+      handleStatusUpdate(5, "MIPR Needed", "MIPR is needed.");
+    const handleStatusProcuringProducts = () =>
+      handleStatusUpdate(
+        6,
+        "Procuring Products",
+        "Currently procuring products."
+      );
+    const handleStatusAllocationPending = () =>
+      handleStatusUpdate(7, "Allocation Pending", "Allocation is pending.");
+    const handleStatusComplete = () =>
+      handleStatusUpdate(8, "Complete", "Request completed.");
 
     // Render main layout with role-based approval section
     if (hasRole(AppRoles.APPROVER) || hasRole(AppRoles.REQUESTOR)) {
@@ -409,6 +419,11 @@ export const RequestDetail = (): React.ReactElement => {
             onReasoningChange={handleReasoningChange}
             onAccept={handleAccept}
             onReject={handleReject}
+            onStatusRomGenerated={handleStatusRomGenerated}
+            onStatusMiprNeeded={handleStatusMiprNeeded}
+            onStatusProcuringProducts={handleStatusProcuringProducts}
+            onStatusAllocationPending={handleStatusAllocationPending}
+            onStatusComplete={handleStatusComplete}
             buttonClass={buttonClass}
             mode={mode}
           />

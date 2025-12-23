@@ -29,11 +29,17 @@ export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
   onReasoningChange,
   onAccept,
   onReject,
+  onStatusRomGenerated,
+  onStatusMiprNeeded,
+  onStatusProcuringProducts,
+  onStatusAllocationPending,
+  onStatusComplete,
   buttonClass: _buttonClass,
   mode,
 }) => {
   const isReadOnly = mode === "view";
   const showActionButtons = mode === "approve";
+  const isDevelopment = import.meta.env.DEV;
 
   return (
     <div className="cart-page__content-wrapper">
@@ -99,6 +105,40 @@ export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
               >
                 Reject
               </button>
+              {isDevelopment && (
+                <>
+                  <button
+                    className="button button--status button--submit"
+                    onClick={onStatusRomGenerated}
+                  >
+                    ROM Generated
+                  </button>
+                  <button
+                    className="button button--status button--submit"
+                    onClick={onStatusMiprNeeded}
+                  >
+                    MIPR Needed
+                  </button>
+                  <button
+                    className="button button--status button--submit"
+                    onClick={onStatusProcuringProducts}
+                  >
+                    Procuring Products
+                  </button>
+                  <button
+                    className="button button--status button--submit"
+                    onClick={onStatusAllocationPending}
+                  >
+                    Allocation Pending
+                  </button>
+                  <button
+                    className="button button--status button--submit"
+                    onClick={onStatusComplete}
+                  >
+                    Complete
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>
