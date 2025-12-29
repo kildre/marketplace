@@ -1,11 +1,16 @@
 # Enhanced Keycloak Authentication System
 
-This document explains how to use the enhanced Keycloak authentication system that supports token capture, storage, role mapping, and local development simulation.
+This document explains how to use the enhanced Keycloak authentication system that supports token capture, storage, role mapping, session management, and local development simulation.
+
+## 🆕 New Features
+
+**Session-Based Authentication** - The frontend now supports backend session storage for improved performance and security. See [BACKEND_SESSION_INTEGRATION.md](./BACKEND_SESSION_INTEGRATION.md) and [QUICK_START_SESSION.md](./QUICK_START_SESSION.md) for details.
 
 ## Overview
 
 The authentication system supports:
 - ✅ **Token Capture & Storage**: Automatically captures and stores JWT tokens and refresh tokens
+- ✅ **Session Management**: Optional session-based authentication with backend (NEW)
 - ✅ **Role Mapping**: Maps Keycloak roles (`marketplace-approver`, `marketplace-requestor`) to app roles
 - ✅ **Local Development**: Enhanced mock system that simulates real Keycloak behavior
 - ✅ **Role-Based UI**: Conditional rendering based on user roles

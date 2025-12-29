@@ -1,4 +1,5 @@
 import { getEndpointUrl, isBypassAuth } from "../utils/api-config";
+import { SessionService } from "./sessionService";
 
 // Custom error class for API errors
 export class ApiError extends Error {
@@ -89,7 +90,12 @@ export interface UseCaseRequestApiDto {
  */
 export class ApiService {
   /**
-   * Get authorization headers for API requests using Keycloak's current token
+   * Get authorization headers for API requests
+   * Supports two modes:
+   * 1. Session Storage Mode (USE_CLIENT_SESSION_STORAGE=true on backend):
+   *    - Uses session ID in Authorization header
+   * 2. Direct Token Mode (USE_CLIENT_SESSION_STORAGE=false on backend):
+   *    - Uses Keycloak JWT token directly in Authorization header
    */
   private static async getAuthHeaders(): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
@@ -97,6 +103,22 @@ export class ApiService {
     };
 
     try {
+      // Check if session storage is enabled
+      if (SessionService.isSessionStorageEnabled()) {
+        // Mode 1: Use session ID
+        const sessionId = SessionService.getSessionId();
+        if (sessionId) {
+          headers["Authorization"] = `Bearer ${sessionId}`;
+          // eslint-disable-next-line no-console
+          console.debug("[ApiService] Using session ID for authorization");
+          return headers;
+        } else {
+          // eslint-disable-next-line no-console
+          console.warn("[ApiService] Session storage enabled but no session ID found, falling back to direct token mode");
+        }
+      }
+
+      // Mode 2: Use Keycloak token directly
       // Import keycloak instance dynamically to avoid circular dependencies
       const { default: keycloak } = await import("../keycloak");
 
@@ -105,10 +127,12 @@ export class ApiService {
         // Ensure token is fresh before using it (refresh if expires within 30 seconds)
         await keycloak.updateToken(30);
         headers["Authorization"] = `Bearer ${keycloak.token}`;
+        // eslint-disable-next-line no-console
+        console.debug("[ApiService] Using Keycloak token for authorization");
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("Failed to get authentication token from Keycloak:", error);
+      console.error("[ApiService] Failed to get authentication token:", error);
       // Continue without token - let the backend handle unauthenticated requests
     }
 

@@ -83,12 +83,12 @@ export class KeycloakService {
   private setupEventListeners(): void {
     // Listen for successful authentication
     this.keycloak.onAuthSuccess = () => {
-      this.handleTokenUpdate();
+      void this.handleTokenUpdate();
     };
 
     // Listen for token refresh
     this.keycloak.onAuthRefreshSuccess = () => {
-      this.handleTokenUpdate();
+      void this.handleTokenUpdate();
     };
 
     // Listen for authentication errors
@@ -96,24 +96,26 @@ export class KeycloakService {
       // eslint-disable-next-line no-console
       console.error("Keycloak authentication error:", error);
       AuthService.clearStoredAuth();
+      void SessionService.cleanup();
     };
 
     // Listen for logout
     this.keycloak.onAuthLogout = () => {
       AuthService.clearStoredAuth();
+      void SessionService.cleanup();
       this.clearRefreshTimer();
     };
 
     // Listen for token expiration
     this.keycloak.onTokenExpired = () => {
-      this.refreshToken();
+      void this.refreshToken();
     };
   }
 
   /**
    * Handle token updates (store user info only, not tokens)
    */
-  private handleTokenUpdate(): void {
+  private async handleTokenUpdate(): Promise<void> {
     if (this.keycloak.token && this.keycloak.tokenParsed) {
       // SECURITY: Do NOT store tokens in localStorage
       // Keycloak manages tokens securely in memory
@@ -123,6 +125,18 @@ export class KeycloakService {
         this.keycloak.tokenParsed
       );
       AuthService.storeUserInfo(userInfo);
+
+      // Initialize session with backend if session storage is enabled
+      try {
+        await SessionService.initializeSession(
+          this.keycloak.token,
+          this.keycloak.refreshToken
+        );
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn("[KeycloakService] Failed to initialize session, continuing with direct token mode:", error);
+        // Continue without session - will use direct token mode
+      }
 
       // Set up automatic token refresh
       this.setupTokenRefresh();
@@ -165,7 +179,7 @@ export class KeycloakService {
     try {
       const refreshed = await this.keycloak.updateToken(30);
       if (refreshed) {
-        this.handleTokenUpdate();
+        await this.handleTokenUpdate();
         return true;
       }
       return false;
@@ -173,6 +187,7 @@ export class KeycloakService {
       // eslint-disable-next-line no-console
       console.error("Failed to refresh token:", error);
       AuthService.clearStoredAuth();
+      await SessionService.cleanup();
       return false;
     }
   }
@@ -187,7 +202,7 @@ export class KeycloakService {
       const authenticated = await this.keycloak.init(initOptions);
 
       if (authenticated) {
-        this.handleTokenUpdate();
+        await this.handleTokenUpdate();
       }
 
       return authenticated;
@@ -217,6 +232,7 @@ export class KeycloakService {
   async logout(): Promise<void> {
     try {
       AuthService.clearStoredAuth();
+      await SessionService.cleanup();
       this.clearRefreshTimer();
       await this.keycloak.logout();
     } catch (error) {

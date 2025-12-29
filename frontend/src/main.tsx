@@ -7,12 +7,13 @@ import { BrowserRouter } from "react-router-dom";
 import { PersistGate } from "redux-persist/integration/react";
 import App from "./App";
 import {
-  EnhancedMockKeycloakProvider,
-  MockUserSwitcher,
+    EnhancedMockKeycloakProvider,
+    MockUserSwitcher,
 } from "./contexts/EnhancedMockKeycloakProvider";
 import { ReduxCartProvider } from "./contexts/ReduxCartContext";
 import { queryClient } from "./lib/queryClient";
 import { AuthService } from "./services/authService";
+import { SessionService } from "./services/sessionService";
 import { persistor, store } from "./store/store";
 import "./styles/main.scss";
 import { getApiUrl, getEnvironmentInfo, logApiConfig } from "./utils/api-config";
@@ -148,7 +149,7 @@ if (bypassAuth) {
     .then(({ default: keycloak }) => {
       // Token capture callback - Keycloak manages tokens in memory/cookies
       // We only need to store user info for quick access
-      const handleTokens = (tokens: { token?: string; refreshToken?: string; idToken?: string }) => {
+      const handleTokens = async (tokens: { token?: string; refreshToken?: string; idToken?: string }) => {
         if (tokens.token && keycloak.tokenParsed) {
           // Extract and store ONLY user info from the token (for role checks and user ID)
           const userInfo = AuthService.createUserInfoFromToken(keycloak.tokenParsed);
@@ -157,6 +158,15 @@ if (bypassAuth) {
           // SECURITY: We explicitly do NOT store the token in localStorage
           // Keycloak manages tokens securely in memory and httpOnly cookies
           // Always use keycloak.token to get the current (potentially refreshed) token
+
+          // Initialize session if session storage is enabled
+          try {
+            await SessionService.initializeSession(tokens.token, tokens.refreshToken);
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.warn("[main] Failed to initialize session, continuing with direct token mode:", error);
+            // Continue without session - will use direct token mode
+          }
         } else {
           // eslint-disable-next-line no-console
           console.warn("[main] onTokens called but no token or tokenParsed available");
@@ -171,7 +181,7 @@ if (bypassAuth) {
                 <ReactKeycloakProvider
                   authClient={keycloak}
                   initOptions={keycloakInitOptions}
-                  LoadingComponent={LoadingComponent}
+                  LoadingComponent={<LoadingComponent />}
                   onTokens={handleTokens}
                 >
                   <BrowserRouter>
