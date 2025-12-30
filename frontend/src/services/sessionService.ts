@@ -1,289 +1,300 @@
 import { getApiUrl } from "../utils/api-config";
 
 /**
- * Session registration and validation service for backend session management
- * Implements IL2/IL5-compliant session handling with Keycloak token registration
- */
-
-export interface RegisterSessionRequest {
-  sessionId: string;
-  refreshToken?: string;
-}
-
-export interface RegisterSessionResponse {
-  sessionId: string;
-  stored: boolean;
-}
-
-export interface SessionStatusResponse {
-  sessionId: string;
-  token: string;
-  refreshToken: string;
-}
-
-export interface ExpireSessionRequest {
-  sessionId: string;
-}
-
-export interface ExpireSessionResponse {
-  success: boolean;
-  message: string;
-}
-
-/**
- * Session service for managing backend session registration and validation
+ * Session Service for managing backend session token storage
+ * 
+ * When USE_CLIENT_SESSION_STORAGE=true on backend, this service:
+ * 1. Registers Keycloak tokens with backend and receives a session ID
+ * 2. Uses session ID for subsequent API calls instead of JWT tokens
+ * 3. Manages session lifecycle (status checks, expiration)
  */
 export class SessionService {
   private static readonly SESSION_ID_KEY = "marketplace_session_id";
-  private static readonly SESSION_VALIDATED_KEY =
-    "marketplace_session_validated";
+  private static readonly USE_SESSION_STORAGE_KEY = "marketplace_use_session_storage";
+  private static readonly SESSION_DISABLED_KEY = "marketplace_session_disabled";
+
+  /**
+   * Check if we're in a browser environment
+   */
+  private static get hasLocalStorage(): boolean {
+    return typeof window !== "undefined" && !!window.localStorage;
+  }
+
+  /**
+   * Safe localStorage wrapper
+   */
+  private static getStorage() {
+    return this.hasLocalStorage ? window.localStorage : null;
+  }
+
+  /**
+   * Check if session storage is enabled
+   * Can be controlled via environment variable or detected at runtime
+   */
+  static isSessionStorageEnabled(): boolean {
+    const storage = this.getStorage();
+    
+    // Check if explicitly disabled (after initialization error)
+    const isDisabled = storage?.getItem(this.SESSION_DISABLED_KEY) === "true";
+    if (isDisabled) {
+      return false;
+    }
+    
+    // Check environment variable first
+    const envEnabled = import.meta.env.VITE_USE_SESSION_STORAGE === "true";
+    
+    // Check stored preference (set after successful registration)
+    const storedPreference = storage?.getItem(this.USE_SESSION_STORAGE_KEY);
+    
+    return envEnabled || storedPreference === "true";
+  }
+
+  /**
+   * Enable session storage mode
+   */
+  static enableSessionStorage(): void {
+    const storage = this.getStorage();
+    if (storage) {
+      storage.setItem(this.USE_SESSION_STORAGE_KEY, "true");
+      storage.removeItem(this.SESSION_DISABLED_KEY);
+    }
+  }
+
+  /**
+   * Disable session storage mode
+   */
+  static disableSessionStorage(): void {
+    const storage = this.getStorage();
+    if (storage) {
+      storage.removeItem(this.USE_SESSION_STORAGE_KEY);
+      storage.removeItem(this.SESSION_ID_KEY);
+      storage.setItem(this.SESSION_DISABLED_KEY, "true");
+    }
+  }
 
   /**
    * Generate a unique session ID (UUID v4)
    */
-  static generateSessionId(): string {
-    return window.crypto.randomUUID();
+  private static generateSessionId(): string {
+    // Use crypto.randomUUID if available (modern browsers)
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    
+    // Fallback for older browsers
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 
   /**
-   * Register a new session with the backend using Keycloak access token
-   *
-   * @param accessToken - The Keycloak access token from authentication
+   * Register a new session with the backend
+   * 
+   * @param accessToken - Keycloak access token
    * @param refreshToken - Optional Keycloak refresh token
-   * @returns Promise resolving to the registration response with sessionId
-   * @throws Error if registration fails
+   * @returns Session ID to use for future requests
    */
   static async registerSession(
     accessToken: string,
     refreshToken?: string
-  ): Promise<RegisterSessionResponse> {
+  ): Promise<string> {
+    const sessionId = this.generateSessionId();
+
     try {
-      // SECURITY: Only log token substring in development with debug flag
-      if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_AUTH === "true") {
-        // eslint-disable-next-line no-console
-        console.log(
-          "SessionService.registerSession called with token:",
-          accessToken ? `${accessToken.substring(0, 20)}...` : "MISSING"
-        );
-      }
-
-      if (!accessToken) {
-        throw new Error("Access token is required for session registration");
-      }
-
-      const sessionId = this.generateSessionId();
-
-      const requestBody: RegisterSessionRequest = {
-        sessionId,
-        refreshToken,
-      };
-
-      const response = await window.fetch(getApiUrl("/api/session/register"), {
+      const response = await fetch(getApiUrl("/api/session/register"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          sessionId,
+          refreshToken: refreshToken || undefined,
+        }),
       });
 
       if (!response.ok) {
-        let errorMessage = `Session registration failed: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || errorMessage;
-        } catch {
-          // Ignore JSON parse errors
-        }
-        throw new Error(errorMessage);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `Failed to register session: ${response.status} ${
+            errorData.error || response.statusText
+          }`
+        );
       }
 
       const data = await response.json();
-
-      // Store the sessionId on successful registration
+      
       if (data.stored) {
-        this.storeSessionId(data.sessionId);
-        this.markSessionAsValidated();
+        // Store session ID for future use
+        const storage = this.getStorage();
+        if (storage) {
+          storage.setItem(this.SESSION_ID_KEY, sessionId);
+          this.enableSessionStorage();
+        }
+        
+        // eslint-disable-next-line no-console
+        console.log("[SessionService] Session registered successfully:", sessionId);
+        return sessionId;
+      } else {
+        throw new Error("Session registration failed - not stored");
       }
-
-      return data;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("Failed to register session with backend:", error);
+      console.error("[SessionService] Failed to register session:", error);
       throw error;
     }
   }
 
   /**
-   * Validate the stored session with the backend
-   *
-   * @param sessionId - The session ID to validate
-   * @returns Promise resolving to true if session is valid, false otherwise
+   * Get stored session ID
    */
-  static async validateSession(sessionId: string): Promise<boolean> {
-    try {
-      const response = await window.fetch(
-        getApiUrl(`/api/session/${sessionId}`),
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.status === 404) {
-        // Session not found or expired
-        return false;
-      }
-
-      if (!response.ok) {
-        // Other errors indicate invalid session
-        return false;
-      }
-
-      const data: SessionStatusResponse = await response.json();
-
-      // Session is valid if we get a valid response with a token
-      return !!data.token;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to validate session:", error);
-      return false;
-    }
-  }
-
-  /**
-   * Expire/revoke a session with the backend
-   *
-   * @param sessionId - The session ID to expire
-   * @returns Promise resolving to the expiration response
-   */
-  static async expireSession(
-    sessionId: string
-  ): Promise<ExpireSessionResponse> {
-    try {
-      const requestBody: ExpireSessionRequest = {
-        sessionId,
-      };
-
-      const response = await window.fetch(getApiUrl("/api/session/expire"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        let errorMessage = `Session expiration failed: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || errorMessage;
-        } catch {
-          // Ignore JSON parse errors
-        }
-        throw new Error(errorMessage);
-      }
-
-      return await response.json();
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to expire session:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Store session ID in localStorage
-   */
-  static storeSessionId(sessionId: string): void {
-    if (typeof window === "undefined" || !window.localStorage) return;
+  static getSessionId(): string | null {
+    const storage = this.getStorage();
+    if (!storage) return null;
 
     try {
-      window.localStorage.setItem(this.SESSION_ID_KEY, sessionId);
+      return storage.getItem(this.SESSION_ID_KEY);
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("Failed to store session ID:", error);
-    }
-  }
-
-  /**
-   * Get stored session ID from localStorage
-   */
-  static getStoredSessionId(): string | null {
-    if (typeof window === "undefined" || !window.localStorage) return null;
-
-    try {
-      return window.localStorage.getItem(this.SESSION_ID_KEY);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to retrieve session ID:", error);
+      console.error("[SessionService] Failed to retrieve session ID:", error);
       return null;
     }
   }
 
   /**
-   * Clear stored session ID from localStorage
+   * Check session status with backend
+   * 
+   * @param sessionId - Session ID to check
+   * @returns Session status information
    */
-  static clearStoredSessionId(): void {
-    if (typeof window === "undefined" || !window.localStorage) return;
-
+  static async checkSessionStatus(sessionId: string): Promise<{
+    exists: boolean;
+    expired?: boolean;
+    username?: string;
+    roles?: string[];
+  }> {
     try {
-      window.localStorage.removeItem(this.SESSION_ID_KEY);
-      window.localStorage.removeItem(this.SESSION_VALIDATED_KEY);
+      const response = await fetch(getApiUrl(`/api/session/${sessionId}`), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return { exists: false };
+        }
+        throw new Error(`Failed to check session: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        exists: data.exists || false,
+        expired: data.expired || false,
+        username: data.username,
+        roles: data.roles,
+      };
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("Failed to clear session ID:", error);
+      console.error("[SessionService] Failed to check session status:", error);
+      return { exists: false };
     }
   }
 
   /**
-   * Mark session as validated (to avoid re-validation on every page load)
+   * Expire/delete session on backend
+   * 
+   * @param sessionId - Session ID to expire
    */
-  private static markSessionAsValidated(): void {
-    if (typeof window === "undefined" || !window.localStorage) return;
-
+  static async expireSession(sessionId: string): Promise<boolean> {
     try {
-      window.localStorage.setItem(
-        this.SESSION_VALIDATED_KEY,
-        Date.now().toString()
-      );
+      const response = await fetch(getApiUrl("/api/session/expire"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sessionId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to expire session: ${response.status}`);
+      }
+
+      // Clear local session ID
+      const storage = this.getStorage();
+      if (storage) {
+        storage.removeItem(this.SESSION_ID_KEY);
+      }
+
+      // eslint-disable-next-line no-console
+      console.log("[SessionService] Session expired successfully:", sessionId);
+      return true;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("Failed to mark session as validated:", error);
-    }
-  }
-
-  /**
-   * Check if session was validated recently (within the last 5 minutes)
-   * This helps reduce unnecessary validation calls
-   */
-  static wasRecentlyValidated(): boolean {
-    if (typeof window === "undefined" || !window.localStorage) return false;
-
-    try {
-      const validatedAt = window.localStorage.getItem(
-        this.SESSION_VALIDATED_KEY
-      );
-      if (!validatedAt) return false;
-
-      const validatedTime = parseInt(validatedAt, 10);
-      const now = Date.now();
-      const fiveMinutes = 5 * 60 * 1000;
-
-      return now - validatedTime < fiveMinutes;
-    } catch {
+      console.error("[SessionService] Failed to expire session:", error);
       return false;
     }
   }
 
   /**
-   * Handle session expiration - clear stored session and trigger re-authentication
+   * Clear local session data (without calling backend)
    */
-  static handleExpiredSession(): void {
-    this.clearStoredSessionId();
-    // eslint-disable-next-line no-console
-    console.warn("Session expired. Please sign in again.");
+  static clearLocalSession(): void {
+    const storage = this.getStorage();
+    if (storage) {
+      storage.removeItem(this.SESSION_ID_KEY);
+    }
+  }
+
+  /**
+   * Initialize session on login
+   * Should be called after successful Keycloak authentication
+   * 
+   * @param accessToken - Keycloak access token
+   * @param refreshToken - Optional Keycloak refresh token
+   * @returns Session ID if session storage is enabled, null otherwise
+   */
+  static async initializeSession(
+    accessToken: string,
+    refreshToken?: string
+  ): Promise<string | null> {
+    // Only register session if enabled via environment variable
+    const envEnabled = import.meta.env.VITE_USE_SESSION_STORAGE === "true";
+    
+    if (!envEnabled) {
+      // eslint-disable-next-line no-console
+      console.log("[SessionService] Session storage not enabled via VITE_USE_SESSION_STORAGE");
+      return null;
+    }
+
+    try {
+      const sessionId = await this.registerSession(accessToken, refreshToken);
+      return sessionId;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("[SessionService] Failed to initialize session, falling back to direct token mode:", error);
+      // Fall back to direct token mode
+      this.disableSessionStorage();
+      return null;
+    }
+  }
+
+  /**
+   * Clean up session on logout
+   */
+  static async cleanup(): Promise<void> {
+    const sessionId = this.getSessionId();
+    
+    if (sessionId) {
+      // Try to expire session on backend
+      await this.expireSession(sessionId);
+    }
+    
+    // Clear local data
+    this.clearLocalSession();
+    this.disableSessionStorage();
   }
 }
