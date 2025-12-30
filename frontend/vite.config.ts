@@ -1,6 +1,6 @@
-import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "vitest/config";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -41,6 +41,13 @@ export default defineConfig({
     globals: true,
     setupFiles: "./src/test-setup.ts",
     css: true,
+    env: {
+      VITE_BYPASS_AUTH: "true",
+      VITE_API_BASE_URL: "http://localhost:8082",
+      VITE_KEYCLOAK_URL: "http://localhost:8085/auth",
+      VITE_KEYCLOAK_REALM: "test-realm",
+      VITE_KEYCLOAK_CLIENT_ID: "test-client",
+    },
     coverage: {
       provider: "v8",
       reporter: ['text', 'json', 'html', 'lcov'],

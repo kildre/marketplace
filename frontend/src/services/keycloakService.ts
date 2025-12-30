@@ -1,5 +1,6 @@
 import Keycloak, { KeycloakConfig, KeycloakInitOptions } from "keycloak-js";
 import { AuthService } from "./authService";
+import { SessionService } from "./sessionService";
 
 // Debug environment variables in development - uncomment for debugging
 // if (import.meta.env.DEV) {

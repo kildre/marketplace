@@ -33,6 +33,8 @@ export default [
         HTMLElement: "readonly",
         HTMLCanvasElement: "readonly",
         React: "readonly",
+        crypto: "readonly",
+        fetch: "readonly",
       },
     },
     plugins: {
@@ -72,6 +74,8 @@ export default [
         afterAll: "readonly",
         vi: "readonly",
         HTMLElement: "readonly",
+        localStorage: "readonly",
+        globalThis: "readonly",
       },
     },
     rules: {

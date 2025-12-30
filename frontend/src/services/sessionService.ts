@@ -11,6 +11,7 @@ import { getApiUrl } from "../utils/api-config";
 export class SessionService {
   private static readonly SESSION_ID_KEY = "marketplace_session_id";
   private static readonly USE_SESSION_STORAGE_KEY = "marketplace_use_session_storage";
+  private static readonly SESSION_DISABLED_KEY = "marketplace_session_disabled";
 
   /**
    * Check if we're in a browser environment
@@ -31,11 +32,18 @@ export class SessionService {
    * Can be controlled via environment variable or detected at runtime
    */
   static isSessionStorageEnabled(): boolean {
+    const storage = this.getStorage();
+    
+    // Check if explicitly disabled (after initialization error)
+    const isDisabled = storage?.getItem(this.SESSION_DISABLED_KEY) === "true";
+    if (isDisabled) {
+      return false;
+    }
+    
     // Check environment variable first
     const envEnabled = import.meta.env.VITE_USE_SESSION_STORAGE === "true";
     
     // Check stored preference (set after successful registration)
-    const storage = this.getStorage();
     const storedPreference = storage?.getItem(this.USE_SESSION_STORAGE_KEY);
     
     return envEnabled || storedPreference === "true";
@@ -48,6 +56,7 @@ export class SessionService {
     const storage = this.getStorage();
     if (storage) {
       storage.setItem(this.USE_SESSION_STORAGE_KEY, "true");
+      storage.removeItem(this.SESSION_DISABLED_KEY);
     }
   }
 
@@ -59,6 +68,7 @@ export class SessionService {
     if (storage) {
       storage.removeItem(this.USE_SESSION_STORAGE_KEY);
       storage.removeItem(this.SESSION_ID_KEY);
+      storage.setItem(this.SESSION_DISABLED_KEY, "true");
     }
   }
 

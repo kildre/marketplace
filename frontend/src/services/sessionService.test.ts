@@ -2,13 +2,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SessionService } from "./sessionService";
 
 // Mock fetch
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn() as any;
 
 // Mock crypto.randomUUID
-Object.defineProperty(global, "crypto", {
+Object.defineProperty(globalThis, "crypto", {
   value: {
     randomUUID: () => "test-uuid-1234",
   },
+  configurable: true,
 });
 
 describe("SessionService", () => {
@@ -67,7 +68,7 @@ describe("SessionService", () => {
         ok: true,
         json: async () => ({ sessionId: "test-uuid-1234", stored: true }),
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       const sessionId = await SessionService.registerSession(
         "test-access-token",
@@ -90,7 +91,7 @@ describe("SessionService", () => {
         statusText: "Unauthorized",
         json: async () => ({ error: "Invalid token" }),
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       await expect(
         SessionService.registerSession("invalid-token")
@@ -102,14 +103,14 @@ describe("SessionService", () => {
         ok: true,
         json: async () => ({ sessionId: "test-uuid-1234", stored: true }),
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       const sessionId = await SessionService.registerSession("test-access-token");
 
       expect(sessionId).toBe("test-uuid-1234");
 
       // Verify fetch was called with correct payload (no refreshToken)
-      const fetchCall = (global.fetch as any).mock.calls[0];
+      const fetchCall = (globalThis.fetch as any).mock.calls[0];
       const body = JSON.parse(fetchCall[1].body);
       expect(body.refreshToken).toBeUndefined();
     });
@@ -137,7 +138,7 @@ describe("SessionService", () => {
           roles: ["marketplace-approver"],
         }),
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       const status = await SessionService.checkSessionStatus("test-session-id");
 
@@ -152,7 +153,7 @@ describe("SessionService", () => {
         ok: false,
         status: 404,
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       const status = await SessionService.checkSessionStatus("non-existent-session");
 
@@ -160,7 +161,7 @@ describe("SessionService", () => {
     });
 
     it("should handle network errors", async () => {
-      (global.fetch as any).mockRejectedValueOnce(new Error("Network error"));
+      (globalThis.fetch as any).mockRejectedValueOnce(new Error("Network error"));
 
       const status = await SessionService.checkSessionStatus("test-session-id");
 
@@ -176,7 +177,7 @@ describe("SessionService", () => {
         ok: true,
         json: async () => ({ sessionId: "test-session-id", expired: true }),
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       const result = await SessionService.expireSession("test-session-id");
 
@@ -189,7 +190,7 @@ describe("SessionService", () => {
         ok: false,
         status: 500,
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       const result = await SessionService.expireSession("test-session-id");
 
@@ -215,7 +216,7 @@ describe("SessionService", () => {
         ok: true,
         json: async () => ({ sessionId: "test-uuid-1234", stored: true }),
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       const sessionId = await SessionService.initializeSession(
         "test-access-token",
@@ -231,7 +232,7 @@ describe("SessionService", () => {
       const sessionId = await SessionService.initializeSession("test-access-token");
 
       expect(sessionId).toBeNull();
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(globalThis.fetch).not.toHaveBeenCalled();
     });
 
     it("should fallback to direct token mode on error", async () => {
@@ -242,7 +243,7 @@ describe("SessionService", () => {
         status: 500,
         json: async () => ({ error: "Server error" }),
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       const sessionId = await SessionService.initializeSession("test-access-token");
 
@@ -262,7 +263,7 @@ describe("SessionService", () => {
         ok: true,
         json: async () => ({ sessionId: "test-session-id", expired: true }),
       };
-      (global.fetch as any).mockResolvedValueOnce(mockResponse);
+      (globalThis.fetch as any).mockResolvedValueOnce(mockResponse);
 
       await SessionService.cleanup();
 
@@ -276,7 +277,7 @@ describe("SessionService", () => {
       localStorage.setItem("marketplace_session_id", "test-session-id");
       SessionService.enableSessionStorage();
 
-      (global.fetch as any).mockRejectedValueOnce(new Error("Network error"));
+      (globalThis.fetch as any).mockRejectedValueOnce(new Error("Network error"));
 
       await SessionService.cleanup();
 
