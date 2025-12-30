@@ -251,6 +251,21 @@ export const EnhancedMockKeycloakProvider: React.FC<
     hasResourceRole: (role: string) => mockUserData.roles.includes(role),
   };
 
+  // Expose mock Keycloak to window for API service access in bypass mode
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      // @ts-ignore - Adding mock keycloak to window for bypass auth mode
+      window.keycloak = mockKeycloak;
+    }
+    return () => {
+      // Cleanup on unmount
+      if (typeof window !== "undefined") {
+        // @ts-ignore
+        delete window.keycloak;
+      }
+    };
+  }, [mockKeycloak]);
+
   const contextValue: MockKeycloakContextType = {
     keycloak: mockKeycloak,
     initialized: true,
@@ -360,7 +375,7 @@ export const MockUserSwitcher: React.FC = () => {
       }}
       onMouseDown={handleMouseDown}
       onKeyDown={(e) => {
-        if (e.key === 'Escape') {
+        if (e.key === "Escape") {
           // Could add close functionality here if needed
         }
       }}

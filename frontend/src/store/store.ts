@@ -1,6 +1,6 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { PersistConfig, persistReducer, persistStore } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
+import sessionStorage from 'redux-persist/lib/storage/session'; // sessionStorage clears on browser close
 import cartReducer from './cartSlice';
 
 // Define the root state type
@@ -8,10 +8,13 @@ export type RootState = {
   cart: ReturnType<typeof cartReducer>;
 };
 
-// Persist configuration for the cart (user-specific key will be set by middleware)
+// Persist configuration for the cart
+// STIG V-222578 Compliance: Using sessionStorage instead of localStorage
+// sessionStorage is automatically cleared when browser closes, ensuring
+// application session data does not persist beyond the browser session
 const cartPersistConfig: PersistConfig<ReturnType<typeof cartReducer>> = {
   key: 'cart',
-  storage,
+  storage: sessionStorage,
 };
 
 // Create persisted reducers

@@ -136,7 +136,7 @@ describe("RequestsTable", () => {
     mockUpdateToken.mockClear();
     mockUpdateToken.mockResolvedValue(true);
     mockKeycloakObject.token = "mock-token"; // Reset to default token
-    
+
     // Mock fetch globally
     window.fetch = vi.fn();
   });
@@ -706,16 +706,28 @@ describe("RequestsTable", () => {
       await waitFor(() => {
         const grid = screen.getByRole("grid");
         expect(grid).toBeInTheDocument();
-        
+
         // Get the scroll container (Paper element)
         const scrollContainer = grid.closest('div[class*="MuiPaper"]');
         if (scrollContainer) {
           // Create a proper scroll event
-          Object.defineProperty(scrollContainer, 'scrollLeft', { value: 100, writable: true, configurable: true });
-          Object.defineProperty(scrollContainer, 'scrollWidth', { value: 1000, writable: true, configurable: true });
-          Object.defineProperty(scrollContainer, 'clientWidth', { value: 500, writable: true, configurable: true });
-          
-          const scrollEvent = new globalThis.Event('scroll', { bubbles: true });
+          Object.defineProperty(scrollContainer, "scrollLeft", {
+            value: 100,
+            writable: true,
+            configurable: true,
+          });
+          Object.defineProperty(scrollContainer, "scrollWidth", {
+            value: 1000,
+            writable: true,
+            configurable: true,
+          });
+          Object.defineProperty(scrollContainer, "clientWidth", {
+            value: 500,
+            writable: true,
+            configurable: true,
+          });
+
+          const scrollEvent = new globalThis.Event("scroll", { bubbles: true });
           scrollContainer.dispatchEvent(scrollEvent);
         }
       });
@@ -732,8 +744,9 @@ describe("RequestsTable", () => {
 
       await waitFor(() => {
         // Try to find and click reset button if it exists
-        const resetButton = container.querySelector('button[aria-label*="Reset"]') || 
-                           container.querySelector('[title="Reset Table View"]');
+        const resetButton =
+          container.querySelector('button[aria-label*="Reset"]') ||
+          container.querySelector('[title="Reset Table View"]');
         if (resetButton) {
           fireEvent.click(resetButton);
         }
@@ -751,9 +764,9 @@ describe("RequestsTable", () => {
 
       await waitFor(() => {
         expect(screen.getByRole("grid")).toBeInTheDocument();
-        
+
         // Simulate window resize
-        const resizeEvent = new globalThis.Event('resize');
+        const resizeEvent = new globalThis.Event("resize");
         fireEvent(window, resizeEvent);
       });
     });
@@ -945,8 +958,10 @@ describe("RequestsTable", () => {
   describe("API Error Handling", () => {
     it("should handle token refresh failure for approvers", async () => {
       // Suppress expected error logs
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-      
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
       mockUpdateToken.mockRejectedValue(new Error("Token refresh failed"));
       mockUseAuth.mockReturnValue(mockApproverAuth);
 
@@ -959,14 +974,16 @@ describe("RequestsTable", () => {
       await waitFor(() => {
         expect(screen.getByRole("grid")).toBeInTheDocument();
       });
-      
+
       consoleErrorSpy.mockRestore();
     });
 
     it("should handle token refresh failure for requestors", async () => {
       // Suppress expected error logs
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-      
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
       mockUpdateToken.mockRejectedValue(new Error("Token refresh failed"));
       mockUseAuth.mockReturnValue(mockRequestorAuth);
 
@@ -979,7 +996,7 @@ describe("RequestsTable", () => {
       await waitFor(() => {
         expect(screen.getByRole("grid")).toBeInTheDocument();
       });
-      
+
       consoleErrorSpy.mockRestore();
     });
 
@@ -1214,9 +1231,11 @@ describe("RequestsTable", () => {
           expect.stringContaining("/api/requests/viewAll"),
           expect.objectContaining({
             method: "POST",
-            headers: {
+            headers: expect.objectContaining({
               "Content-Type": "application/json",
-            },
+              // In bypass mode, a dummy token is always provided even when keycloak.token is null
+              Authorization: expect.stringMatching(/^Bearer mock\./),
+            }),
           })
         );
       });

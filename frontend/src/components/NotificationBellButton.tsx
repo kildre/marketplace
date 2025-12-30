@@ -12,11 +12,13 @@ import { Notification } from "../interfaces/interfaceStore";
  */
 export const NotificationBellButton: React.FC = () => {
   const navigate = useNavigate();
-  const { notifications, markAsRead, markAllAsRead } = useNotificationContext();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } =
+    useNotificationContext();
 
-  // Get 5 most recent notifications for dropdown
-  const recentNotifications = useMemo(() => {
+  // Get 5 most recent unread notifications for dropdown
+  const recentUnreadNotifications = useMemo(() => {
     return notifications
+      .filter((n) => !n.read)
       .sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -34,7 +36,8 @@ export const NotificationBellButton: React.FC = () => {
   return (
     <div className="notification-bell-button">
       <NotificationBell
-        notifications={recentNotifications}
+        notifications={recentUnreadNotifications}
+        totalUnreadCount={unreadCount}
         onNotificationClick={handleNotificationClick}
         onMarkAsRead={markAsRead}
         onMarkAllAsRead={markAllAsRead}

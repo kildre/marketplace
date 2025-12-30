@@ -17,6 +17,10 @@ import { SessionService } from "./services/sessionService";
 import { persistor, store } from "./store/store";
 import "./styles/main.scss";
 import { getApiUrl, getEnvironmentInfo, logApiConfig } from "./utils/api-config";
+import { initInstrumentation } from './instrumentation';
+
+// Initialize OpenTelemetry before anything else
+initInstrumentation();
 
 // Expose debugging utilities to window for browser console access
 if (typeof window !== "undefined") {
@@ -26,7 +30,7 @@ if (typeof window !== "undefined") {
     getEnvironmentInfo,
     getApiUrl,
     env: import.meta.env,
-    
+
     // Comprehensive debug function for authentication state
     debugAuth: () => {
       /* eslint-disable no-console */
@@ -34,46 +38,69 @@ if (typeof window !== "undefined") {
       const debugAdvana = window.debugAdvana;
       // @ts-ignore - Accessing custom window properties
       const keycloak = window.keycloak;
-      
+
       console.log("=== ADVANA MARKETPLACE DEBUG ===");
       console.log("Environment:", debugAdvana.env?.VITE_ENVIRONMENT);
       console.log("Bypass Auth:", debugAdvana.env?.VITE_BYPASS_AUTH);
       console.log("Keycloak URL:", debugAdvana.env?.VITE_KEYCLOAK_URL);
       console.log("Keycloak Realm:", debugAdvana.env?.VITE_KEYCLOAK_REALM);
-      
+
       console.log("\n=== AUTHENTICATION STATE ===");
       if (keycloak) {
         console.log("✅ Keycloak found - Production mode");
         console.log("Authenticated:", keycloak.authenticated);
-        console.log("Has token:", !!keycloak.token);
-        console.log("Token length:", keycloak.token?.length);
-        console.log("User email:", keycloak.tokenParsed?.email);
-        console.log("User roles:", keycloak.tokenParsed?.resource_access?.marketplace?.roles);
+
+        // Only log token metadata in development with explicit debug flag
+        if (import.meta.env.DEV && import.meta.env.VITE_DEBUG_AUTH === "true") {
+          console.log("Has token:", !!keycloak.token);
+          console.log("Token length:", keycloak.token?.length);
+          console.log("User email:", keycloak.tokenParsed?.email);
+          console.log(
+            "User roles:",
+            keycloak.tokenParsed?.resource_access?.marketplace?.roles
+          );
+        }
       } else {
         console.log("❌ Keycloak not found - Development mode or not loaded");
       }
-      
+
       console.log("\n=== LOCALSTORAGE ===");
-      const userInfo = window.localStorage.getItem('marketplace_user_info');
-      const cartData = window.localStorage.getItem('persist:cart');
+      const userInfo = window.localStorage.getItem("marketplace_user_info");
+      const cartData = window.localStorage.getItem("persist:cart");
       console.log("User info:", userInfo ? JSON.parse(userInfo) : "Not found");
-      console.log("Cart items:", cartData ? JSON.parse(cartData)?.items : "No cart data");
-      
+      console.log(
+        "Cart items:",
+        cartData ? JSON.parse(cartData)?.items : "No cart data"
+      );
+
       console.log("\n=== COOKIES ===");
-      const cookies = document.cookie.split(';').map(c => c.trim()).filter(c => c);
-      const keycloakCookies = cookies.filter(c => c.includes('KEYCLOAK') || c.includes('AUTH_SESSION'));
+      const cookies = document.cookie
+        .split(";")
+        .map((c) => c.trim())
+        .filter((c) => c);
+      const keycloakCookies = cookies.filter(
+        (c) => c.includes("KEYCLOAK") || c.includes("AUTH_SESSION")
+      );
       console.log("Total cookies:", cookies.length);
       console.log("Keycloak cookies:", keycloakCookies.length);
       if (keycloakCookies.length > 0) {
-        keycloakCookies.forEach(cookie => console.log("  -", cookie.split('=')[0]));
+        keycloakCookies.forEach((cookie) =>
+          console.log("  -", cookie.split("=")[0])
+        );
       }
-      
+
       console.log("\n=== QUICK COMMANDS ===");
-      console.log("Run 'window.debugAdvana.debugAuth()' to see this info again");
-      console.log("Run 'window.debugAdvana.logApiConfig()' to see API configuration");
-      console.log("Run 'window.debugAdvana.getEnvironmentInfo()' to see environment details");
+      console.log(
+        "Run 'window.debugAdvana.debugAuth()' to see this info again"
+      );
+      console.log(
+        "Run 'window.debugAdvana.logApiConfig()' to see API configuration"
+      );
+      console.log(
+        "Run 'window.debugAdvana.getEnvironmentInfo()' to see environment details"
+      );
       /* eslint-enable no-console */
-    }
+    },
   };
 }
 
@@ -149,12 +176,18 @@ if (bypassAuth) {
     .then(({ default: keycloak }) => {
       // Token capture callback - Keycloak manages tokens in memory/cookies
       // We only need to store user info for quick access
-      const handleTokens = async (tokens: { token?: string; refreshToken?: string; idToken?: string }) => {
+      const handleTokens = async (tokens: { 
+        token?: string; 
+        refreshToken?: string; 
+        idToken?: string;
+      }) => {
         if (tokens.token && keycloak.tokenParsed) {
           // Extract and store ONLY user info from the token (for role checks and user ID)
-          const userInfo = AuthService.createUserInfoFromToken(keycloak.tokenParsed);
+          const userInfo = AuthService.createUserInfoFromToken(
+            keycloak.tokenParsed
+          );
           AuthService.storeUserInfo(userInfo);
-          
+
           // SECURITY: We explicitly do NOT store the token in localStorage
           // Keycloak manages tokens securely in memory and httpOnly cookies
           // Always use keycloak.token to get the current (potentially refreshed) token
@@ -169,14 +202,19 @@ if (bypassAuth) {
           }
         } else {
           // eslint-disable-next-line no-console
-          console.warn("[main] onTokens called but no token or tokenParsed available");
+          console.warn(
+            "[main] onTokens called but no token or tokenParsed available"
+          );
         }
       };
 
       root.render(
         <React.StrictMode>
           <Provider store={store}>
-            <PersistGate loading={<div>Loading cart...</div>} persistor={persistor}>
+            <PersistGate
+              loading={<div>Loading cart...</div>}
+              persistor={persistor}
+            >
               <QueryClientProvider client={queryClient}>
                 <ReactKeycloakProvider
                   authClient={keycloak}
@@ -214,7 +252,10 @@ if (bypassAuth) {
             ⚠️ Authentication Error: {error.message}
           </div>
           <Provider store={store}>
-            <PersistGate loading={<div>Loading cart...</div>} persistor={persistor}>
+            <PersistGate
+              loading={<div>Loading cart...</div>}
+              persistor={persistor}
+            >
               <QueryClientProvider client={queryClient}>
                 <BrowserRouter>
                   <ReduxCartProvider>

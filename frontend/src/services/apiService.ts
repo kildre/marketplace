@@ -119,16 +119,71 @@ export class ApiService {
       }
 
       // Mode 2: Use Keycloak token directly
-      // Import keycloak instance dynamically to avoid circular dependencies
-      const { default: keycloak } = await import("../keycloak");
+      // Check if we're in bypass auth mode (development with mock Keycloak)
+      const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
 
-      // Check if keycloak is authenticated and has a valid token
-      if (keycloak?.authenticated && keycloak.token) {
-        // Ensure token is fresh before using it (refresh if expires within 30 seconds)
-        await keycloak.updateToken(30);
-        headers["Authorization"] = `Bearer ${keycloak.token}`;
+      // Debug logging
+      if (import.meta.env.DEV) {
         // eslint-disable-next-line no-console
-        console.debug("[ApiService] Using Keycloak token for authorization");
+        console.log("[ApiService] getAuthHeaders debug:", {
+          bypassAuth,
+          VITE_BYPASS_AUTH: import.meta.env.VITE_BYPASS_AUTH,
+          // @ts-ignore
+          hasWindowKeycloak: !!window.keycloak,
+          // @ts-ignore
+          isAuthenticated: window.keycloak?.authenticated,
+          // @ts-ignore
+          hasToken: !!window.keycloak?.token,
+        });
+      }
+
+      if (bypassAuth) {
+        // In bypass mode, get token from window.keycloak (mock Keycloak instance)
+        // @ts-ignore - window.keycloak is set by EnhancedMockKeycloakProvider
+        const keycloak = window.keycloak;
+        if (keycloak?.authenticated && keycloak.token) {
+          headers["Authorization"] = `Bearer ${keycloak.token}`;
+          // eslint-disable-next-line no-console
+          if (import.meta.env.DEV) {
+            // eslint-disable-next-line no-console
+            console.log(
+              "[ApiService] Added Authorization header (bypass mode)"
+            );
+          }
+        } else {
+          // If window.keycloak isn't ready yet, provide a dummy bypass token
+          // This ensures the backend bypass logic still works
+          const dummyToken = `mock.${window.btoa(
+            JSON.stringify({
+              sub: "bypass-user",
+              email: "bypass@local.dev",
+              preferred_username: "bypass-user",
+              roles: [],
+            })
+          )}.signature`;
+          headers["Authorization"] = `Bearer ${dummyToken}`;
+          // eslint-disable-next-line no-console
+          console.warn(
+            "[ApiService] Using dummy bypass token (window.keycloak not ready yet)",
+            {
+              keycloakExists: !!keycloak,
+              authenticated: keycloak?.authenticated,
+              hasToken: !!keycloak?.token,
+            }
+          );
+        }
+      } else {
+        // In production mode, import real keycloak instance
+        const { default: keycloak } = await import("../keycloak");
+
+        // Check if keycloak is authenticated and has a valid token
+        if (keycloak?.authenticated && keycloak.token) {
+          // Ensure token is fresh before using it (refresh if expires within 30 seconds)
+          await keycloak.updateToken(30);
+          headers["Authorization"] = `Bearer ${keycloak.token}`;
+          // eslint-disable-next-line no-console
+          console.debug("[ApiService] Using Keycloak token for authorization");
+        }
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -188,6 +243,15 @@ export class ApiService {
     try {
       const headers = await this.getAuthHeaders();
 
+      // Log request payload in development mode
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.log(
+          "[ApiService] submitRequest payload:",
+          JSON.stringify(requestData, null, 2)
+        );
+      }
+
       const response = await window.fetch(getEndpointUrl("SUBMIT_REQUEST"), {
         method: "POST",
         headers: headers,
@@ -195,6 +259,15 @@ export class ApiService {
         mode: "cors",
         credentials: "omit",
       });
+
+      // Log response status in development mode
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.log(
+          "[ApiService] submitRequest response status:",
+          response.status
+        );
+      }
 
       return this.handleResponse<SubmitRequestApiResponse>(response);
     } catch (error) {

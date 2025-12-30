@@ -256,6 +256,11 @@ export interface RequestDetailViewProps {
   onReasoningChange?: (event: React.ChangeEvent<any>) => void;
   onAccept?: () => void;
   onReject?: () => void;
+  onStatusRomGenerated?: () => void;
+  onStatusMiprNeeded?: () => void;
+  onStatusProcuringProducts?: () => void;
+  onStatusAllocationPending?: () => void;
+  onStatusComplete?: () => void;
   buttonClass: string;
   mode: "view" | "edit" | "approve";
 }
@@ -372,6 +377,7 @@ export interface Notification {
 
 export interface NotificationBellProps {
   notifications?: Notification[];
+  totalUnreadCount?: number;
   onNotificationClick?: (notification: Notification) => void;
   onMarkAsRead?: (notificationId: string) => void;
   onMarkAllAsRead?: () => void;

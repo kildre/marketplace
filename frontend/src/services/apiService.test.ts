@@ -7,12 +7,12 @@ import * as apiConfig from "../utils/api-config";
 vi.mock("./authService");
 vi.mock("../utils/api-config");
 
-  // Mock Keycloak module with proper typing
-  const mockKeycloak = {
-    authenticated: true,
-    token: "mock-token-123" as string | null,
-    updateToken: vi.fn().mockResolvedValue(true),
-  };
+// Mock Keycloak module with proper typing
+const mockKeycloak = {
+  authenticated: true,
+  token: "mock-token-123" as string | null,
+  updateToken: vi.fn().mockResolvedValue(true),
+};
 vi.mock("../keycloak", () => ({ default: mockKeycloak }));
 
 describe("ApiService", () => {
@@ -29,6 +29,14 @@ describe("ApiService", () => {
     mockKeycloak.token = "mock-token-123";
     mockKeycloak.updateToken.mockClear();
     mockKeycloak.updateToken.mockResolvedValue(true);
+
+    // Set up window.keycloak for bypass auth mode
+    // @ts-ignore - window.keycloak is set for bypass auth mode
+    window.keycloak = {
+      authenticated: true,
+      token: "mock-token-123",
+      updateToken: vi.fn().mockResolvedValue(true),
+    };
 
     // Mock console methods to suppress expected error/log outputs
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -201,6 +209,8 @@ describe("ApiService", () => {
       // Set Keycloak to not authenticated state
       mockKeycloak.authenticated = false;
       mockKeycloak.token = null;
+      // @ts-ignore - Set window.keycloak to simulate no token available
+      window.keycloak = { authenticated: false, token: null };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -213,7 +223,8 @@ describe("ApiService", () => {
       const callArgs = mockFetch.mock.calls[0][1];
       const headers = callArgs?.headers as Record<string, string>;
 
-      expect(headers?.["Authorization"]).toBeUndefined();
+      // In bypass mode, when window.keycloak exists but is not authenticated, a dummy bypass token is used
+      expect(headers?.["Authorization"]).toMatch(/^Bearer mock\./);
       expect(headers?.["Content-Type"]).toBe("application/json");
     });
   });
@@ -386,6 +397,8 @@ describe("ApiService", () => {
       // Ensure Keycloak is authenticated with a token
       mockKeycloak.authenticated = true;
       mockKeycloak.token = "test-keycloak-token";
+      // @ts-ignore - Set window.keycloak for bypass auth mode
+      window.keycloak = { authenticated: true, token: "test-keycloak-token" };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
