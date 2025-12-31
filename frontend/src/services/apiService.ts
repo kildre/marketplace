@@ -143,7 +143,7 @@ export class ApiService {
         const keycloak = window.keycloak;
         if (keycloak?.authenticated && keycloak.token) {
           headers["Authorization"] = `Bearer ${keycloak.token}`;
-          // eslint-disable-next-line no-console
+           
           if (import.meta.env.DEV) {
             // eslint-disable-next-line no-console
             console.log(
@@ -178,13 +178,23 @@ export class ApiService {
         // @ts-ignore - window.keycloak is set by main.tsx after initialization
         const keycloak = window.keycloak;
 
+        // eslint-disable-next-line no-console
+        console.log("[ApiService] Production mode - checking keycloak", {
+          keycloakExists: !!keycloak,
+          authenticated: keycloak?.authenticated,
+          hasToken: !!keycloak?.token,
+          tokenLength: keycloak?.token?.length,
+        });
+
         // Check if keycloak is authenticated and has a valid token
         if (keycloak?.authenticated && keycloak.token) {
           // Ensure token is fresh before using it (refresh if expires within 30 seconds)
           await keycloak.updateToken(30);
           headers["Authorization"] = `Bearer ${keycloak.token}`;
           // eslint-disable-next-line no-console
-          console.debug("[ApiService] Using Keycloak token for authorization");
+          console.log("[ApiService] Using Keycloak token for authorization", {
+            tokenPreview: keycloak.token.substring(0, 20) + "..."
+          });
         } else {
           // eslint-disable-next-line no-console
           console.error("[ApiService] Keycloak not authenticated or no token available", {
