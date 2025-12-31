@@ -102,6 +102,9 @@ export class ApiService {
       "Content-Type": "application/json",
     };
 
+    // eslint-disable-next-line no-console
+    console.log("[ApiService] 🔑 Getting auth headers...");
+
     try {
       // Check if session storage is enabled
       if (SessionService.isSessionStorageEnabled()) {
@@ -192,16 +195,21 @@ export class ApiService {
           await keycloak.updateToken(30);
           headers["Authorization"] = `Bearer ${keycloak.token}`;
           // eslint-disable-next-line no-console
-          console.log("[ApiService] Using Keycloak token for authorization", {
-            tokenPreview: keycloak.token.substring(0, 20) + "..."
+          console.log("[ApiService] ✅ Using Keycloak token for authorization", {
+            tokenPreview: keycloak.token.substring(0, 20) + "...",
+            tokenSet: !!headers["Authorization"]
           });
         } else {
           // eslint-disable-next-line no-console
-          console.error("[ApiService] Keycloak not authenticated or no token available", {
+          console.error("[ApiService] ❌ Keycloak not authenticated or no token available", {
             keycloakExists: !!keycloak,
             authenticated: keycloak?.authenticated,
             hasToken: !!keycloak?.token,
+            windowKeycloakType: typeof window.keycloak,
           });
+          // Log what's in window to help debug
+          // eslint-disable-next-line no-console
+          console.log("[ApiService] window.keycloak debug:", window.keycloak);
         }
       }
     } catch (error) {
@@ -209,6 +217,13 @@ export class ApiService {
       console.error("[ApiService] Failed to get authentication token:", error);
       // Continue without token - let the backend handle unauthenticated requests
     }
+
+    // eslint-disable-next-line no-console
+    console.log("[ApiService] 🔑 Final headers:", {
+      hasContentType: !!headers["Content-Type"],
+      hasAuthorization: !!headers["Authorization"],
+      authHeaderPreview: headers["Authorization"] ? headers["Authorization"].substring(0, 20) + "..." : "MISSING"
+    });
 
     return headers;
   }
