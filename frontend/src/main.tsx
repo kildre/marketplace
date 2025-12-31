@@ -11,13 +11,13 @@ import {
     MockUserSwitcher,
 } from "./contexts/EnhancedMockKeycloakProvider";
 import { ReduxCartProvider } from "./contexts/ReduxCartContext";
+import { initInstrumentation } from './instrumentation';
 import { queryClient } from "./lib/queryClient";
 import { AuthService } from "./services/authService";
 import { SessionService } from "./services/sessionService";
 import { persistor, store } from "./store/store";
 import "./styles/main.scss";
 import { getApiUrl, getEnvironmentInfo, logApiConfig } from "./utils/api-config";
-import { initInstrumentation } from './instrumentation';
 
 // Initialize OpenTelemetry before anything else
 initInstrumentation();
