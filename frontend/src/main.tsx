@@ -174,20 +174,34 @@ if (bypassAuth) {
   // Production mode with Keycloak - import only when needed
   import("./keycloak")
     .then(({ default: keycloak }) => {
+      // Immediately expose keycloak instance globally
+      // This needs to happen BEFORE rendering so ApiService can access it
+      // @ts-ignore
+      window.keycloak = keycloak;
+      // eslint-disable-next-line no-console
+      console.log("[main] 🔐 Keycloak instance loaded and exposed to window (pre-init)", {
+        hasKeycloak: !!keycloak
+      });
+
       // Handle Keycloak events - called when Keycloak state changes
       const handleKeycloakEvent = (event: string) => {
         // eslint-disable-next-line no-console
-        console.log("[main] Keycloak event:", event);
+        console.log("[main] 🔐 Keycloak event:", event, {
+          authenticated: keycloak.authenticated,
+          hasToken: !!keycloak.token,
+          tokenLength: keycloak.token?.length
+        });
         
-        // Expose keycloak instance globally after initialization
-        // This is necessary because ApiService cannot use React hooks
+        // Update the window reference (in case keycloak instance changes)
+        // @ts-ignore
+        window.keycloak = keycloak;
+        
         if (event === 'onReady' || event === 'onAuthSuccess') {
-          // @ts-ignore
-          window.keycloak = keycloak;
           // eslint-disable-next-line no-console
-          console.log("[main] Keycloak instance exposed to window", {
+          console.log("[main] ✅ Keycloak ready/authenticated", {
             authenticated: keycloak.authenticated,
-            hasToken: !!keycloak.token
+            hasToken: !!keycloak.token,
+            windowKeycloakSet: !!(window as any).keycloak
           });
         }
       };
