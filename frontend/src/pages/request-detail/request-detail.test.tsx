@@ -129,16 +129,16 @@ vi.mock("../../components/common/request-detail-view", () => ({
     // Use statusReason prop directly, fallback to the value from the mock data
     const initialReason = statusReason || request?.statusReason || "";
     const [localReasoning, setLocalReasoning] = React.useState(initialReason);
-    const [isInitialized, setIsInitialized] = React.useState(false);
+    const isInitializedRef = React.useRef(false);
 
-    // Only update local state on initial mount, not on subsequent changes
+    // Only update local state on initial mount
     React.useEffect(() => {
-      if (!isInitialized) {
+      if (!isInitializedRef.current) {
         const newReason = statusReason || request?.statusReason || "";
         setLocalReasoning(newReason);
-        setIsInitialized(true);
+        isInitializedRef.current = true;
       }
-    }, [statusReason, request?.statusReason, isInitialized]);
+    }, [statusReason, request?.statusReason]);
 
     const handleReasoningChange = (e: any) => {
       const newValue = e.target.value;

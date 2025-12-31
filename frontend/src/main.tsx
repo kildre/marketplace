@@ -174,10 +174,23 @@ if (bypassAuth) {
   // Production mode with Keycloak - import only when needed
   import("./keycloak")
     .then(({ default: keycloak }) => {
-      // Expose keycloak instance globally for ApiService to access
-      // This is necessary because ApiService cannot use React hooks
-      // @ts-ignore
-      window.keycloak = keycloak;
+      // Handle Keycloak events - called when Keycloak state changes
+      const handleKeycloakEvent = (event: string) => {
+        // eslint-disable-next-line no-console
+        console.log("[main] Keycloak event:", event);
+        
+        // Expose keycloak instance globally after initialization
+        // This is necessary because ApiService cannot use React hooks
+        if (event === 'onReady' || event === 'onAuthSuccess') {
+          // @ts-ignore
+          window.keycloak = keycloak;
+          // eslint-disable-next-line no-console
+          console.log("[main] Keycloak instance exposed to window", {
+            authenticated: keycloak.authenticated,
+            hasToken: !!keycloak.token
+          });
+        }
+      };
       
       // Token capture callback - Keycloak manages tokens in memory/cookies
       // We only need to store user info for quick access
@@ -225,6 +238,7 @@ if (bypassAuth) {
                   authClient={keycloak}
                   initOptions={keycloakInitOptions}
                   LoadingComponent={<LoadingComponent />}
+                  onEvent={handleKeycloakEvent}
                   onTokens={handleTokens}
                 >
                   <BrowserRouter>
