@@ -173,8 +173,10 @@ export class ApiService {
           );
         }
       } else {
-        // In production mode, import real keycloak instance
-        const { default: keycloak } = await import("../keycloak");
+        // In production mode, use the initialized keycloak instance from window
+        // The keycloak instance is set by main.tsx after ReactKeycloakProvider initializes it
+        // @ts-ignore - window.keycloak is set by main.tsx after initialization
+        const keycloak = window.keycloak;
 
         // Check if keycloak is authenticated and has a valid token
         if (keycloak?.authenticated && keycloak.token) {
@@ -183,6 +185,13 @@ export class ApiService {
           headers["Authorization"] = `Bearer ${keycloak.token}`;
           // eslint-disable-next-line no-console
           console.debug("[ApiService] Using Keycloak token for authorization");
+        } else {
+          // eslint-disable-next-line no-console
+          console.error("[ApiService] Keycloak not authenticated or no token available", {
+            keycloakExists: !!keycloak,
+            authenticated: keycloak?.authenticated,
+            hasToken: !!keycloak?.token,
+          });
         }
       }
     } catch (error) {

@@ -7,8 +7,8 @@ import { BrowserRouter } from "react-router-dom";
 import { PersistGate } from "redux-persist/integration/react";
 import App from "./App";
 import {
-    EnhancedMockKeycloakProvider,
-    MockUserSwitcher,
+  EnhancedMockKeycloakProvider,
+  MockUserSwitcher,
 } from "./contexts/EnhancedMockKeycloakProvider";
 import { ReduxCartProvider } from "./contexts/ReduxCartContext";
 import { initInstrumentation } from './instrumentation';
@@ -174,6 +174,11 @@ if (bypassAuth) {
   // Production mode with Keycloak - import only when needed
   import("./keycloak")
     .then(({ default: keycloak }) => {
+      // Expose keycloak instance globally for ApiService to access
+      // This is necessary because ApiService cannot use React hooks
+      // @ts-ignore
+      window.keycloak = keycloak;
+      
       // Token capture callback - Keycloak manages tokens in memory/cookies
       // We only need to store user info for quick access
       const handleTokens = async (tokens: { 
