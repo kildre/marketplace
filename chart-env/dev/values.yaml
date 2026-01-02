@@ -64,6 +64,8 @@ secret:
           VITE_KEYCLOAK_CLIENT_ID: "marketplace"
           VITE_KEYCLOAK_CHECK_LOGIN_IFRAME: "false"
           VITE_BYPASS_AUTH: "false"
+          # Session Storage - must match backend USE_CLIENT_SESSION_STORAGE setting
+          VITE_USE_SESSION_STORAGE: "true"
   volume:
     secret:
       "secret-volume-ca-bundle-crt":
