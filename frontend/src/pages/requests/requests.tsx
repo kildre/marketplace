@@ -1,7 +1,7 @@
+import Alert from "@mui/material/Alert";
+import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
 import React from "react";
 import { useLocation, useParams, useSearchParams } from "react-router-dom";
-import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 import { PageTitle } from "../../components/page-title/page-title";
 import { RequestsTable } from "../../components/requests-table/requests-table";
 import { useAuth } from "../../hooks/useAuth";
@@ -52,8 +52,8 @@ export const Requests = (): React.ReactElement => {
     effectiveUserId = userInfo.email; // Use email for API filtering instead of username
   }
 
-  // Use the useRequests hook to trigger updates when user changes
-  useRequests(effectiveUserId, true);
+  // Use the useRequests hook to get requests data
+  const { requests, requestsCount } = useRequests(effectiveUserId, true);
 
   // Determine if user column should be shown or not
   // Hide user column when filtering by specific user OR when user is a requestor (they only see their own)
@@ -66,6 +66,7 @@ export const Requests = (): React.ReactElement => {
         <RequestsTable
           userId={effectiveUserId}
           showUserColumn={showUserColumn}
+          data={requests as unknown as RequestData[]}
         />
       </div>
 

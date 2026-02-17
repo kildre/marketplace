@@ -4,8 +4,8 @@ import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import {
-  RequestData,
-  RequestsTableProps,
+    RequestData,
+    RequestsTableProps,
 } from "../../interfaces/interfaceStore";
 // import { RequestsDebugPanel } from "../debug/RequestsDebugPanel"; // Uncomment to use debug panel with userId and component
 import { ApiError, ApiService } from "@/services/apiService";
@@ -89,18 +89,14 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
   }, []); // Remove the dependencies that cause infinite loops
 
   React.useEffect(() => {
-    // Only fetch requests once on mount if no data is provided
-    if (!data && !isLoading) {
+    // When data prop is provided, use it directly
+    // When no data prop, fetch from API
+    if (data !== undefined) {
+      setAllRequests(data);
+    } else if (!isLoading) {
       fetchData();
     }
-  }, [data]); // Only depend on data prop, not fetchData to prevent loops
-
-  React.useEffect(() => {
-    // Update allRequests state when data prop changes
-    if (data) {
-      setAllRequests(data);
-    }
-  }, [data]);
+  }, [data, isLoading]); // Depend on both data and isLoading
 
   // Handle scroll to show/hide fade indicators
   const handleScroll = React.useCallback((event: globalThis.Event) => {
