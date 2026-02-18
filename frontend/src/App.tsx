@@ -1,5 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { ApproverRedirectGuard } from "./components/auth/ApproverRedirectGuard";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import UserProfileDropdown from "./components/auth/UserProfileDropdown";
 import { Footer } from "./components/footer/footer-component";
 import { GovernmentBanner } from "./components/government-banner/government-banner";
 import { Sidebar } from "./components/sidebar/sidebar";
@@ -7,6 +9,7 @@ import { useAuth } from "./hooks/useAuth";
 import { useCartUserSync } from "./hooks/useCartUserSync";
 import { AuthStatusPage } from "./pages/auth-status/auth-status";
 import { Cart } from "./pages/cart/cart";
+import MockLogin from "./pages/mock-login/MockLogin";
 import { ProductCatalog } from "./pages/product-catalog/product-catalog";
 import { RequestDetail } from "./pages/request-detail/request-detail";
 import { Requests } from "./pages/requests/requests";
@@ -27,6 +30,7 @@ import "./styles/main.scss";
 
 function App(): React.ReactElement {
   const { hasRole } = useAuth();
+  const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true';
 
   // Automatically clear cart when user changes
   useCartUserSync();
@@ -52,60 +56,119 @@ function App(): React.ReactElement {
     />
   );
 
-  return (
+  // Main app layout component
+  const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <NotificationProvider>
       <div className="app-wrapper">
         <GovernmentBanner />
         <div className="advana-menu-override advana-service-desk-style header-with-cart">
-          {/* Provide local mega menu JSON and disable CRA env mode so props are used */}
           <AdvanaMenu
             menuLogoSection={customLogoSection}
             megaMenuBaseDomain="/"
             isCRA={false}
           />
-          <NotificationBellButton />
-          <CartOverlayButton />
+          <div className="header-actions-container">
+            <NotificationBellButton />
+            <CartOverlayButton />
+            <UserProfileDropdown />
+          </div>
         </div>
         <main className="main-content">
           <Sidebar />
-          <Routes>
-            <Route path="/" element={getHomeComponent()} />
-            <Route
-              path="/cart"
-              element={
-                <ApproverRedirectGuard>
-                  <Cart />
-                </ApproverRedirectGuard>
-              }
-            />
-            <Route path="/requests" element={<Requests />} />
-            <Route path="/requests/:userId" element={<Requests />} />
-            <Route path="/request-detail" element={<RequestDetail />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route
-              path="/metrics"
-              element={
-                <RoleGuard roles={[AppRoles.APPROVER]} redirectTo="/403">
-                  <Metrics />
-                </RoleGuard>
-              }
-            />
-            {/* Development-only auth status page */}
-            {import.meta.env.DEV && (
-              <Route path="/auth-status" element={<AuthStatusPage />} />
-            )}
-            {/* Error pages */}
-            <Route path="/403" element={<Error403 />} />
-            <Route path="/404" element={<Error404 />} />
-            <Route path="/500" element={<Error500 />} />
-            {/* Catch-all route for unmatched paths */}
-            <Route path="*" element={<Error404 />} />
-          </Routes>
+          {children}
         </main>
         <Footer />
-        {/* <RoleDebugInfo /> */}
       </div>
     </NotificationProvider>
+  );
+
+  return (
+    <Routes>
+      {/* Mock login route - only in bypass mode, renders WITHOUT main layout */}
+      {bypassAuth && <Route path="/mock-login" element={<MockLogin />} />}
+
+      {/* All other routes render WITH main layout and protection */}
+      <Route
+        path="/*"
+        element={
+          bypassAuth ? (
+            <ProtectedRoute>
+              <MainLayout>
+                <Routes>
+                  <Route path="/" element={getHomeComponent()} />
+                  <Route
+                    path="/cart"
+                    element={
+                      <ApproverRedirectGuard>
+                        <Cart />
+                      </ApproverRedirectGuard>
+                    }
+                  />
+                  <Route path="/requests" element={<Requests />} />
+                  <Route path="/requests/:userId" element={<Requests />} />
+                  <Route path="/request-detail" element={<RequestDetail />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route
+                    path="/metrics"
+                    element={
+                      <RoleGuard roles={[AppRoles.APPROVER]} redirectTo="/403">
+                        <Metrics />
+                      </RoleGuard>
+                    }
+                  />
+                  {/* Development-only auth status page */}
+                  {import.meta.env.DEV && (
+                    <Route path="/auth-status" element={<AuthStatusPage />} />
+                  )}
+                  {/* Error pages */}
+                  <Route path="/403" element={<Error403 />} />
+                  <Route path="/404" element={<Error404 />} />
+                  <Route path="/500" element={<Error500 />} />
+                  {/* Catch-all route for unmatched paths */}
+                  <Route path="*" element={<Error404 />} />
+                </Routes>
+              </MainLayout>
+            </ProtectedRoute>
+          ) : (
+            <MainLayout>
+              <Routes>
+                <Route path="/" element={getHomeComponent()} />
+                <Route
+                  path="/cart"
+                  element={
+                    <ApproverRedirectGuard>
+                      <Cart />
+                    </ApproverRedirectGuard>
+                  }
+                />
+                <Route path="/requests" element={<Requests />} />
+                <Route path="/requests/:userId" element={<Requests />} />
+                <Route path="/request-detail" element={<RequestDetail />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route
+                  path="/metrics"
+                  element={
+                    <RoleGuard roles={[AppRoles.APPROVER]} redirectTo="/403">
+                      <Metrics />
+                    </RoleGuard>
+                  }
+                />
+                {/* Development-only auth status page */}
+                {import.meta.env.DEV && (
+                  <Route path="/auth-status" element={<AuthStatusPage />} />
+                )}
+                {/* Error pages */}
+                <Route path="/403" element={<Error403 />} />
+                <Route path="/404" element={<Error404 />} />
+                <Route path="/500" element={<Error500 />} />
+                {/* Catch-all route for unmatched paths */}
+                <Route path="*" element={<Error404 />} />
+              </Routes>
+            </MainLayout>
+          )
+        }
+      />
+    </Routes>
   );
 }
 

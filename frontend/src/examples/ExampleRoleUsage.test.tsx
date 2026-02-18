@@ -1,12 +1,52 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ExampleRoleUsage from './ExampleRoleUsage';
 import { AuthService } from '../services/authService';
 import { AppRoles } from '../types/auth';
 
+// Mock useMockKeycloak so RoleGuard components get authenticated state
+const mockUseMockKeycloak = vi.fn();
+vi.mock('../contexts/MockKeycloakProvider', () => ({
+  MockKeycloakProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useMockKeycloak: () => mockUseMockKeycloak(),
+}));
+
+const makeMockKeycloak = (roles: string[]) => ({
+  keycloak: {
+    authenticated: true,
+    token: 'mock-token',
+    tokenParsed: {
+      sub: 'test-user',
+      preferred_username: 'testuser',
+      email: 'test@example.com',
+      given_name: 'Test',
+      family_name: 'User',
+      realm_access: { roles },
+      resource_access: {
+        'marketplace-ui': { roles },
+        marketplace: { roles },
+      },
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      iat: Math.floor(Date.now() / 1000),
+      iss: 'https://keycloak.test',
+      aud: 'marketplace',
+    },
+    hasRealmRole: (role: string) => roles.includes(role),
+    hasResourceRole: (role: string) => roles.includes(role),
+    login: vi.fn(),
+    logout: vi.fn(),
+    updateToken: vi.fn().mockResolvedValue(true),
+  },
+  initialized: true,
+  login: vi.fn(),
+  logout: vi.fn(),
+});
+
 describe('ExampleRoleUsage', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    // Default: requestor role
+    mockUseMockKeycloak.mockReturnValue(makeMockKeycloak(['marketplace-requestor']));
   });
 
   it('should render without crashing', () => {
@@ -55,6 +95,7 @@ describe('ExampleRoleUsage', () => {
   });
 
   it('should show approver content for approver role', () => {
+    mockUseMockKeycloak.mockReturnValue(makeMockKeycloak(['marketplace-approver']));
     AuthService.storeUserInfo({
       id: 'test',
       username: 'test',

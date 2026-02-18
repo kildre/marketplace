@@ -4,7 +4,7 @@ import { Notification } from "../interfaces/interfaceStore";
  * Mock Notification Data
  *
  * This file contains sample notifications for development and testing purposes.
- * Notifications are associated with specific users from EnhancedMockKeycloakProvider.
+ * Notifications are associated with specific users from MockKeycloakProvider.
  *
  * MOCK USERS:
  * - Approvers: joanna.c.ramsey.civ@mail.mil, jennifer.a.cowley.civ@mail.mil, jane.f.roberts.civ@mail.mil

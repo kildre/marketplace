@@ -4,9 +4,9 @@ import { useAuth } from './useAuth';
 import { AppRoles, Resources, Actions } from '../types/auth';
 import { ReactNode } from 'react';
 import { AuthService } from '../services/authService';
-import { EnhancedMockKeycloakProvider } from '../contexts/EnhancedMockKeycloakProvider';
+import { MockKeycloakProvider } from '../contexts/MockKeycloakProvider';
 
-// Mock wrapper with EnhancedMockKeycloakProvider
+// Mock wrapper with MockKeycloakProvider
 const createWrapper = (mockUserRoles: AppRoles[] = []) => {
   // Store mock user info
   AuthService.storeUserInfo({
@@ -20,7 +20,7 @@ const createWrapper = (mockUserRoles: AppRoles[] = []) => {
   });
 
   const WrapperComponent = ({ children }: { children: ReactNode }) => {
-    return <EnhancedMockKeycloakProvider>{children}</EnhancedMockKeycloakProvider>;
+    return <MockKeycloakProvider>{children}</MockKeycloakProvider>;
   };
   return WrapperComponent;
 };
@@ -142,7 +142,7 @@ describe('useAuth', () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
       
       expect(result.current.hasRole(AppRoles.APPROVER)).toBe(true);
-      // Note: In development mode with EnhancedMockKeycloakProvider,
+      // Note: In development mode with MockKeycloakProvider,
       // the hasRole check might return true for REQUESTOR as well
       // This is expected behavior in the mock environment
     });

@@ -77,13 +77,13 @@ export const useAuth = () => {
    * Check if user has a specific role (supports both app roles and Keycloak roles)
    */
   const hasRole = (role: AppRoles): boolean => {
-    if (!keycloak.authenticated) {
-      return false;
-    }
-
-    // Check against stored user info first (no logging in production)
+    // Check stored user info first — works even when keycloak isn't authenticated yet
     if (userInfo?.roles?.includes(role)) {
       return true;
+    }
+
+    if (!keycloak.authenticated) {
+      return false;
     }
 
     // Fallback to Keycloak role checking
@@ -134,8 +134,6 @@ export const useAuth = () => {
    * Check if user has permission to perform an action on a resource
    */
   const hasPermission = (resource: Resources, action: Actions): boolean => {
-    if (!keycloak.authenticated) return false;
-
     // Get user's roles
     const userRoles = Object.values(AppRoles).filter((role) => hasRole(role));
 

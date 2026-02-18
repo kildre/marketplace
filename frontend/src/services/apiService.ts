@@ -142,7 +142,7 @@ export class ApiService {
 
       if (bypassAuth) {
         // In bypass mode, get token from window.keycloak (mock Keycloak instance)
-        // @ts-ignore - window.keycloak is set by EnhancedMockKeycloakProvider
+        // @ts-ignore - window.keycloak is set by MockKeycloakProvider
         const keycloak = window.keycloak;
         if (keycloak?.authenticated && keycloak.token) {
           headers["Authorization"] = `Bearer ${keycloak.token}`;

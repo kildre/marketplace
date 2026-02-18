@@ -6,6 +6,7 @@ import { PageTitle } from "../../components/page-title/page-title";
 import { RequestsTable } from "../../components/requests-table/requests-table";
 import { useAuth } from "../../hooks/useAuth";
 import { useRequests } from "../../hooks/useRequests";
+import { RequestData } from "../../interfaces/interfaceStore";
 
 export const Requests = (): React.ReactElement => {
   const location = useLocation();
@@ -53,7 +54,7 @@ export const Requests = (): React.ReactElement => {
   }
 
   // Use the useRequests hook to get requests data
-  const { requests, requestsCount } = useRequests(effectiveUserId, true);
+  const { requests } = useRequests(effectiveUserId, true);
 
   // Determine if user column should be shown or not
   // Hide user column when filtering by specific user OR when user is a requestor (they only see their own)

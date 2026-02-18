@@ -5,7 +5,7 @@ import {
   NotificationProvider,
   useNotificationContext,
 } from "./NotificationContext";
-import { EnhancedMockKeycloakProvider } from "./EnhancedMockKeycloakProvider";
+import { MockKeycloakProvider } from "./MockKeycloakProvider";
 import { AuthService } from "../services/authService";
 import { AppRoles } from "../types/auth";
 
@@ -14,8 +14,7 @@ const createWrapper = (
   mockUserEmail: string,
   mockUserRoles: AppRoles[] = []
 ) => {
-  // Store mock user info
-  AuthService.storeUserInfo({
+  const userInfo = {
     id: "test-user",
     username: "testuser",
     email: mockUserEmail,
@@ -23,13 +22,15 @@ const createWrapper = (
     lastName: "User",
     roles: mockUserRoles,
     keycloakRoles: mockUserRoles.map((r) => `marketplace-${r.toLowerCase()}`),
-  });
+  };
 
   const WrapperComponent = ({ children }: { children: ReactNode }) => {
+    // Store user info inside the component so each instance uses its own email
+    AuthService.storeUserInfo(userInfo);
     return (
-      <EnhancedMockKeycloakProvider>
+      <MockKeycloakProvider>
         <NotificationProvider>{children}</NotificationProvider>
-      </EnhancedMockKeycloakProvider>
+      </MockKeycloakProvider>
     );
   };
   return WrapperComponent;
