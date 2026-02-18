@@ -1,123 +1,226 @@
-import React, { createContext, useContext, ReactNode } from "react";
+import React, { createContext, ReactNode, useContext, useState, useEffect } from 'react';
+import { MockUserProfile } from '../constants/mockUsers';
+import { AuthService } from '../services/authService';
 
-// Type definitions for the token structure
-interface ResourceAccess {
-  roles: string[];
-}
-
-interface TokenParsed {
+interface MockTokenParsed {
+  sub: string;
   preferred_username: string;
   email: string;
   given_name: string;
   family_name: string;
-  resource_access: {
-    marketplace: ResourceAccess;
-    account: ResourceAccess;
-    [key: string]: ResourceAccess; // Allow for additional resources
+  name: string;
+  realm_access: {
+    roles: string[];
   };
+  resource_access: {
+    [key: string]: {
+      roles: string[];
+    };
+  };
+  exp: number;
+  iat: number;
+  iss: string;
+  aud: string;
 }
 
-// Mock user data for development - can be configured via environment
-const getMockUserRoles = (): string[] => {
-  const envRoles = import.meta.env.VITE_MOCK_USER_ROLES;
-  if (envRoles) {
-    return envRoles.split(",").map((role: string) => role.trim());
-  }
-  // Default role - use environment variable to easily switch between admin and requestor
-  const userType = import.meta.env.VITE_MOCK_USER_TYPE || "requestor";
-  return userType === "admin" 
-    ? ["marketplace-requestor", "marketplace-approver"] 
-    : ["marketplace-requestor"];
-};
-
-const getMockUserData = () => ({
-  id: import.meta.env.VITE_MOCK_USER_ID || "dev-user-123",
-  username: import.meta.env.VITE_MOCK_USERNAME || "developer",
-  email: import.meta.env.VITE_MOCK_USER_EMAIL || "developer@advana.mil",
-  firstName: import.meta.env.VITE_MOCK_USER_FIRST_NAME || "Dev",
-  lastName: import.meta.env.VITE_MOCK_USER_LAST_NAME || "User",
-  roles: getMockUserRoles(),
-  permissions: ["READ", "WRITE"],
-});
-
-// Mock user data for development
-const mockUser = getMockUserData();
-
-// Mock Keycloak object that mimics the real Keycloak API
-const mockKeycloak = {
-  authenticated: true,
-  token: "mock-jwt-token",
-  tokenParsed: {
-    preferred_username: mockUser.username,
-    email: mockUser.email,
-    given_name: mockUser.firstName,
-    family_name: mockUser.lastName,
-    // Match the actual Keycloak token structure with resource_access
-    resource_access: {
-      marketplace: {
-        roles: mockUser.roles,
-      },
-      account: {
-        roles: [
-          "manage-account",
-          "manage-account-links",
-          "view-profile"
-        ]
-      }
-    } as { [key: string]: ResourceAccess },
-  } as TokenParsed,
-  login: () => Promise.resolve(),
-  logout: () => Promise.resolve(),
-  updateToken: () => Promise.resolve(true),
-  hasRealmRole: (role: string) => mockUser.roles.includes(role),
-  hasResourceRole: (role: string, resource: string = "marketplace") => {
-    const resourceAccess = mockKeycloak.tokenParsed?.resource_access?.[resource];
-    return resourceAccess?.roles?.includes(role) || false;
-  },
-  // Helper method to check if user has marketplace role
-  hasMarketplaceRole: (role: string) => {
-    const marketplaceRoles = mockKeycloak.tokenParsed?.resource_access?.marketplace?.roles || [];
-    return marketplaceRoles.includes(role);
-  },
-  // Helper method to check if user is approver
-  isApprover: () => {
-    return mockKeycloak.hasMarketplaceRole("marketplace-approver");
-  },
-  // Helper method to check if user is requestor
-  isRequestor: () => {
-    return mockKeycloak.hasMarketplaceRole("marketplace-requestor");
-  },
-};
+interface MockKeycloak {
+  authenticated: boolean;
+  token?: string;
+  tokenParsed?: MockTokenParsed;
+  refreshToken?: string;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
+  updateToken: (minValidity?: number) => Promise<boolean>;
+  hasRealmRole: (role: string) => boolean;
+  hasResourceRole: (role: string, resource?: string) => boolean;
+}
 
 interface MockKeycloakContextType {
-  keycloak: typeof mockKeycloak;
+  keycloak: MockKeycloak;
   initialized: boolean;
+  login: (userProfile: MockUserProfile) => void;
+  logout: () => void;
 }
 
-const MockKeycloakContext = createContext<MockKeycloakContextType>({
-  keycloak: mockKeycloak,
-  initialized: true,
-});
+const MockKeycloakContext = createContext<MockKeycloakContextType | undefined>(undefined);
 
 interface MockKeycloakProviderProps {
   children: ReactNode;
 }
 
-export const MockKeycloakProvider: React.FC<MockKeycloakProviderProps> = ({
-  children,
-}) => {
+// Helper to create mock token from user profile
+function createTokenPayload(user: MockUserProfile): MockTokenParsed {
+  const now = Math.floor(Date.now() / 1000);
+  return {
+    sub: user.sub,
+    email: user.email,
+    preferred_username: user.username,
+    given_name: user.firstName,
+    family_name: user.lastName,
+    name: `${user.firstName} ${user.lastName}`,
+    realm_access: {
+      roles: user.roles,
+    },
+    resource_access: {
+      'marketplace-ui': {
+        roles: user.roles,
+      },
+    },
+    exp: now + 3600, // 1 hour expiry
+    iat: now,
+    iss: import.meta.env.VITE_KEYCLOAK_URL || 'https://keycloak.cdao.us/auth/realms/baby-yoda',
+    aud: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'marketplace',
+  };
+}
+
+// Helper to create mock token string
+function createMockToken(tokenParsed: MockTokenParsed): string {
+  const payload = btoa(JSON.stringify(tokenParsed));
+  return `mock.${payload}.signature`;
+}
+
+// Create unauthenticated mock keycloak instance
+function createUnauthenticatedMockKeycloak(): MockKeycloak {
+  return {
+    authenticated: false,
+    token: undefined,
+    tokenParsed: undefined,
+    refreshToken: undefined,
+    login: async () => {
+      console.warn('Mock Keycloak login called on unauthenticated instance');
+    },
+    logout: async () => {
+      console.warn('Mock Keycloak logout called on unauthenticated instance');
+    },
+    updateToken: async () => false,
+    hasRealmRole: () => false,
+    hasResourceRole: () => false,
+  };
+}
+
+// Create authenticated mock keycloak instance
+function createAuthenticatedMockKeycloak(token: string, tokenParsed: MockTokenParsed): MockKeycloak {
+  return {
+    authenticated: true,
+    token,
+    tokenParsed,
+    refreshToken: 'mock-refresh-token',
+    login: async () => {
+      console.log('Already authenticated');
+    },
+    logout: async () => {
+      AuthService.clearStoredAuth();
+    },
+    updateToken: async () => true,
+    hasRealmRole: (role: string) => {
+      return tokenParsed.realm_access?.roles?.includes(role) || false;
+    },
+    hasResourceRole: (role: string, resource = 'marketplace-ui') => {
+      return tokenParsed.resource_access?.[resource]?.roles?.includes(role) || false;
+    },
+  };
+}
+
+export const MockKeycloakProvider: React.FC<MockKeycloakProviderProps> = ({ children }) => {
+  const [keycloak, setKeycloak] = useState<MockKeycloak>(() =>
+    createUnauthenticatedMockKeycloak()
+  );
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    // Check for existing session in localStorage
+    const savedAuth = localStorage.getItem('mock_auth_state');
+    if (savedAuth) {
+      try {
+        const authState = JSON.parse(savedAuth);
+        const authenticatedKeycloak = createAuthenticatedMockKeycloak(
+          authState.token,
+          authState.tokenParsed
+        );
+        setKeycloak(authenticatedKeycloak);
+
+        // Set window.keycloak for backward compatibility
+        if (typeof window !== 'undefined') {
+          (window as any).keycloak = authenticatedKeycloak;
+        }
+
+        // Store user info in localStorage using AuthService
+        const userInfo = AuthService.createUserInfoFromToken(authState.tokenParsed);
+        AuthService.storeUserInfo(userInfo);
+      } catch (error) {
+        console.error('Failed to restore mock auth state:', error);
+        localStorage.removeItem('mock_auth_state');
+      }
+    } else {
+      // Set unauthenticated keycloak to window
+      if (typeof window !== 'undefined') {
+        (window as any).keycloak = keycloak;
+      }
+    }
+
+    setInitialized(true);
+  }, []);
+
+  const login = (userProfile: MockUserProfile) => {
+    const tokenParsed = createTokenPayload(userProfile);
+    const token = createMockToken(tokenParsed);
+
+    const authenticatedKeycloak = createAuthenticatedMockKeycloak(token, tokenParsed);
+
+    setKeycloak(authenticatedKeycloak);
+    localStorage.setItem('mock_auth_state', JSON.stringify({ tokenParsed, token }));
+
+    // Update window.keycloak
+    if (typeof window !== 'undefined') {
+      (window as any).keycloak = authenticatedKeycloak;
+    }
+
+    // Store user info using AuthService
+    const userInfo = AuthService.createUserInfoFromToken(tokenParsed);
+    AuthService.storeUserInfo(userInfo);
+  };
+
+  const logout = () => {
+    const unauthenticatedKeycloak = createUnauthenticatedMockKeycloak();
+    setKeycloak(unauthenticatedKeycloak);
+    localStorage.removeItem('mock_auth_state');
+    localStorage.removeItem('marketplace_session_id');
+    AuthService.clearStoredAuth();
+
+    // Update window.keycloak
+    if (typeof window !== 'undefined') {
+      (window as any).keycloak = unauthenticatedKeycloak;
+    }
+  };
+
+  // Update window.keycloak when keycloak state changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).keycloak = keycloak;
+    }
+  }, [keycloak]);
+
+  const contextValue: MockKeycloakContextType = {
+    keycloak,
+    initialized,
+    login,
+    logout,
+  };
+
   return (
-    <MockKeycloakContext.Provider
-      value={{ keycloak: mockKeycloak, initialized: true }}
-    >
+    <MockKeycloakContext.Provider value={contextValue}>
       {children}
     </MockKeycloakContext.Provider>
   );
 };
 
-// Hook that mimics useKeycloak but returns mock data
+// Hook to use mock keycloak
 export const useMockKeycloak = () => {
-  return useContext(MockKeycloakContext);
+  const context = useContext(MockKeycloakContext);
+  if (!context) {
+    throw new Error('useMockKeycloak must be used within MockKeycloakProvider');
+  }
+  return context;
 };
 
 export default MockKeycloakProvider;

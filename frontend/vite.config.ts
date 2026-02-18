@@ -47,6 +47,7 @@ export default defineConfig({
       VITE_KEYCLOAK_URL: "http://localhost:8085/auth",
       VITE_KEYCLOAK_REALM: "test-realm",
       VITE_KEYCLOAK_CLIENT_ID: "test-client",
+      VITE_USE_SESSION_STORAGE: "",
     },
     coverage: {
       provider: "v8",

@@ -64,15 +64,34 @@ vi.mock("./pages/auth-status/auth-status", () => ({
 }));
 
 // Mock the authentication providers
-vi.mock("./contexts/EnhancedMockKeycloakProvider", () => ({
-  EnhancedMockKeycloakProvider: ({
+vi.mock("./contexts/MockKeycloakProvider", () => ({
+  MockKeycloakProvider: ({
     children,
   }: {
     children: React.ReactNode;
   }) => <div data-testid="mock-keycloak-provider">{children}</div>,
-  MockUserSwitcher: () => (
-    <div data-testid="mock-user-switcher">Mock User Switcher</div>
-  ),
+  useMockKeycloak: () => ({
+    keycloak: {
+      authenticated: true,
+      token: "mock-token",
+      tokenParsed: {
+        preferred_username: "testuser",
+        email: "test@advana.mil",
+        given_name: "Test",
+        family_name: "User",
+        realm_access: { roles: [] },
+        resource_access: {},
+      },
+      hasRealmRole: () => false,
+      hasResourceRole: () => false,
+      login: vi.fn(),
+      logout: vi.fn(),
+      updateToken: vi.fn().mockResolvedValue(true),
+    },
+    initialized: true,
+    login: vi.fn(),
+    logout: vi.fn(),
+  }),
 }));
 
 // Mock the Keycloak service

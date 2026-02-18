@@ -1,4 +1,4 @@
-import { mockUserConfigurations } from "@/contexts/EnhancedMockKeycloakProvider";
+import { MOCK_USER_PROFILES } from "@/constants/mockUsers";
 
 export const formatPrice = (price: number | null, rom?: string) => {
   if (rom) return rom;
@@ -125,10 +125,10 @@ export const getValue = (name: string): string => {
   return (element as { value?: string })?.value || "";
 };
 
-// Helper function to get user name from email using mockUserConfigurations
+// Helper function to get user name from email using MOCK_USER_PROFILES
 export const getUserNameFromEmail = (email: string): string => {
-  // Find user by email in mockUserConfigurations
-  const user = Object.values(mockUserConfigurations).find(
+  // Find user by email in MOCK_USER_PROFILES
+  const user = MOCK_USER_PROFILES.find(
     (user) => user.email === email
   );
 
