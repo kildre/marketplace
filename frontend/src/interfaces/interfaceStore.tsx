@@ -185,7 +185,7 @@ export interface RequestSummary {
 }
 
 export interface SubmissionData {
-  requestId: string;
+  requestId?: string; // Deprecated: request number is now assigned by the backend
   personalData: PersonalData;
   requestDetails: OrganizationFormData & RequestDetailsFormData;
   cartItems: CartItem[];
@@ -382,4 +382,21 @@ export interface NotificationBellProps {
   onMarkAsRead?: (notificationId: string) => void;
   onMarkAllAsRead?: () => void;
   onClearAll?: () => void;
+}
+
+// Raw DTO shapes returned by GET /api/notificationRecipients/visible
+export interface NotificationApiDto {
+  id: number;
+  title: string;
+  message: string;
+  priorityLevel: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NotificationRecipientApiResponse {
+  notification: NotificationApiDto;
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

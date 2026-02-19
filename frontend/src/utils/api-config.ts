@@ -91,9 +91,8 @@ export const API_ENDPOINTS = {
   // Report/Metrics
   REPORT_SUMMARY: "/api/report/summary",
 
-  // Future endpoints can be added here
-  // USER_PROFILE: "/api/users/profile",
-  // ADMIN: "/api/admin",
+  // Notifications
+  NOTIFICATION_RECIPIENTS: "/api/notificationRecipients/visible",
 } as const;
 
 /**
