@@ -105,7 +105,7 @@ export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
               >
                 Reject
               </button>
-              {isDevelopment && (
+              {/* {isDevelopment && (
                 <>
                   <button
                     className="button button--status button--submit"
@@ -138,7 +138,7 @@ export const RequestDetailView: React.FC<RequestDetailViewProps> = ({
                     Complete
                   </button>
                 </>
-              )}
+              )} */}
             </>
           )}
         </div>

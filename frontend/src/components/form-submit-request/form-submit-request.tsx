@@ -10,13 +10,10 @@ import {
   useValidationErrors,
 } from "../../hooks/useFormQueries";
 import { SubmissionData } from "../../interfaces";
-import { generateRequestId } from "../../utils/helper-functions";
 import { ErrorModal } from "../error-modal/error-modal";
 
 export const FormSubmitRequest = (): React.ReactElement => {
   const [checked, setChecked] = React.useState(false);
-  const [submittedRequestId, setSubmittedRequestId] =
-    React.useState<string>("");
   const [errorModalOpen, setErrorModalOpen] = React.useState(false);
   const [errorDetails, setErrorDetails] = React.useState<{
     code?: string;
@@ -64,17 +61,17 @@ export const FormSubmitRequest = (): React.ReactElement => {
 
   // Navigate to requests page on successful submission
   React.useEffect(() => {
-    if (submitMutation.isSuccess && submittedRequestId) {
+    if (submitMutation.isSuccess && submitMutation.data?.requestNumber) {
       clearCart(); // Clear the cart items
-      // Navigate to requests page with success state and request ID for toast notification
+      // Navigate to requests page with success state and the backend-assigned request number
       navigate("/requests", {
         state: {
           showSuccessToast: true,
-          requestId: submittedRequestId,
+          requestId: submitMutation.data.requestNumber,
         },
       });
     }
-  }, [submitMutation.isSuccess, submittedRequestId, navigate, clearCart]);
+  }, [submitMutation.isSuccess, submitMutation.data, navigate, clearCart]);
 
   // Redirect to 500 page if there's a server error, otherwise show error modal
   React.useEffect(() => {
@@ -148,15 +145,8 @@ export const FormSubmitRequest = (): React.ReactElement => {
       quantity: item.quantity,
     }));
 
-    // Generate a unique request ID
-    const requestId = generateRequestId(7);
-
-    // Store the request ID for the toast message
-    setSubmittedRequestId(requestId);
-
     // Combine form data and cart data
     const submitData: SubmissionData = {
-      requestId: requestId,
       personalData: personalData,
       requestDetails: formData,
       cartItems: cartData,
