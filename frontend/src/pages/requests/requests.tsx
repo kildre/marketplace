@@ -8,6 +8,45 @@ import { useAuth } from "../../hooks/useAuth";
 import { useRequests } from "../../hooks/useRequests";
 import { RequestData } from "../../interfaces/interfaceStore";
 
+// Custom transition: spring slide-down + fade in, fade-out + slide-up exit
+const ToastTransition = React.forwardRef<
+  HTMLDivElement,
+  { in?: boolean; children?: React.ReactNode; onEnter?: () => void; onExited?: () => void }
+>(function ToastTransition({ in: inProp, children, onEnter, onExited }, ref) {
+  // Initialise directly from inProp so the correct class is present on the very first paint.
+  const [animClass, setAnimClass] = React.useState(inProp ? "toast-enter" : "");
+  const [show, setShow] = React.useState(!!inProp);
+  const prevIn = React.useRef(inProp);
+
+  // useLayoutEffect fires synchronously before the browser paints, eliminating the one-frame
+  // flicker that useEffect would cause.
+  React.useLayoutEffect(() => {
+    if (inProp && !prevIn.current) {
+      setShow(true);
+      setAnimClass("toast-enter");
+      onEnter?.();
+    } else if (!inProp && prevIn.current) {
+      setAnimClass("toast-exit"); // keep visible until animation ends
+    }
+    prevIn.current = inProp;
+  }, [inProp, onEnter]);
+
+  const handleAnimationEnd = () => {
+    if (!inProp) {
+      setShow(false); // unmount only after exit animation completes
+      onExited?.();
+    }
+  };
+
+  if (!show) return null;
+
+  return (
+    <div ref={ref} className={animClass} onAnimationEnd={handleAnimationEnd}>
+      {children}
+    </div>
+  );
+});
+
 export const Requests = (): React.ReactElement => {
   const location = useLocation();
   const { isRequestor, isApprover, getUserInfo } = useAuth();
@@ -75,6 +114,8 @@ export const Requests = (): React.ReactElement => {
       <Snackbar
         open={snackbarOpen}
         onClose={handleClose}
+        autoHideDuration={7000}
+        TransitionComponent={ToastTransition}
         id="toast-notification"
       >
         <Alert

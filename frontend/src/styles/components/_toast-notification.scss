@@ -7,3 +7,39 @@
   left: auto;
   bottom: auto;
 }
+
+// Enter: spring slide down from above + fade in
+@keyframes toast-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(4px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Exit: fade out + slight slide up
+@keyframes toast-exit {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+}
+
+.toast-enter {
+  animation: toast-enter 380ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.toast-exit {
+  animation: toast-exit 2000ms ease-out forwards;
+}

@@ -6,7 +6,10 @@ import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import { PersistGate } from "redux-persist/integration/react";
 import App from "./App";
-import { MockKeycloakProvider } from "./contexts/MockKeycloakProvider";
+import {
+  EnhancedMockKeycloakProvider,
+  MockUserSwitcher,
+} from "./contexts/EnhancedMockKeycloakProvider";
 import { ReduxCartProvider } from "./contexts/ReduxCartContext";
 import { initInstrumentation } from './instrumentation';
 import { queryClient } from "./lib/queryClient";
@@ -147,20 +150,21 @@ const LoadingComponent = () => (
 
 // Choose rendering approach based on environment
 if (bypassAuth) {
-  // Development mode with mock authentication
+  // Development mode with enhanced mock authentication
   root.render(
     <React.StrictMode>
       {/* <DevBanner /> */}
       <Provider store={store}>
         <PersistGate loading={<div>Loading cart...</div>} persistor={persistor}>
           <QueryClientProvider client={queryClient}>
-            <MockKeycloakProvider>
+            <EnhancedMockKeycloakProvider>
               <BrowserRouter>
                 <ReduxCartProvider>
                   <App />
+                  <MockUserSwitcher />
                 </ReduxCartProvider>
               </BrowserRouter>
-            </MockKeycloakProvider>
+            </EnhancedMockKeycloakProvider>
           </QueryClientProvider>
         </PersistGate>
       </Provider>
