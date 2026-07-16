@@ -1,35 +1,8 @@
 import { render } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
-import { vi } from "vitest";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
-
-// Mock AdvanaMenu component
-vi.mock("@advana/platform-ui/dist/AdvanaMenu", () => ({
-  default: ({ menuLogoSection }: { menuLogoSection: React.ReactNode }) => (
-    <div data-testid="advana-menu" style={{ 
-      width: "0px", 
-      height: "0px", 
-      borderTop: "100px solid rgb(8, 29, 70)", 
-      borderRight: "100px solid transparent", 
-      position: "absolute" 
-    }}>
-      <div data-testid="menu-logo-section">{menuLogoSection}</div>
-      {/* Simulate the triangular decorator element that should be hidden */}
-      <div 
-        style={{ 
-          width: "0px", 
-          height: "0px", 
-          borderTop: "100px solid rgb(8, 29, 70)", 
-          borderRight: "100px solid transparent", 
-          position: "absolute" 
-        }}
-        data-testid="triangular-decorator"
-      />
-    </div>
-  ),
-}));
 
 // Test component that includes the global styles
 const TestComponent = () => (
@@ -39,7 +12,7 @@ const TestComponent = () => (
       <span className="cui-banner__text">CUI</span>
     </div>
     
-    {/* AdvanaMenu with Service Desk styling */}
+    {/* Marketplace header with Service Desk styling */}
     <div className="advana-menu-override advana-service-desk-style">
       <div data-testid="mock-advana-menu">
         <div style={{ 
@@ -49,7 +22,7 @@ const TestComponent = () => (
           borderRight: "100px solid transparent", 
           position: "absolute" 
         }} data-testid="triangular-element" />
-        Mock AdvanaMenu Content
+        Mock Marketplace Header Content
       </div>
     </div>
   </div>
@@ -81,7 +54,7 @@ describe("Global Styles for Header Updates", () => {
     });
   });
 
-  describe("AdvanaMenu Service Desk Styling", () => {
+  describe("Marketplace header Service Desk styling", () => {
     it("should apply service desk styling class", () => {
       const { container } = render(<TestComponent />);
       

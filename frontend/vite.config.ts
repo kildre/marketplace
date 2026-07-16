@@ -30,12 +30,6 @@ export default defineConfig({
   css: {
     devSourcemap: true, // Enable CSS source maps in development
   },
-  resolve: {
-    alias: {
-      // Try to alias the entire images directory
-      "@advana/platform-ui/dist/images": "/assets/images",
-    },
-  },
   test: {
     environment: "jsdom",
     globals: true,

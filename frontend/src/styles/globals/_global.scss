@@ -30,8 +30,7 @@ body {
   color: $primary-color;
 }
 
-// Override AdvanaMenu styles to remove fixed positioning and margin-top
-// Target the pageTitleRow style that AdvanaMenu uses internally
+// Override legacy fixed header styles if they appear in local header markup
 div[style*="position: fixed"][style*="margin-top: 30px"] {
   position: static !important;
   margin-top: 0 !important;
@@ -53,7 +52,7 @@ div[style*="position: fixed"][style*="margin-top: 30px"] {
   }
 }
 
-// Service Desk Style Overrides for AdvanaMenu
+// Service Desk Style Overrides for the Marketplace header
 .advana-service-desk-style {
   // Hide the triangular decorator element - multiple selectors for different variations
   div[style*="border-top"][style*="border-right"][style*="transparent"],

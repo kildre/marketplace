@@ -1,0 +1,497 @@
+.chat-widget {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3000;
+  color: #1f2937;
+
+  button {
+    font: inherit;
+  }
+
+  &__launcher {
+    min-width: 108px;
+    height: 48px;
+    border: 0;
+    border-radius: 24px;
+    background: #1f6feb;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    font-weight: 700;
+
+    &:hover {
+      background: #174ea6;
+      transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+      outline: 3px solid rgba(31, 111, 235, 0.35);
+      outline-offset: 3px;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .chat-widget__launcher-icon {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+
+    span {
+      line-height: 1;
+    }
+  }
+
+  &__drawer {
+    position: absolute;
+    right: 0;
+    bottom: 64px;
+    width: min(392px, calc(100vw - 32px));
+    height: min(640px, calc(100vh - 128px));
+    min-height: 440px;
+    background: #fff;
+    border: 1px solid #d7dee8;
+    border-radius: 8px;
+    box-shadow: 0 20px 48px rgba(15, 23, 42, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.18s ease, height 0.18s ease;
+  }
+
+  &__drawer--expanded {
+    width: min(840px, calc(100vw - 48px));
+    height: min(780px, calc(100vh - 96px));
+  }
+
+  &__header {
+    padding: 14px 16px;
+    background: #20375a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    &-title {
+      min-width: 0;
+    }
+
+    &-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    h2 {
+      margin: 0;
+      color: #fff;
+      font-size: 1rem;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    span {
+      display: block;
+      margin-top: 2px;
+      color: #d9e8f6;
+      font-size: 0.78rem;
+      line-height: 1.2;
+    }
+  }
+
+  &__icon-button,
+  &__send-button {
+    border: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+  }
+
+  &__icon-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    svg {
+      width: 21px;
+      height: 21px;
+    }
+  }
+
+  &__messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background: #f7f9fc;
+  }
+
+  &__suggestions {
+    display: grid;
+    gap: 8px;
+
+    button {
+      min-height: 40px;
+      border: 1px solid #c8d3e1;
+      border-radius: 8px;
+      background: #fff;
+      color: #20375a;
+      padding: 9px 12px;
+      text-align: left;
+      cursor: pointer;
+
+      &:hover {
+        background: #edf5ff;
+        border-color: #75a8e6;
+      }
+
+      &:focus-visible {
+        outline: 2px solid #1f6feb;
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  &__message {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 14px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &--user {
+      flex-direction: row-reverse;
+
+      .chat-widget__bubble {
+        background: #1f6feb;
+        color: #fff;
+        border-color: #1f6feb;
+
+        code {
+          background: rgba(255, 255, 255, 0.18);
+        }
+
+        a {
+          color: #fff;
+        }
+      }
+
+      .chat-widget__avatar {
+        background: #dbeafe;
+        color: #174ea6;
+      }
+    }
+
+    &--assistant .chat-widget__avatar {
+      background: #e7f4ed;
+      color: #1f7a4d;
+    }
+  }
+
+  &__avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__bubble {
+    max-width: calc(100% - 38px);
+    border: 1px solid #d7dee8;
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px 12px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+
+    p {
+      margin: 0;
+
+      + p {
+        margin-top: 8px;
+      }
+    }
+
+    a {
+      color: #005ea2;
+      font-weight: 600;
+    }
+
+    code {
+      background: #eef2f7;
+      border-radius: 4px;
+      padding: 1px 4px;
+      font-size: 0.9em;
+    }
+
+    &--typing {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 22px;
+
+      span {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #6b7280;
+        animation: chat-widget-pulse 1s ease-in-out infinite;
+
+        &:nth-child(2) {
+          animation-delay: 0.15s;
+        }
+
+        &:nth-child(3) {
+          animation-delay: 0.3s;
+        }
+      }
+    }
+  }
+
+  &__message-heading {
+    margin: 0 0 8px;
+    font-size: 0.98rem;
+    line-height: 1.3;
+  }
+
+  &__markdown-list {
+    margin: 0;
+    padding-left: 18px;
+
+    li + li {
+      margin-top: 4px;
+    }
+  }
+
+  &__citations,
+  &__products {
+    margin-top: 10px;
+    display: grid;
+    gap: 8px;
+  }
+
+  &__citation {
+    border-left: 3px solid #2e7d32;
+    padding-left: 8px;
+    font-size: 0.82rem;
+
+    p {
+      margin-top: 3px;
+      color: #4b5563;
+    }
+  }
+
+  &__product-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #c8d3e1;
+    border-radius: 8px;
+    background: #fbfdff;
+    padding: 9px 10px;
+
+    &:hover {
+      border-color: #75a8e6;
+    }
+  }
+
+  &__product-name {
+    color: #20375a;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  &__product-type,
+  &__product-price {
+    margin-top: 4px;
+    color: #52606d;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  &__product-description {
+    margin-top: 6px;
+    color: #374151;
+    font-size: 0.86rem;
+  }
+
+  &__error {
+    margin: 0 16px 12px;
+    border: 1px solid #f2b8b5;
+    border-radius: 8px;
+    background: #fff4f2;
+    color: #8f1f17;
+    padding: 9px 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.88rem;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+  }
+
+  &__composer {
+    border-top: 1px solid #d7dee8;
+    background: #fff;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr 42px;
+    gap: 8px;
+
+    textarea {
+      min-height: 42px;
+      max-height: 120px;
+      resize: vertical;
+      border: 1px solid #c8d3e1;
+      border-radius: 8px;
+      padding: 9px 10px;
+      font: inherit;
+      line-height: 1.35;
+
+      &:focus {
+        border-color: #1f6feb;
+        outline: 2px solid rgba(31, 111, 235, 0.18);
+      }
+    }
+  }
+
+  &__send-button {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #1f6feb;
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background: #174ea6;
+    }
+
+    &:disabled {
+      background: #b7c1cf;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@keyframes chat-widget-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 520px) {
+  .chat-widget {
+    right: 16px;
+    bottom: 16px;
+
+    &__drawer {
+      position: fixed;
+      inset: 16px 16px 88px;
+      width: auto;
+      height: auto;
+      min-height: 0;
+    }
+
+    &__drawer--expanded {
+      inset: 12px 12px 88px;
+      width: auto;
+      height: auto;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .chat-widget {
+    color: #e5e7eb;
+
+    &__drawer,
+    &__bubble,
+    &__composer {
+      background: #111827;
+      border-color: #334155;
+    }
+
+    &__messages {
+      background: #0f172a;
+    }
+
+    &__suggestions button,
+    &__product-card {
+      background: #162033;
+      border-color: #334155;
+      color: #e5e7eb;
+    }
+
+    &__bubble code {
+      background: #243145;
+    }
+
+    &__citation p,
+    &__product-description,
+    &__product-type,
+    &__product-price {
+      color: #cbd5e1;
+    }
+
+    &__product-name,
+    &__suggestions button {
+      color: #d9e8f6;
+    }
+
+    &__composer textarea {
+      background: #0f172a;
+      border-color: #334155;
+      color: #e5e7eb;
+    }
+  }
+}

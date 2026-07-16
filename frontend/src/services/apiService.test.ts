@@ -49,13 +49,15 @@ describe("ApiService", () => {
 
     // Mock getEndpointUrl to return predictable URLs for typed endpoints
     vi.mocked(apiConfig.getEndpointUrl).mockImplementation(
-      (endpoint: string) => {
+      (endpoint: string, params?: Record<string, string | number>) => {
         const endpoints: Record<string, string> = {
           SUBMIT_REQUEST: "http://localhost:3000/api/requests",
           VIEW_FOR_REQUESTOR:
             "http://localhost:3000/api/requests/viewForRequestor",
           VIEW_PENDING: "http://localhost:3000/api/requests/viewPending",
           VIEW_ALL: "http://localhost:3000/api/requests/viewAll",
+          CHAT: "http://localhost:3000/api/chat",
+          CHAT_CONVERSATION: `http://localhost:3000/api/chat/${params?.conversationId}`,
         };
         return endpoints[endpoint] || `http://localhost:3000/api/${endpoint}`;
       }
@@ -226,6 +228,122 @@ describe("ApiService", () => {
       // In bypass mode, when window.keycloak exists but is not authenticated, a dummy bypass token is used
       expect(headers?.["Authorization"]).toMatch(/^Bearer mock\./);
       expect(headers?.["Content-Type"]).toBe("application/json");
+    });
+  });
+
+  describe("sendChatMessage", () => {
+    it("should send a chat message to the Marketplace backend", async () => {
+      const mockResponse = {
+        answer: "Use Tableau for dashboards.",
+        conversationId: "conversation-123",
+        citations: [{ title: "Tableau", source: "catalog" }],
+        products: [{ id: 7, name: "Tableau" }],
+      };
+      const requestData = {
+        message: "Which product is best for dashboards?",
+        conversationId: "conversation-abc",
+        history: [
+          {
+            role: "user" as const,
+            content: "Which product is best for dashboards?",
+          },
+        ],
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockResponse,
+      });
+
+      const result = await ApiService.sendChatMessage(requestData);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/chat",
+        expect.objectContaining({
+          method: "POST",
+          headers: expect.objectContaining({
+            "Content-Type": "application/json",
+            Authorization: "Bearer mock-token-123",
+          }),
+          body: JSON.stringify(requestData),
+          mode: "cors",
+          credentials: "omit",
+        })
+      );
+    });
+
+    it("should normalize deprecated chat prompts to the message field", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ answer: "Use GitLab for CI/CD." }),
+      });
+
+      await ApiService.sendChatMessage({
+        prompt: "What should I use for CI/CD?",
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/chat",
+        expect.objectContaining({
+          body: JSON.stringify({
+            message: "What should I use for CI/CD?",
+          }),
+        })
+      );
+    });
+
+    it("should surface chat endpoint errors", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({ errMsg: "Assistant unavailable" }),
+      });
+
+      await expect(
+        ApiService.sendChatMessage({ prompt: "Help me choose a product" })
+      ).rejects.toThrow("Assistant unavailable");
+    });
+
+    it("should clear a chat conversation through the Marketplace backend", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+        json: async () => {
+          throw new Error("No response body");
+        },
+      });
+
+      await expect(
+        ApiService.clearChatConversation("conversation-123")
+      ).resolves.toBeUndefined();
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "http://localhost:3000/api/chat/conversation-123",
+        expect.objectContaining({
+          method: "DELETE",
+          headers: expect.objectContaining({
+            "Content-Type": "application/json",
+            Authorization: "Bearer mock-token-123",
+          }),
+          mode: "cors",
+          credentials: "omit",
+        })
+      );
+    });
+
+    it("should treat missing chat conversations as already clear", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ message: "Chat not found" }),
+      });
+
+      await expect(
+        ApiService.clearChatConversation("missing-chat")
+      ).resolves.toBeUndefined();
     });
   });
 

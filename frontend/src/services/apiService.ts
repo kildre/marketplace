@@ -90,6 +90,54 @@ export interface UseCaseRequestApiDto {
   cartItems: CartItemApiDto[];
 }
 
+export type ChatMessageRole = "user" | "assistant";
+
+export interface ChatHistoryItem {
+  role: ChatMessageRole;
+  content: string;
+}
+
+export interface ChatMessageApiRequest {
+  message?: string;
+  prompt?: string;
+  conversationId?: string;
+  history?: ChatHistoryItem[];
+}
+
+export interface ChatCitationApiDto {
+  id?: string | number;
+  title?: string;
+  source?: string;
+  url?: string;
+  snippet?: string;
+  text?: string;
+}
+
+export interface ChatProductApiDto {
+  id?: string | number;
+  name?: string;
+  title?: string;
+  type?: string;
+  description?: string;
+  price?: number | null;
+  rom?: string;
+  url?: string;
+}
+
+export interface ChatApiResponse {
+  answer?: string;
+  response?: string;
+  message?: string;
+  content?: string;
+  text?: string;
+  conversationId?: string;
+  citations?: ChatCitationApiDto[];
+  sources?: ChatCitationApiDto[];
+  products?: ChatProductApiDto[];
+  productCards?: ChatProductApiDto[];
+  errMsg?: string;
+}
+
 function mapPriorityLevel(level: number): NotificationPriority {
   if (level === 1) return "high";
   if (level === 2) return "medium";
@@ -371,6 +419,52 @@ export class ApiService {
 
       throw error;
     }
+  }
+
+  /**
+   * Send a Marketplace assistant prompt to the backend chat endpoint.
+   */
+  static async sendChatMessage(
+    requestData: ChatMessageApiRequest
+  ): Promise<ChatApiResponse> {
+    const { prompt, ...requestWithoutDeprecatedPrompt } = requestData;
+    const requestBody = {
+      ...requestWithoutDeprecatedPrompt,
+      ...(requestData.message || prompt
+        ? { message: requestData.message || prompt }
+        : {}),
+    };
+
+    const response = await window.fetch(getEndpointUrl("CHAT"), {
+      method: "POST",
+      headers: await this.getAuthHeaders(),
+      body: JSON.stringify(requestBody),
+      mode: "cors",
+      credentials: "omit",
+    });
+
+    return this.handleResponse<ChatApiResponse>(response);
+  }
+
+  /**
+   * Clear a Marketplace assistant conversation on the backend.
+   */
+  static async clearChatConversation(conversationId: string): Promise<void> {
+    const response = await window.fetch(
+      getEndpointUrl("CHAT_CONVERSATION", { conversationId }),
+      {
+        method: "DELETE",
+        headers: await this.getAuthHeaders(),
+        mode: "cors",
+        credentials: "omit",
+      }
+    );
+
+    if (response.status === 204 || response.status === 404) {
+      return;
+    }
+
+    await this.handleResponse<unknown>(response);
   }
 
   /**

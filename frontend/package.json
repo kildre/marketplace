@@ -23,7 +23,6 @@
     "beforepush": "npm run lint && npm run test"
   },
   "dependencies": {
-    "@advana/platform-ui": "^3.1.0",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",

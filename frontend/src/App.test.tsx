@@ -107,15 +107,6 @@ vi.mock("./services/keycloakService", () => ({
   },
 }));
 
-// Mock the AdvanaMenu component from @advana/platform-ui
-vi.mock("@advana/platform-ui/dist/AdvanaMenu", () => ({
-  default: ({ menuLogoSection }: { menuLogoSection: React.ReactNode }) => (
-    <div data-testid="advana-menu">
-      <div data-testid="menu-logo-section">{menuLogoSection}</div>
-    </div>
-  ),
-}));
-
 // Mock CustomMenuLogoSection component
 vi.mock("./components/CustomMenuLogoSection", () => ({
   default: () => (
@@ -126,6 +117,11 @@ vi.mock("./components/CustomMenuLogoSection", () => ({
 // Mock CartOverlayButton component
 vi.mock("./components/CartOverlayButton", () => ({
   default: () => <div data-testid="cart-overlay-btn">Cart Overlay</div>,
+}));
+
+// Mock ChatWidget component
+vi.mock("./components/chat/ChatWidget", () => ({
+  default: () => <div data-testid="chat-widget">Chat Widget</div>,
 }));
 
 // Extend Jest matchers
@@ -191,6 +187,7 @@ describe("App", () => {
     expect(screen.getByTestId("advana-menu")).toBeInTheDocument();
     expect(screen.getByTestId("custom-menu-logo-section")).toBeInTheDocument();
     expect(screen.getByTestId("sidebar")).toBeInTheDocument();
+    expect(screen.getByTestId("chat-widget")).toBeInTheDocument();
     expect(screen.getByTestId("footer")).toBeInTheDocument();
     // RoleDebugInfo is commented out in App.tsx, so not checking for it
   });
@@ -208,7 +205,7 @@ describe("App", () => {
     );
   });
 
-  test("should render AdvanaMenu with Service Desk styling", () => {
+  test("should render Marketplace header with Service Desk styling", () => {
     const { container } = renderAppWithRouter("/", AppRoles.REQUESTOR);
 
     const advanaMenuContainer = container.querySelector(

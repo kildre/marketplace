@@ -407,6 +407,16 @@ describe("api-config", () => {
       expect(API_ENDPOINTS.REPORT_SUMMARY).toBe("/api/report/summary");
     });
 
+    it("should contain CHAT endpoint", () => {
+      expect(API_ENDPOINTS.CHAT).toBe("/api/chat");
+    });
+
+    it("should contain CHAT_CONVERSATION endpoint", () => {
+      expect(API_ENDPOINTS.CHAT_CONVERSATION).toBe(
+        "/api/chat/:conversationId"
+      );
+    });
+
     it("should have all endpoints as strings", () => {
       Object.values(API_ENDPOINTS).forEach((endpoint) => {
         expect(typeof endpoint).toBe("string");
@@ -456,6 +466,21 @@ describe("api-config", () => {
       const result = getEndpointUrl("REPORT_SUMMARY");
       expect(result).toBeTruthy();
       expect(result).toContain("/api/report/summary");
+    });
+
+    it("should return a valid URL for CHAT", () => {
+      const result = getEndpointUrl("CHAT");
+      expect(result).toBeTruthy();
+      expect(result).toContain("/api/chat");
+    });
+
+    it("should replace route params for CHAT_CONVERSATION", () => {
+      const result = getEndpointUrl("CHAT_CONVERSATION", {
+        conversationId: "conversation 123",
+      });
+
+      expect(result).toBeTruthy();
+      expect(result).toContain("/api/chat/conversation%20123");
     });
 
     it("should use getApiUrl internally", () => {
