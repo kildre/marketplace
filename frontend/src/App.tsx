@@ -18,10 +18,9 @@ import { Error404 } from "./pages/error-404/error-404";
 import { Error500 } from "./pages/error-500/error-500";
 import { Notifications } from "./pages/notifications/notifications";
 import { AppRoles } from "./types/auth";
-// @ts-ignore
-import AdvanaMenu from "@advana/platform-ui/dist/AdvanaMenu";
 import { RoleGuard } from "./components/auth/RoleGuard";
 import CartOverlayButton from "./components/CartOverlayButton";
+import ChatWidget from "./components/chat/ChatWidget";
 import CustomMenuLogoSection from "./components/CustomMenuLogoSection";
 import NotificationBellButton from "./components/NotificationBellButton";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -47,7 +46,7 @@ function App(): React.ReactElement {
     }
   };
 
-  // Create custom logo section for AdvanaMenu
+  // Create custom logo section for the local Marketplace header
   const customLogoSection = (
     <CustomMenuLogoSection
       enclave="advana"
@@ -62,11 +61,11 @@ function App(): React.ReactElement {
       <div className="app-wrapper">
         <GovernmentBanner />
         <div className="advana-menu-override advana-service-desk-style header-with-cart">
-          <AdvanaMenu
-            menuLogoSection={customLogoSection}
-            megaMenuBaseDomain="/"
-            isCRA={false}
-          />
+          <div data-testid="advana-menu" className="local-advana-menu">
+            <div className="local-advana-menu__inner">
+              <div data-testid="menu-logo-section">{customLogoSection}</div>
+            </div>
+          </div>
           <div className="header-actions-container">
             <NotificationBellButton />
             <CartOverlayButton />
@@ -77,6 +76,7 @@ function App(): React.ReactElement {
           <Sidebar />
           {children}
         </main>
+        <ChatWidget />
         <Footer />
       </div>
     </NotificationProvider>

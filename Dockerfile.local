@@ -52,8 +52,8 @@ RUN find / -type f \( -name "*tiff*" -o -name "*libtiff*" \) -delete 2>/dev/null
 # Copy the built React app from builder stage
 COPY --from=builder /app/frontend/dist /opt/bitnami/nginx/html
 
-# Copy complete nginx configuration (eliminates user directive warning)
-COPY nginx.conf.local /etc/nginx/nginx.conf
+# Copy complete nginx configuration to Bitnami nginx's active config path.
+COPY nginx.conf.local /opt/bitnami/nginx/conf/nginx.conf
 
 # Copy startup script
 COPY start-nginx.sh /usr/local/bin/start-nginx.sh
@@ -64,13 +64,15 @@ RUN groupadd -g ${APP_GID} appgroup && \
     useradd -u ${APP_UID} -g appgroup -s /bin/bash -m appuser
 
 # Set proper ownership and fix potential permission issues
-RUN mkdir -p /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /tmp/nginx /opt/bitnami/nginx/tmp && \
+RUN mkdir -p /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /tmp/nginx /opt/bitnami/nginx/tmp /bitnami/nginx/conf/vhosts && \
     chown -R ${APP_UID}:${APP_GID} /opt/bitnami/nginx/html && \
+    chown -R ${APP_UID}:${APP_GID} /opt/bitnami/nginx/conf && \
     chown -R ${APP_UID}:${APP_GID} /var/cache/nginx && \
     chown -R ${APP_UID}:${APP_GID} /var/log/nginx && \
     chown -R ${APP_UID}:${APP_GID} /etc/nginx/conf.d && \
     chown -R ${APP_UID}:${APP_GID} /tmp/nginx && \
     chown -R ${APP_UID}:${APP_GID} /opt/bitnami/nginx/tmp && \
+    chown -R ${APP_UID}:${APP_GID} /bitnami/nginx && \
     chmod 777 /tmp && \
     touch /tmp/nginx.pid && \
     chown ${APP_UID}:${APP_GID} /tmp/nginx.pid

@@ -93,21 +93,40 @@ export const API_ENDPOINTS = {
 
   // Notifications
   NOTIFICATION_RECIPIENTS: "/api/notificationRecipients/visible",
+
+  // Marketplace assistant
+  CHAT: "/api/chat",
+  CHAT_CONVERSATION: "/api/chat/:conversationId",
 } as const;
+
+type EndpointParams = Record<string, string | number>;
+
+const applyEndpointParams = (
+  path: string,
+  params: EndpointParams = {}
+): string => {
+  return Object.entries(params).reduce(
+    (currentPath, [key, value]) =>
+      currentPath.replace(`:${key}`, encodeURIComponent(String(value))),
+    path
+  );
+};
 
 /**
  * Get a typed API endpoint URL
  *
  * @param endpoint - Key from API_ENDPOINTS
+ * @param params - Optional route parameters for endpoints with tokens
  * @returns Complete URL for the endpoint
  *
  * @example
  * getEndpointUrl('SUBMIT_REQUEST') // => 'http://localhost:8082/api/requests'
  */
 export const getEndpointUrl = (
-  endpoint: keyof typeof API_ENDPOINTS
+  endpoint: keyof typeof API_ENDPOINTS,
+  params?: EndpointParams
 ): string => {
-  return getApiUrl(API_ENDPOINTS[endpoint]);
+  return getApiUrl(applyEndpointParams(API_ENDPOINTS[endpoint], params));
 };
 
 /**
